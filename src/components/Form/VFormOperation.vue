@@ -59,7 +59,7 @@ const resetForm = () => {
 };
 
 const groupsOperation = computed(() =>
-  ["project", "create", "install"].map((x) => {
+  ["0", "1", "2", "3", "4", "5"].map((x) => {
     return {
       label: t(`groupOperation.${x}`),
       value: x,
@@ -84,7 +84,7 @@ const groupsOperation = computed(() =>
         <a-select
           v-model:value="formState.group"
           style="width: 100%"
-          :placeholder="$t('form.task.selectGroup')"
+          :placeholder="$t('form.order.selectGroup')"
           :options="groupsOperation"
         ></a-select>
       </a-form-item>

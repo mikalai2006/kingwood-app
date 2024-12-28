@@ -27,7 +27,7 @@ const role = computed(() =>
       <VIcon :path="iBell" class="text-2xl" />
       <div
         v-if="true"
-        class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-[3px] border-s-50 dark:border-g-800"
+        class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-[3px] border-s-900 dark:border-g-950"
       ></div>
     </div>
   </div>

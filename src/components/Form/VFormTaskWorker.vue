@@ -253,6 +253,7 @@ onMounted(() => {
           v-model:value="taskRange"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!!formState.id"
         />
       </a-form-item>
 
@@ -265,6 +266,7 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!!formState.id"
         />
       </a-form-item>
 
@@ -276,6 +278,7 @@ onMounted(() => {
           :options="workers"
           :placeholder="$t('form.taskWorker.selectWorkerId')"
           :filter-option="filterOption"
+          :disabled="!!formState.id"
         >
           <template #option="{ value, label, post }">
             <div class="flex flex-row">

@@ -4,6 +4,7 @@ import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 import {
   useObjectStore,
+  useOperationStore,
   useOrderStore,
   useTaskStatusStore,
   useTaskStore,
@@ -24,20 +25,22 @@ const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
 const objectStore = useObjectStore();
 const taskStore = useTaskStore();
+const operationStore = useOperationStore();
 
 const { t } = useI18n();
 
-taskStore.find({ name: "Монтаж" });
+orderStore.find({ status: 4 });
+
+const idsInstallOperation = computed(() =>
+  operationStore.items.filter((x) => x.group === "install")
+);
 
 const ordersForMontaj = computed(() =>
   orderStore.items
-    .filter((x) => x.priority === 1)
+    .filter((x) => x.status === 4)
     .map((x) => {
-      const taskMontaj = taskStore.items.find(
-        (y) =>
-          y.orderId === x.id &&
-          (y.name.toLowerCase().indexOf("монтаж") > -1 ||
-            y.name.toLowerCase().indexOf("упаковка") > -1)
+      const taskMontaj = taskStore.items.filter(
+        (y) => y.orderId === x.id && y.name.toLowerCase().indexOf("монтаж") > -1
       );
       return {
         ...x,
@@ -55,20 +58,24 @@ const open = ref<boolean>(false);
 const showModal = () => {
   open.value = true;
 };
+const onAddNewItem = () => {
+  dataForm.value = defaultData;
+  showModal();
+};
 
 const week = ref<Dayjs>(dayjs(new Date()));
 
 const dateFormat = "DD MMMM YYYY";
 const weekFormat = "DD MMM YYYY";
 
-const daysOfSelectWeek = ref<string[]>([]);
+const daysOfSelectWeek = ref<{ dayString: string; day: Dayjs }[]>([]);
 
 const onCreateWeekDays = (startDay: Dayjs) => {
   daysOfSelectWeek.value = Array(7)
     .fill(startDay)
     .map((el: Dayjs, idx) => {
-      const newD = el.add(idx, "day").format(dateFormat);
-      return newD;
+      const newD = el.add(idx, "day");
+      return { dayString: newD.format(dateFormat), day: newD };
     });
 };
 
@@ -99,6 +106,11 @@ onMounted(() => {
   <div class="h-full flex flex-row items-stretch">
     <div class="flex-auto p-4">
       <VTitle :text="$t('page.montajList.title')" />
+      <div class="flex-auto">
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
+      </div>
       <div class="">
         <div class="flex flex-row items-center">
           <a-date-picker
@@ -119,21 +131,33 @@ onMounted(() => {
       >
         <thead>
           <tr>
-            <td></td>
+            <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+              Объект
+            </td>
+            <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+              Исполнитель
+            </td> -->
             <th
               v-for="day in daysOfSelectWeek"
-              :key="day"
+              :key="day.dayString"
               class="px-4 text-normal border border-s-200 dark:border-g-700"
             >
               {{
-                day
+                day.dayString
                   .split(" ")
-                  .slice(0, day.split(" ").length - 1)
+                  .slice(0, day.dayString.split(" ").length - 1)
                   .join(" ")
               }}
-              <a-button size="small" @click="">
+              <RouterLink
+                :to="{
+                  name: 'montajListDay',
+                  params: {
+                    day: day.day.toISOString(),
+                  },
+                }"
+              >
                 {{ $t("button.edit") }}
-              </a-button>
+              </RouterLink>
             </th>
           </tr>
         </thead>
@@ -141,46 +165,55 @@ onMounted(() => {
           <tr v-for="order in ordersForMontaj" :key="order.id">
             <th class="w-64 py-4 border border-s-200 dark:border-g-700">
               <span class="text-base font-normal leading-4">
-                {{ order.name }} / {{ order.id }} / {{ order.taskMontaj?.name }}
+                {{ order.name }} / {{ order.id }} /
+                {{ order.taskMontaj[0]?.name }}
               </span>
             </th>
+            <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
+              <span class="text-base font-normal leading-4">
+                Исполнитель 1
+              </span>
+            </th> -->
             <td
               v-for="day in daysOfSelectWeek"
-              :key="day"
-              class="border border-s-200 dark:border-g-700"
+              :key="day.dayString"
+              class="border border-s-200 dark:border-g-700 m-0 p-0"
             >
-              <div class="text-left px-4">
-                <!-- <a-button @click="">
+              <!-- <div class="text-left px-4 bg-s-400 w-full h-8">
+                <a-button @click="">
                   {{ $t("form.create") }}
-                </a-button> -->
-              </div>
+                </a-button>
+              </div> -->
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="w-64 border-l border-s-100 dark:border-g-700">aside</div>
   </div>
-  <!-- 
+
   <a-modal
-    v-model:open="openOrderInfo"
+    v-model:open="open"
     width="1000px"
-    :key="currentOrderInModal?.id"
-    @ok=""
+    :key="dataForm?.id"
+    @ok="
+      () => {
+        open = false;
+      }
+    "
   >
     <template #title>
       <p class="text-xl">
-        {{ currentOrderInModal?.name }}
+        {{ dataForm?.name }}
       </p>
     </template>
-    <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
-      <OrderTaskList
-        :order-id="currentOrderInModal.id"
+    <div v-if="dataForm" class="-mt-4 -ml-4 pl-4 py-4">
+      <!-- <OrderTaskList
+        :order-id="dataForm.id"
         @on-edit-task="onEditTask"
       />
-      <a-button @click="onAddNewTask(currentOrderInModal.id)" class="mt-2">
+      <a-button @click="onAddNewTask(dataForm.id)" class="mt-2">
         {{ $t("form.task.add") }}
-      </a-button>
+      </a-button> -->
     </div>
-  </a-modal> -->
+  </a-modal>
 </template>

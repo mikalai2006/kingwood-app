@@ -2,6 +2,9 @@
 import { reactive, ref } from "vue";
 import VTitle from "../components/VTitle.vue";
 import { useAuthStore } from "@/store";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const authStore = useAuthStore();
 
@@ -18,7 +21,10 @@ const formState = reactive<FormState>({
 });
 const onFinish = async (values: any) => {
   console.log("Success:", values);
-  const result = await authStore.login(formState);
+  const result = await authStore.login(formState).then((r) => {
+    router.replace("/");
+    return r;
+  });
   console.log("result auth: ", result);
 };
 

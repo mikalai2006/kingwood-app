@@ -2,6 +2,7 @@ import type { IWsMessage } from "@/api/types";
 // import router from "@/router";
 import {
   useAuthStore,
+  useOrderStore,
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
@@ -14,6 +15,7 @@ export const useSocket = () => {
   const taskStore = useTaskStore();
   const taskStatusStore = useTaskStatusStore();
   const taskWorkerStore = useTaskWorkerStore();
+  const orderStore = useOrderStore();
 
   // console.log("router0", router.currentRoute);
 
@@ -59,6 +61,13 @@ export const useSocket = () => {
             if (method === "REMOVE") {
             } else {
               taskStore.onAddItemToStore(content);
+              // window?.ipcRenderer?.show("title", "body");
+
+              new window.Notification("Изменение задания", {
+                body: `Тестовое сообщение`,
+              }).onclick = () => {
+                // document.getElementById("output").innerText = CLICK_MESSAGE;
+              };
             }
             break;
 
@@ -66,6 +75,13 @@ export const useSocket = () => {
             if (method === "REMOVE") {
             } else {
               taskWorkerStore.onAddItemToStore(content);
+            }
+            break;
+
+          case "order":
+            if (method === "REMOVE") {
+            } else {
+              orderStore.onAddItemToStore(content);
             }
             break;
 

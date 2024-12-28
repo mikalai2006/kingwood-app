@@ -183,9 +183,9 @@ const activeKey = ref("current");
     <VTitle :text="$t('page.user.title')" />
     <div class="flex flex-row items-center">
       <div class="flex-auto">
-        <a-button type="primary" @click="onAddNewItem">{{
-          $t("form.add")
-        }}</a-button>
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
       </div>
       <div class="flex gap-2">
         <span class="whitespace-nowrap">

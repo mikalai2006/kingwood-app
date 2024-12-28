@@ -44,7 +44,7 @@ const indexHtml = path.join(RENDERER_DIST, "index.html");
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: "Main window",
+    title: "App",
     icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
     webPreferences: {
       preload,
@@ -53,8 +53,10 @@ async function createWindow() {
 
       // Consider using contextBridge.exposeInMainWorld
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
-      // contextIsolation: false,
+      contextIsolation: true,
     },
+    width: 1600,
+    height: 900,
     autoHideMenuBar: true,
     // frame: false,
     titleBarStyle: "hidden",
@@ -69,7 +71,7 @@ async function createWindow() {
     // #298
     win.loadURL(VITE_DEV_SERVER_URL);
     // Open devTool if the app is not packaged
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
     win.webContents.session.clearCache();
   } else {
     win.loadFile(indexHtml);

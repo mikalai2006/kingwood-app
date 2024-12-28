@@ -31,12 +31,7 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
 };
 </script>
 <template>
-  <a-dropdown
-    v-if="user"
-    placement="bottomRight"
-    arrow
-    @click="handleButtonClick"
-  >
+  <a-dropdown v-if="user" placement="topLeft" arrow @click="handleButtonClick">
     <div class="flex flex-row items-center gap-2 cursor-pointer">
       <!-- <img
       src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=1"
@@ -52,14 +47,14 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
       <div class="font-bold leading-4">
         {{ getShortFIO(user?.name) }}
         <span
-          class="block font-normal leading-3 text-xs text-g-500 dark:text-g-300"
+          class="block font-normal leading-3 text-xs text-s-400 dark:text-g-300"
         >
           {{ role?.name }}
         </span>
       </div>
     </div>
     <template #overlay>
-      <a-menu @click="handleMenuClick">
+      <a-menu @click="handleMenuClick" placement="right">
         <template v-if="menuItems.length">
           <a-menu-item v-for="item in menuItems" :key="item">
             {{ $t(`page.${item}.title`) }}

@@ -14,7 +14,7 @@ import { computed, h, ref } from "vue";
 import VIcon from "../UI/VIcon.vue";
 import { invertColor, replaceSubstringByArray } from "@/utils/utils";
 import { ITaskWorker, ITaskWorkerInput } from "@/api/task_worker/types";
-import { Modal } from "ant-design-vue";
+import { message, Modal } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
 import TaskWorkerStatusTag from "../Task/TaskWorkerStatusTag.vue";
 import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
@@ -120,7 +120,13 @@ const onDeleteTask = (item: ITask | undefined) => {
       console.log("Delete task: ", item);
 
       return new Promise((resolve, reject) => {
-        setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+        try {
+          taskStore.deleteItem(item?.id);
+
+          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+        } catch (e) {
+          message.error("Error: delete task");
+        }
       }).catch(() => console.log("Oops errors!"));
     },
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -172,7 +178,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
   <div class="flex flex-col items-center">
     <div
       :class="[
-        'rounded-full w-8 h-8 relative flex items-center justify-center',
+        'rounded-full p-2 relative flex items-center justify-center',
         // {
         //   'bg-s-200 dark:bg-s-700': task?.statusId === 'wait',
         // },
@@ -193,7 +199,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       <VIcon
         v-if="taskStatus?.icon"
         :path="taskStatus?.icon"
-        :class="['text-2xl', taskStatus.animate]"
+        :class="['text-xl', taskStatus.animate]"
       />
       <!-- <VIcon
         v-if="task?.statusId === 'wait'"
@@ -328,6 +334,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           </template>
           <a-button
             shape="circle"
+            type="dashed"
             size="middle"
             @click="onAddNewTaskWorker(task?.orderId)"
           >

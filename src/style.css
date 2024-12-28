@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  .b-scroll::-webkit-scrollbar {
+  .b-scroll::-webkit-scrollbar,
+  .ant-modal-wrap::-webkit-scrollbar {
     @apply cursor-pointer w-3;
     /*background-color: rgba(229, 231, 235, var(--bg-opacity));*/
   }
@@ -18,15 +19,18 @@
     -ms-overflow-style: none;
   }
 
-  .b-scroll::-webkit-scrollbar-track {
+  .b-scroll::-webkit-scrollbar-track,
+  .ant-modal-wrap::-webkit-scrollbar-track {
     @apply bg-s-100 dark:bg-g-800;
     /*background: red;*/
   }
-  .b-scroll::-webkit-scrollbar-thumb {
+  .b-scroll::-webkit-scrollbar-thumb,
+  .ant-modal-wrap::-webkit-scrollbar-thumb {
     @apply box-border bg-s-400 dark:bg-g-600 rounded-md border-2 border-solid border-transparent bg-clip-content;
     /*outline: 1px solid slategrey;*/
   }
-  .b-scroll::-webkit-scrollbar:hover {
+  .b-scroll::-webkit-scrollbar:hover,
+  .ant-modal-wrap::-webkit-scrollbar:hover {
     @apply w-5;
   }
 

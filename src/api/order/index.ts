@@ -6,10 +6,10 @@ enum URLS {
   path = "/order",
 }
 
-const find = async (params: IRequestParams<IOrder> | Partial<IOrder>) =>
-  $get<IResponseData<IOrder>>({
-    url: URLS.path,
-    params,
+const find = async (data: IRequestParams<IOrder> | Partial<IOrder>) =>
+  $post<IResponseData<IOrder>>({
+    url: `${URLS.path}/find`,
+    data,
   });
 const get = async (id: string | number) =>
   $get<IOrder>({

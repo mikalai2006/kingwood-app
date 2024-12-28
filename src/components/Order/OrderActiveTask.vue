@@ -86,7 +86,7 @@ const activeTasks = computed(() => {
         />
         <div class="">
           <p class="text-sm">
-            {{ item.name }}
+            {{ item.name }}: {{ taskWorker.taskWorkerStatus?.name }}
           </p>
           <p>
             {{ getShortFIO(taskWorker.user?.name) }}

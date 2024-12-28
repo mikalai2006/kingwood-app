@@ -122,10 +122,18 @@ const tokenTheme = computed(() => {
     result.colorBgBase = Colors.g[951];
     result.colorTextBase = Colors.white;
     result.colorPrimary = Colors.p[400];
+    result.colorInfo = Colors.p[400];
+    result.colorLink = Colors.p[500];
+    result.colorLinkHover = Colors.p[500];
+    result.colorLinkActive = Colors.p[500];
   } else {
     result.colorBgBase = Colors.white;
     result.colorTextBase = Colors.black;
     result.colorPrimary = Colors.s[500];
+    result.colorInfo = Colors.s[500];
+    result.colorLink = Colors.s[500];
+    result.colorLinkHover = Colors.s[500];
+    result.colorLinkActive = Colors.s[500];
   }
 
   return result;
@@ -140,6 +148,7 @@ const tokenTheme = computed(() => {
         generalStore.themeMode === 'dark'
           ? theme.darkAlgorithm
           : theme.defaultAlgorithm,
+
       token: tokenTheme,
     }"
   >
@@ -181,12 +190,12 @@ const tokenTheme = computed(() => {
               class="flex-auto px-4 py-2 flex flex-row items-center gap-4"
             >
               <div class="flex-auto">{{ route.meta.title }}</div>
-              <div>
+              <!-- <div>
                 <UserMessage />
               </div>
               <div>
                 <UserInfoAside />
-              </div>
+              </div> -->
             </div>
           </header>
           <div
@@ -241,9 +250,16 @@ const tokenTheme = computed(() => {
               </a>
             </nav> -->
               </div>
+              <div class="flex-auto"></div>
+              <div class="bg-white/5 mx-4 p-2 rounded-lg">
+                <UserInfoAside />
+              </div>
+              <nav class="flex pr-4">
+                <div class="">
+                  <VChangerMode />
+                </div>
 
-              <nav>
-                <VChangerMode />
+                <UserMessage />
                 <!-- <a
                   href="#"
                   class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"

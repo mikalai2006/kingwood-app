@@ -1,6 +1,6 @@
 <script setup lang="ts" async>
 import { useUserStore } from "@/store/modules/user";
-import { computed, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 import { useObjectStore, useOrderStore, useTaskStatusStore } from "@/store";
 import { IOrder, IOrderInput } from "@/api/order/types";
@@ -13,9 +13,14 @@ import { iPen, iSearch } from "@/utils/icons";
 import colors from "tailwindcss/colors";
 import { Dayjs } from "dayjs";
 import { getShortFIO } from "@/utils/utils";
-import OrderGroupInfo from "@/components/Order/OrderGroupInfo.vue";
+import { useRoute } from "vue-router";
 
 dayjs.locale("ru");
+
+const route = useRoute();
+
+const { objectId } = route.params;
+
 const userStore = useUserStore();
 const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
@@ -23,7 +28,7 @@ const objectStore = useObjectStore();
 
 const { t } = useI18n();
 
-await orderStore.find({ $limit: 50 });
+const object = computed(() => objectStore.items.find((x) => x.id === objectId));
 
 const allColumns = ref([
   { key: "number" },
@@ -56,10 +61,6 @@ const allColumns = ref([
   { key: "group" },
   { key: "image" },
   { key: "activeOperation" },
-  { key: "stolyarComplete" },
-  { key: "malyarComplete" },
-  { key: "goComplete" },
-  { key: "montajComplete" },
   { key: "createdAt" },
   { key: "updatedAt" },
   { key: "action" },
@@ -146,15 +147,17 @@ const columns = computed(
 );
 
 const columnsData = computed(() => {
-  return orderStore.items.map((x) => {
-    const object = objectStore.items.find((y) => y.id === x.objectId);
+  return orderStore.items
+    .filter((x) => x.objectId === objectId)
+    .map((x) => {
+      const object = objectStore.items.find((y) => y.id === x.objectId);
 
-    return {
-      object,
-      ...x,
-      key: x.id,
-    };
-  });
+      return {
+        object,
+        ...x,
+        key: x.id,
+      };
+    });
 });
 const defaultData: IOrderInput = {};
 
@@ -264,11 +267,25 @@ const handleReset = (clearFilters) => {
   state.searchText = "";
 };
 
-const activeKey = ref("all");
+const activeKey = ref("inwork");
+
+onMounted(async () => {
+  await orderStore.find({ $limit: 100, objectIds: [objectId] });
+});
 </script>
 <template>
   <div class="p-4">
-    <VTitle :text="$t('page.order.title')" />
+    <!-- <VTitle :text="$t('page.order.title')" /> -->
+    <a-page-header
+      :title="object?.name"
+      :sub-title="$t('page.order.title')"
+      class="border-b border-s-200 dark:border-g-700"
+      @back="
+        () => {
+          $router.back();
+        }
+      "
+    />
     <div class="flex flex-row items-center">
       <div class="flex-auto">
         <a-button type="primary" @click="onAddNewItem">{{
@@ -310,7 +327,7 @@ const activeKey = ref("all");
     </div>
 
     <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="all" :tab="$t('tabs.order.all')" force-render>
+      <a-tab-pane key="inwork" :tab="$t('tabs.order.inwork')" force-render>
         <!-- :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'custom cursor-pointer bg-red-500/50' : 'cursor-pointer')"
         :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'cursor-pointer font-medium text-red-500 dark:text-red-300' : 'cursor-pointer')" 
         -->
@@ -372,41 +389,6 @@ const activeKey = ref("all");
                 {{ $t(`groupOperation.${item}`) }}
               </a-tag>
             </template>
-
-            <template v-if="column.key === 'stolyarComplete'">
-              <div class="relative w-32 bg-s-200 dark:bg-g-700 rounded-md">
-                <div
-                  class="absolute w-2 h-2 top-1 left-1/2 bg-white dark:bg-g-600 rounded-full z-10"
-                ></div>
-                <div class="p-2 pt-4">
-                  <div>Столяр 1</div>
-                  <div>Столяр 2</div>
-                </div>
-              </div>
-            </template>
-
-            <template v-if="column.key === 'malyarComplete'">
-              <div class="relative w-32 min-h-16 bg-s-200 rounded-md">
-                <div
-                  class="absolute w-2 h-2 top-1 left-1/2 bg-white rounded-full z-10"
-                ></div>
-                <div class="p-2 pt-4">
-                  <div>Маляр 1</div>
-                </div>
-              </div>
-            </template>
-
-            <template v-if="column.key === 'goComplete'">
-              <div class="relative w-32 min-h-16 bg-green-500 rounded-md">
-                <div
-                  class="absolute w-2 h-2 top-1 left-1/2 bg-white rounded-full z-10"
-                ></div>
-                <div class="p-2 pt-4">
-                  <div>Маляр 1</div>
-                </div>
-              </div>
-            </template>
-
             <template v-if="column.key === 'constructorId'">
               <p class="text-nowrap">
                 {{
@@ -517,15 +499,6 @@ const activeKey = ref("all");
           </template> -->
         </a-table>
       </a-tab-pane>
-      <a-tab-pane
-        key="stolyar_complete"
-        :tab="$t('tabs.order.stolyar_complete')"
-      >
-        Content of Tab Pane 2
-      </a-tab-pane>
-      <a-tab-pane key="malyar_complete" :tab="$t('tabs.order.malyar_complete')">
-        Content of Tab Pane 2
-      </a-tab-pane>
       <a-tab-pane key="future" :tab="$t('tabs.order.future')">
         Content of Tab Pane 2
       </a-tab-pane>
@@ -577,17 +550,7 @@ const activeKey = ref("all");
     v-model:open="openOrderInfo"
     width="1000px"
     :key="currentOrderInModal?.id"
-    wrapClassName="b-scroll"
-    @ok="
-      () => {
-        openOrderInfo = false;
-      }
-    "
-    @cancel="
-      () => {
-        openOrderInfo = false;
-      }
-    "
+    @ok=""
   >
     <template #title>
       <p class="text-xl">
@@ -605,5 +568,3 @@ const activeKey = ref("all");
     </div>
   </a-modal>
 </template>
-
-<style scoped></style>

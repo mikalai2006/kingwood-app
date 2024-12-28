@@ -19,6 +19,7 @@ import { iSearch } from "@/utils/icons";
 import { message } from "ant-design-vue";
 import { debounce } from "lodash-es";
 import { IObject } from "@/api/object/types";
+import { dateFormat } from "@/utils/date";
 
 const props = defineProps<{ data: IOrder; defaultData: IOrder }>();
 const emit = defineEmits(["callback"]);
@@ -110,6 +111,23 @@ const constructors = computed(() => {
     });
 });
 
+const orderGroups = computed(() => {
+  return ["0", "1", "2", "3", "4", "5", "10"].map((x) => {
+    return {
+      value: x,
+      label: t(`groupOperation.${x}`),
+    };
+  });
+});
+
+const orderStatuses = computed(() => {
+  return [0, 1, 2, 3, 4, 5, 100].map((x) => {
+    return {
+      value: x,
+      label: t(`orderStatus.${x}`),
+    };
+  });
+});
 // const loading = ref(false);
 
 // const onFindObjects = async () => {
@@ -259,7 +277,32 @@ const fetchObjects = debounce((value: string) => {
           v-model:value="formState.constructorId"
           style="width: 100%"
           :placeholder="$t('form.order.selectConstructor')"
-          :options="constructors"
+          :options="[
+            {
+              value: '000000000000000000000000',
+              label: 'Без конструктора',
+            },
+            ...constructors,
+          ]"
+        ></a-select>
+      </a-form-item>
+
+      <a-form-item :label="$t('form.order.group')" name="group">
+        <a-select
+          v-model:value="formState.group"
+          style="width: 100%"
+          :placeholder="$t('form.order.selectGroup')"
+          :options="orderGroups"
+          mode="tags"
+        ></a-select>
+      </a-form-item>
+
+      <a-form-item :label="$t('form.order.status')" name="status">
+        <a-select
+          v-model:value="formState.status"
+          style="width: 100%"
+          :placeholder="$t('form.order.selectStatus')"
+          :options="orderStatuses"
         ></a-select>
       </a-form-item>
 
@@ -282,12 +325,21 @@ const fetchObjects = debounce((value: string) => {
       <a-form-item :label="$t('form.order.term')" name="term">
         <a-date-picker
           v-model:value="formState.term"
-          format="DD.MM.YYYY"
+          :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
           :placeholder="$t('form.order.selectTerm')"
         />
       </a-form-item>
+      <!-- <a-form-item :label="$t('form.order.termMontaj')" name="termMontaj">
+        <a-date-picker
+          v-model:value="formState.termMontaj"
+          :format="dateFormat"
+          value-format="YYYY-MM-DD"
+          style="width: 100%"
+          :placeholder="$t('form.order.selectTermMontaj')"
+        />
+      </a-form-item> -->
 
       <a-form-item :label="$t('form.order.priority')" name="priority">
         <a-switch

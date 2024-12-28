@@ -1,4 +1,4 @@
-import { createMemoryHistory, createRouter } from "vue-router";
+import { createWebHashHistory, createRouter } from "vue-router";
 
 import Home from "./pages/Home.vue";
 import About from "./pages/About.vue";
@@ -14,6 +14,8 @@ import TaskStatus from "./pages/TaskStatus.vue";
 import Object from "./pages/Object.vue";
 import Account from "./pages/Account.vue";
 import MontajList from "./pages/MontajList.vue";
+import MontajListDay from "./pages/MontajListDay.vue";
+import ObjectOrder from "./pages/ObjectOrder.vue";
 
 const routes = [
   {
@@ -82,16 +84,28 @@ const routes = [
     component: MontajList,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/montajList/:day",
+    name: "montajListDay",
+    component: MontajListDay,
+    meta: { requiresAuth: true },
+  },
 
   {
     path: "/dashboard",
     component: Dashboard,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/object/:objectId",
+    name: "objectOrderId",
+    component: ObjectOrder,
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
-  history: createMemoryHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 

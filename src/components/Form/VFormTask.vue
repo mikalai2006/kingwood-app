@@ -108,12 +108,14 @@ const resetForm = () => {
 };
 
 const operations = computed(() => {
-  return operationStore.items.map((x) => {
-    return {
-      value: x.name,
-      label: x.name,
-    };
-  });
+  return operationStore.items
+    .filter((x) => x.group === "create")
+    .map((x) => {
+      return {
+        value: x.name,
+        label: x.name,
+      };
+    });
 });
 
 const workers = computed(() => {
@@ -218,6 +220,7 @@ onMounted(() => {
           :placeholder="$t('form.task.namePlaceholder')"
           :allow-clear="true"
           :filter-option="filterOption"
+          :disabled="!!formState.id"
         >
           <template #clearIcon>
             <VIcon :path="iX" class="text-2xl leading-3 -mt-1.5 -ml-1.5" />
@@ -245,6 +248,7 @@ onMounted(() => {
           style="width: 100%"
           :placeholder="$t('form.taskWorker.selectTypeGo')"
           :options="typesGo"
+          :disabled="!!formState.id"
         ></a-select>
       </a-form-item>
 
@@ -257,6 +261,7 @@ onMounted(() => {
           v-model:value="taskRange"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!!formState.id"
         />
       </a-form-item>
 
@@ -269,6 +274,7 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!!formState.id"
         />
       </a-form-item>
 

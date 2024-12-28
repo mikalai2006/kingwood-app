@@ -92,9 +92,18 @@ const onEditItem = (item: IObject) => {
           </a-tooltip>
         </template>
         <template v-if="column.key === 'name'">
-          <a-tag :bordered="false">
+          <RouterLink
+            :to="{
+              name: 'objectOrderId',
+              params: {
+                objectId: record.id,
+              },
+            }"
+          >
             {{ record.name }}
-          </a-tag>
+          </RouterLink>
+          <!-- <a-tag :bordered="false">
+          </a-tag> -->
         </template>
       </template>
 

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { find, get } from "@/api/task";
+import { find, get, remove } from "@/api/task";
 import { IRequestParams } from "@/api/types";
-import { ITask } from "@/api/task/types";
+import { ITask, ITaskInput } from "@/api/task/types";
 // import sift from 'sift'
 
 export const useTaskStore = defineStore("task", {
@@ -72,6 +72,31 @@ export const useTaskStore = defineStore("task", {
         item = this._items.find((el: ITask) => el.id == id);
       }
       return item || null;
+    },
+    onRemoveItemFromStore(id: string | number, params?: ITaskInput): number {
+      let itemIndex = -1;
+      if (params) {
+        // search by params
+      } else {
+        itemIndex = this._items.findIndex((el: ITask) => el.id == id);
+      }
+
+      if (itemIndex !== -1) {
+        this._items.splice(itemIndex, 1);
+      }
+
+      return itemIndex;
+    },
+    async deleteItem(id: string | undefined) {
+      if (!id) {
+        return;
+      }
+
+      const data = await remove(id, {}).then(() => {
+        this.onRemoveItemFromStore(id);
+      });
+
+      return data;
     },
   },
 });

@@ -22,7 +22,7 @@ const menuItems = ref([
     <RouterLink
       v-for="item in menuItems"
       :to="`/${item}`"
-      class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-s-700 hover:text-black dark:hover:text-white group rounded-lg"
+      class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
       :class="[
         route.name === item
           ? 'bg-s-300  dark:bg-g-700 text-black dark:text-white'
