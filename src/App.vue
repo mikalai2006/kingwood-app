@@ -47,7 +47,7 @@ const onInitData = async () => {
     await userStore.find({ $limit: 100 });
     await operationStore.find({ $limit: 100 });
     await taskStore.find({ $limit: 300 });
-    await orderStore.find({ $limit: 100 });
+    // await orderStore.find({ $limit: 100 });
     await taskWorkerStore.find({ $limit: 100 });
     await taskStatus.find();
 
@@ -73,7 +73,6 @@ const onInitData = async () => {
 watch(
   () => authStore.tokenData,
   (val, oldVal) => {
-    console.log(val?.access_token);
     onInitData();
   }
 );

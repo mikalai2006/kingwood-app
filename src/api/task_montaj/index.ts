@@ -9,9 +9,9 @@ enum URLS {
 const find = async (
   params: IRequestParams<ITaskMontaj> | Partial<ITaskMontaj>
 ) =>
-  $get<IResponseData<ITaskMontaj>>({
+  $post<IResponseData<ITaskMontaj>>({
     url: `${URLS.path}/find`,
-    params,
+    data: params,
   });
 const get = async (id: string | number) =>
   $get<ITaskMontaj>({

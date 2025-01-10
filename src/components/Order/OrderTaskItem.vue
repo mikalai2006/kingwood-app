@@ -18,7 +18,6 @@ import { message, Modal } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
 import TaskWorkerStatusTag from "../Task/TaskWorkerStatusTag.vue";
 import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
-import { Item } from "ant-design-vue/es/menu";
 import VImg from "../UI/VImg.vue";
 
 const props = defineProps<{ taskId: string }>();
@@ -162,6 +161,9 @@ const onAddNewTaskWorker = (orderId: string | undefined) => {
   dataTaskForm.value = {
     ...defaultDataTask,
     taskId: props.taskId,
+    orderId: task.value?.orderId,
+    objectId: task.value?.objectId,
+    operationId: task.value?.operationId,
   };
   showTaskModal();
 };
@@ -169,28 +171,27 @@ const onAddNewTaskWorker = (orderId: string | undefined) => {
 const onEditTaskWorker = (item: ITaskWorker) => {
   console.log("Edit taskWorker: ", item);
 
-  dataTaskForm.value = Object.assign({}, item);
+  dataTaskForm.value = Object.assign({}, item, {
+    orderId: task.value?.orderId,
+    objectId: task.value?.objectId,
+    operationId: task.value?.operationId,
+  });
   showTaskModal();
+};
+
+const onDeleteTaskWorker = async (item: ITaskWorker) => {
+  console.log("Delete taskWorker: ", item);
+  await taskWorkerStore.onRemove(item.id);
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(true), 1000);
+  });
 };
 </script>
 
 <template>
   <div class="flex flex-col items-center">
     <div
-      :class="[
-        'rounded-full p-2 relative flex items-center justify-center',
-        // {
-        //   'bg-s-200 dark:bg-s-700': task?.statusId === 'wait',
-        // },
-        // {
-        //   'bg-blue-500': task?.statusId === 'process',
-        // },
-        // // { '': item.status === 'process' },
-        // {
-        //   'bg-green-500': task?.statusId === 'finish',
-        // },
-        // // { 'bg-zinc-200': !item.status },
-      ]"
+      :class="['rounded-full p-2 relative flex items-center justify-center']"
       :style="{
         background: taskStatus?.color,
         color: invertColor(taskStatus?.color, true),
@@ -201,31 +202,9 @@ const onEditTaskWorker = (item: ITaskWorker) => {
         :path="taskStatus?.icon"
         :class="['text-xl', taskStatus.animate]"
       />
-      <!-- <VIcon
-        v-if="task?.statusId === 'wait'"
-        :path="iTimerGlass"
-        class="text-lg text-s-400 dark:text-s-500"
-      /> -->
-      <!-- <VIcon
-        v-else-if="task?.statusId === 'process'"
-        :path="iArrowClockWise"
-        class="text-2xl animate-spin2"
-      />
-      <VIcon
-        v-else-if="task?.statusId === 'finish'"
-        :path="iCheckLg"
-        class="text-white dark:text-black text-xl"
-      /> -->
     </div>
     <div
-      :class="[
-        'mt-2 -mb-2 w-[2px] flex-auto',
-        // task?.statusId === 'finish'
-        //   ? ' bg-green-500'
-        //   : task?.statusId === 'wait'
-        //   ? 'bg-s-300 dark:bg-s-700'
-        //   : '',
-      ]"
+      :class="['mt-2 -mb-2 w-[2px] flex-auto']"
       :style="{
         // background: taskWorkers[0]?.post?.color,
         // color: invertColor(taskWorkers[0]?.post?.color, true),
@@ -317,6 +296,44 @@ const onEditTaskWorker = (item: ITaskWorker) => {
         <a-button @click="onEditTaskWorker(item)">
           {{ $t("button.edit") }}
         </a-button>
+        <a-popconfirm
+          :cancelText="$t('button.cancel')"
+          :okText="$t('button.delete')"
+          :okButtonProps="{
+            size: 'small',
+            type: 'primary',
+            danger: true,
+          }"
+          @confirm="onDeleteTaskWorker(item)"
+        >
+          <!-- <template #okButton>
+            <a-button
+              type="primary"
+              danger
+              size="small"
+              @click="onDeleteTask(item)"
+            >
+              {{ $t("button.delete") }}
+            </a-button>
+          </template> -->
+          <template #title>
+            <div class="w-52">
+              {{
+                replaceSubstringByArray($t("message.removeTaskWorker"), [
+                  item.worker?.name,
+                  order?.number,
+                  order?.name,
+                ])
+              }}
+            </div>
+          </template>
+          <template #icon>
+            <VIcon :path="iWraningTriangle" class="text-2xl text-red-500" />
+          </template>
+          <a-button>
+            {{ $t("button.delete") }}
+          </a-button>
+        </a-popconfirm>
       </div>
       <div>
         <TaskWorkerStatusTag :task-worker-id="item.id" />

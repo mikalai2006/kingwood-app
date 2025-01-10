@@ -14,6 +14,7 @@ import { ITask } from "@/api/task/types";
 import { sort } from "@/api/task";
 import { message } from "ant-design-vue";
 import { Colors } from "@/utils/colors";
+import OrderTaskItemMontaj from "./OrderTaskItemMontaj.vue";
 
 const props = defineProps<{ orderId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -39,6 +40,12 @@ const taskNotCompleted = computed(() =>
 const tasksCompleted = computed(() =>
   taskStore.items.filter(
     (x) => x.orderId === props.orderId && x.statusId === "finish"
+  )
+);
+
+const operationMontaj = computed(() =>
+  operationStore.items.filter(
+    (x) => x.name.toLowerCase().indexOf("монтаж") > -1
   )
 );
 
@@ -177,6 +184,21 @@ const activeKey = ref("list");
               <div
                 class="p-2 flex flex-row hover:bg-black/5 dark:hover:bg-black/10"
               >
+                <!-- <template
+                  v-if="
+                    operationMontaj
+                      .map((x) => x.id)
+                      .includes(element.operationId)
+                  "
+                >
+                  <OrderTaskItemMontaj
+                    :objectId="element.objectId"
+                    :taskId="element.id"
+                    @on-edit-task="emit('onEditTask', element)"
+                  />
+                </template>
+                <template v-else>
+                </template> -->
                 <OrderTaskItem
                   :taskId="element.id"
                   @on-edit-task="emit('onEditTask', element)"

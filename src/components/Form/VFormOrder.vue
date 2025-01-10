@@ -3,23 +3,20 @@ import { create, patch } from "@/api/order";
 import { Rule } from "ant-design-vue/es/form";
 import {
   computed,
-  defineComponent,
+  onBeforeUnmount,
   onMounted,
   reactive,
   ref,
   toRaw,
   UnwrapRef,
-  watch,
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useObjectStore, useOrderStore, useUserStore } from "@/store";
 import { IOrder } from "@/api/order/types";
-import VIcon from "../UI/VIcon.vue";
-import { iSearch } from "@/utils/icons";
-import { message } from "ant-design-vue";
-import { debounce } from "lodash-es";
-import { IObject } from "@/api/object/types";
 import { dateFormat } from "@/utils/date";
+import useObject from "@/composable/useObject";
+import { message } from "ant-design-vue";
+import { IValidateError, useError } from "@/composable/useError";
 
 const props = defineProps<{ data: IOrder; defaultData: IOrder }>();
 const emit = defineEmits(["callback"]);
@@ -66,15 +63,25 @@ const rules: Record<string, Rule[]> = {
     },
     // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
   ],
-  // code: [
+  constructorId: [
+    {
+      required: true,
+      message: t("form.order.rule.constructorId"),
+      trigger: "change",
+    },
+    // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
+  ],
+  // term: [
   //   {
   //     required: true,
-  //     message: "Please input Activity name",
+  //     message: t("form.order.rule.term"),
   //     trigger: "change",
   //   },
-  //   { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
+  //   // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
   // ],
 };
+
+const { onGetValidateError } = useError();
 
 const onSubmit = async () => {
   await formRef.value
@@ -82,7 +89,9 @@ const onSubmit = async () => {
     .then(async () => {
       // console.log("values", formState, toRaw(formState));
       const data = toRaw(formState) as IOrder;
-      data.term = new Date(data.term).toISOString();
+      if (data.term) {
+        data.term = new Date(data.term).toISOString();
+      }
       if (data.id) {
         const result = await patch(data.id, data);
         orderStore.onAddItemToStore(result);
@@ -91,13 +100,20 @@ const onSubmit = async () => {
         orderStore.onAddItemToStore(result);
       }
       emit("callback");
+      message.success(t("form.order.successAdd"));
+      resetForm();
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: IValidateError) => {
+      if (error?.errorFields) {
+        message.error(onGetValidateError(error));
+      } else {
+        message.error(error.message);
+      }
     });
+  // Object.assign(formState, props.defaultData);
 };
 const resetForm = () => {
-  formRef.value.resetFields();
+  formRef.value?.resetFields();
 };
 
 const constructors = computed(() => {
@@ -121,7 +137,7 @@ const orderGroups = computed(() => {
 });
 
 const orderStatuses = computed(() => {
-  return [0, 1, 2, 3, 4, 5, 100].map((x) => {
+  return [0, 1, 100].map((x) => {
     return {
       value: x,
       label: t(`orderStatus.${x}`),
@@ -147,46 +163,17 @@ const orderStatuses = computed(() => {
 //     message.error("Form order error: ", e);
 //   }
 // };
-let lastFetchId = 0;
-const state = reactive<{ data: IObject[]; value: string; fetching: boolean }>({
-  data: [],
-  value: "",
-  fetching: false,
-});
+
+const { onCreateObject, onFetchObjects, state } = useObject();
 
 onMounted(() => {
   const object = objectStore.items.find((x) => x.id === formState.objectId);
-  object?.name && fetchObjects(object?.name);
+  object?.name && onFetchObjects(object?.name);
 });
 
-const fetchObjects = debounce((value: string) => {
-  console.log("fetching objects", value);
-  state.value = value;
-  lastFetchId += 1;
-  const fetchId = lastFetchId;
-  state.data = [];
-  state.fetching = true;
-  objectStore
-    .find({
-      name: value,
-    })
-    .then((body) => {
-      if (fetchId !== lastFetchId) {
-        // for fetch callback order
-        return;
-      }
-      const data = body.data.map((obj) => ({
-        ...obj,
-        label: obj.name,
-        value: obj.id,
-      }));
-      state.data = data;
-    })
-    .finally(() => {
-      state.fetching = false;
-    });
-}, 300);
-
+onBeforeUnmount(() => {
+  resetForm();
+});
 // watch(
 //   () => state.value,
 //   () => {
@@ -219,19 +206,36 @@ const fetchObjects = debounce((value: string) => {
       <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
         <a-input v-model:value="formState.object" />
       </a-form-item> -->
+
       <a-form-item :label="$t('form.order.objectId')" name="objectId">
         <a-select
           v-model:value="formState.objectId"
           style="width: 100%"
           :placeholder="$t('form.order.selectObject')"
           :options="state.data"
-          @search="fetchObjects"
+          @search="onFetchObjects"
           :show-search="true"
           :filter-option="false"
-          :not-found-content="state.fetching ? undefined : null"
+          :not-found-content="state.value ? undefined : null"
         >
-          <template v-if="state.fetching" #notFoundContent>
-            <a-spin size="small" />
+          <template v-if="state.value" #notFoundContent>
+            <div class="flex">
+              <div>
+                <p>{{ $t("form.object.notfound") }}: {{ state.value }}</p>
+                <a-button
+                  type="primary"
+                  @click="
+                    () =>
+                      onCreateObject((result) => {
+                        formState.objectId = result.id;
+                      })
+                  "
+                >
+                  {{ $t("form.object.add") }} {{ state.value }}
+                </a-button>
+              </div>
+              <a-spin v-if="state.fetching" size="small" />
+            </div>
           </template>
           <!-- <template #dropdownRender="{ menuNode: menu }">
             <a-space style="padding: 4px 8px">
@@ -254,6 +258,21 @@ const fetchObjects = debounce((value: string) => {
         </a-select>
       </a-form-item>
 
+      <a-form-item :label="$t('form.order.constructorId')" name="constructorId">
+        <a-select
+          v-model:value="formState.constructorId"
+          style="width: 100%"
+          :placeholder="$t('form.order.selectConstructor')"
+          :options="[
+            {
+              value: '000000000000000000000000',
+              label: 'Без конструктора',
+            },
+            ...constructors,
+          ]"
+        ></a-select>
+      </a-form-item>
+
       <a-form-item ref="name" :label="$t('form.order.name')" name="name">
         <a-textarea
           v-model:value="formState.name"
@@ -272,22 +291,7 @@ const fetchObjects = debounce((value: string) => {
         />
       </a-form-item>
 
-      <a-form-item :label="$t('form.order.constructorId')" name="color">
-        <a-select
-          v-model:value="formState.constructorId"
-          style="width: 100%"
-          :placeholder="$t('form.order.selectConstructor')"
-          :options="[
-            {
-              value: '000000000000000000000000',
-              label: 'Без конструктора',
-            },
-            ...constructors,
-          ]"
-        ></a-select>
-      </a-form-item>
-
-      <a-form-item :label="$t('form.order.group')" name="group">
+      <!-- <a-form-item :label="$t('form.order.group')" name="group">
         <a-select
           v-model:value="formState.group"
           style="width: 100%"
@@ -295,7 +299,7 @@ const fetchObjects = debounce((value: string) => {
           :options="orderGroups"
           mode="tags"
         ></a-select>
-      </a-form-item>
+      </a-form-item> -->
 
       <a-form-item :label="$t('form.order.status')" name="status">
         <a-select
@@ -303,6 +307,7 @@ const fetchObjects = debounce((value: string) => {
           style="width: 100%"
           :placeholder="$t('form.order.selectStatus')"
           :options="orderStatuses"
+          :disabled="true"
         ></a-select>
       </a-form-item>
 

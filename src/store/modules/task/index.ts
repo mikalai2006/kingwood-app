@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { find, get, remove } from "@/api/task";
+import { find, findPopulate, get, remove } from "@/api/task";
 import { IRequestParams } from "@/api/types";
-import { ITask, ITaskInput } from "@/api/task/types";
+import { ITask, ITaskFilter, ITaskInput } from "@/api/task/types";
 // import sift from 'sift'
 
 export const useTaskStore = defineStore("task", {
@@ -16,11 +16,11 @@ export const useTaskStore = defineStore("task", {
     },
   },
   actions: {
-    async find(params?: IRequestParams<ITask> | Partial<ITask>) {
+    async find(data?: ITaskFilter) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
-      const data = await find(params || {});
-      data.data?.forEach((el) => this.onAddItemToStore(el));
+      const _data = await findPopulate(data || {});
+      _data.data?.forEach((el) => this.onAddItemToStore(el));
       // }
       return data;
     },

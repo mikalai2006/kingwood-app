@@ -11,6 +11,7 @@ import { useGeneralStore } from "./modules/general";
 import { useTaskStatusStore } from "./modules/taskStatus";
 import { useObjectStore } from "./modules/object";
 import { useTaskMontajStore } from "./modules/taskMontaj";
+import { useTaskMontajWorkerStore } from "./modules/taskMontajWorker";
 // import { useLibrary } from './modules/library'
 // import { useComponent } from './modules/component'
 // import { useComponentGroup } from './modules/component_group'
@@ -31,6 +32,7 @@ export {
   useTaskStatusStore,
   useObjectStore,
   useTaskMontajStore,
+  useTaskMontajWorkerStore,
   // useLibrary,
   // useComponent,
   useUserStore,

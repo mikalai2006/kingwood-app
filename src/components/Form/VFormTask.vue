@@ -108,15 +108,26 @@ const resetForm = () => {
 };
 
 const operations = computed(() => {
-  return operationStore.items
-    .filter((x) => x.group === "create")
-    .map((x) => {
-      return {
-        value: x.name,
-        label: x.name,
-      };
-    });
+  return (
+    operationStore.items
+      // .filter((x) => ["2", "3", "4"].includes(x.group))
+      .map((x) => {
+        return {
+          value: x.id,
+          label: x.name,
+        };
+      })
+  );
 });
+
+const onChangeOperation = (value: string) => {
+  const _operation = operationStore.items.find((x) => x.id === value);
+
+  if (_operation) {
+    formState.name = _operation?.name;
+    // console.log("onChangeOperation: ", value, _operation);
+  }
+};
 
 const workers = computed(() => {
   return (
@@ -212,8 +223,8 @@ onMounted(() => {
         />
       </a-form-item> -->
 
-      <a-form-item :label="$t('form.task.name')" name="name">
-        <a-auto-complete
+      <a-form-item :label="$t('form.task.operationId')" name="operationId">
+        <!-- <a-auto-complete
           v-model:value="formState.name"
           :options="operations"
           style="width: 100%"
@@ -225,15 +236,16 @@ onMounted(() => {
           <template #clearIcon>
             <VIcon :path="iX" class="text-2xl leading-3 -mt-1.5 -ml-1.5" />
           </template>
-        </a-auto-complete>
-        <!-- <a-select
-          v-model:value="formState.name"
+        </a-auto-complete> -->
+        <a-select
+          v-model:value="formState.operationId"
           style="width: 100%"
           show-search
-          :placeholder="$t('form.task.namePlaceholder')"
+          :placeholder="$t('form.task.selectOperationId')"
           :options="operations"
           :filter-option="filterOption"
-        ></a-select> -->
+          @change="onChangeOperation"
+        ></a-select>
         <!-- <a-select
           v-model:value="formState.operationId"
           style="width: 100%"
@@ -299,16 +311,16 @@ onMounted(() => {
         ></a-select>
       </a-form-item> -->
 
-      <a-form-item :label="$t('form.task.statusId')" name="statusId">
+      <!-- <a-form-item :label="$t('form.task.statusId')" name="statusId">
         <a-select
           v-model:value="formState.statusId"
           style="width: 100%"
           :placeholder="$t('form.task.selectStatusId')"
           :options="taskStatuses"
         ></a-select>
-      </a-form-item>
+      </a-form-item> -->
 
-      <a-form-item :labelCol="{ span: 21 }" name="active">
+      <!-- <a-form-item :labelCol="{ span: 21 }" name="active">
         <template #label>
           {{ $t("form.task.active") }}
           <UIHelp :title="$t('form.task.help.active')" />
@@ -318,9 +330,9 @@ onMounted(() => {
           :checkedValue="1"
           :unCheckedValue="0"
         />
-      </a-form-item>
+      </a-form-item> -->
 
-      <a-form-item :labelCol="{ span: 21 }" name="autoCheck">
+      <!-- <a-form-item :labelCol="{ span: 21 }" name="autoCheck">
         <template #label>
           {{ $t("form.task.autoCheck") }}
           <UIHelp :title="$t('form.task.help.autoCheck')" />
@@ -330,7 +342,7 @@ onMounted(() => {
           :checkedValue="1"
           :unCheckedValue="0"
         />
-      </a-form-item>
+      </a-form-item> -->
 
       <!-- <a-form-item :label="$t('form.post.color')" name="color">
         <a-select

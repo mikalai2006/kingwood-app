@@ -25,3 +25,11 @@ export interface IAuth {
   token_access: string;
   refresh_token: string;
 }
+
+export interface IAuthInput {
+  password?: string;
+}
+
+export interface IAuthPublicData {
+  login: string;
+}

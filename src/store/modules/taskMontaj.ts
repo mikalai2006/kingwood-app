@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { find, get } from "@/api/task_montaj";
 import { IRequestParams } from "@/api/types";
 import { ITaskMontaj } from "@/api/task_montaj/types";
+import { useObjectStore } from "..";
 // import sift from 'sift'
 
 export const useTaskMontajStore = defineStore("taskMontaj", {
@@ -17,10 +18,18 @@ export const useTaskMontajStore = defineStore("taskMontaj", {
   },
   actions: {
     async find(params?: IRequestParams<ITaskMontaj> | Partial<ITaskMontaj>) {
+      const objectStore = useObjectStore();
+
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
       const data = await find(params || {});
-      data.data?.forEach((el) => this.onAddItemToStore(el));
+      data.data?.forEach((el) => {
+        this.onAddItemToStore(el);
+
+        if (el.object) {
+          objectStore.onAddItemToStore(el.object);
+        }
+      });
       // }
       return data;
     },

@@ -12,6 +12,7 @@ const menuItems = ref([
   // "operation",
   "object",
   "order",
+  // "montaj",
   "montajList",
   // "task_status",
 ]);

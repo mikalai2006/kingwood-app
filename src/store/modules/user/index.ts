@@ -28,11 +28,17 @@ export const useUserStore = defineStore("user", {
     },
   },
   actions: {
+    async get(id: string) {
+      const data = await get(id);
+
+      data && this.onAddItemToStore(data);
+      return data;
+    },
     async find(params?: IRequestParams<IUser> | Partial<IUser>) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
       const data = await find(params || {});
-      data.data.forEach((el) => this.onAddItemToStore(el));
+      data.data?.forEach((el) => this.onAddItemToStore(el));
       // }
       return data;
     },
@@ -55,12 +61,13 @@ export const useUserStore = defineStore("user", {
     // },
     onAddItemToStore(item: IUser) {
       const existsItem = this.onExists(item.id);
+
       if (existsItem.index == -1) {
         this._items.push(item);
       } else {
         this._items[existsItem.index] = Object.assign(
           {},
-          this._items[existsItem.index],
+          // this._items[existsItem.index],
           item
         );
       }

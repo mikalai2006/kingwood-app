@@ -12,7 +12,12 @@ import { useI18n } from "vue-i18n";
 
 import { create, patch } from "@/api/task_worker";
 import { Rule } from "ant-design-vue/es/form";
-import { useTaskStatusStore, useTaskWorkerStore, useUserStore } from "@/store";
+import {
+  usePostStore,
+  useTaskStatusStore,
+  useTaskWorkerStore,
+  useUserStore,
+} from "@/store";
 import { ITaskWorkerInput } from "@/api/task_worker/types";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
@@ -29,6 +34,7 @@ const { t } = useI18n();
 const taskWorkerStore = useTaskWorkerStore();
 const userStore = useUserStore();
 const taskStatusStore = useTaskStatusStore();
+const postStore = usePostStore();
 
 const formState: UnwrapRef<ITaskWorkerInput> = reactive({ ...props.data });
 const formRef = ref();
@@ -141,8 +147,9 @@ const workers = computed(() => {
       // .filter((x) => x.typeWork?.includes(formState.operationId))
       .filter((x) => x.hidden)
       .map((x) => {
+        const post = postStore.items.find((y) => y.id === x.postId);
         return {
-          post: x.postObject,
+          post,
           value: x.id,
           label: x.name,
         };
@@ -171,7 +178,7 @@ const typesGo = computed(() =>
 
 const disabledDate = (current: Dayjs) => {
   // Can not select days before today and today
-  return current && current < dayjs().subtract(1, "day"); //.endOf("day");
+  return current && current < dayjs().subtract(2, "day"); //.endOf("day");
 };
 
 watch(taskRange, (v) => {
@@ -186,6 +193,15 @@ watch(taskDate, (v) => {
 onMounted(() => {
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
+
+    const waitStatus = taskStatusStore.items.find((x) => x.status === "wait");
+    if (waitStatus) {
+      formState.status = waitStatus.status;
+      formState.statusId = waitStatus.id;
+    }
+  }
+  if (formState.to && formState.from) {
+    taskRange.value = [dayjs(formState.from), dayjs(formState.to)];
   }
 });
 </script>
@@ -235,6 +251,27 @@ onMounted(() => {
         </a-auto-complete>
       </a-form-item> -->
 
+      <a-form-item :label="$t('form.taskWorker.workerId')" name="workerId">
+        <a-select
+          v-model:value="formState.workerId"
+          style="width: 100%"
+          show-search
+          :options="workers"
+          :placeholder="$t('form.taskWorker.selectWorkerId')"
+          :filter-option="filterOption"
+          :disabled="!!formState.id"
+        >
+          <template #option="{ value, label, post }">
+            <div class="flex flex-row">
+              <div class="flex-auto">
+                {{ label }}
+              </div>
+              <div class="text-s-500">{{ post?.name }}</div>
+            </div>
+          </template>
+        </a-select>
+      </a-form-item>
+
       <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
         <a-select
           v-model:value="formState.typeGo"
@@ -253,8 +290,8 @@ onMounted(() => {
           v-model:value="taskRange"
           :disabledDate="disabledDate"
           :format="dateFormat"
-          :disabled="!!formState.id"
         />
+        <!-- :disabled="!!formState.id" -->
       </a-form-item>
 
       <a-form-item
@@ -266,29 +303,7 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
-          :disabled="!!formState.id"
         />
-      </a-form-item>
-
-      <a-form-item :label="$t('form.taskWorker.workerId')" name="workerId">
-        <a-select
-          v-model:value="formState.workerId"
-          style="width: 100%"
-          show-search
-          :options="workers"
-          :placeholder="$t('form.taskWorker.selectWorkerId')"
-          :filter-option="filterOption"
-          :disabled="!!formState.id"
-        >
-          <template #option="{ value, label, post }">
-            <div class="flex flex-row">
-              <div class="flex-auto">
-                {{ label }}
-              </div>
-              <div class="text-s-500">{{ post.name }}</div>
-            </div>
-          </template>
-        </a-select>
       </a-form-item>
 
       <a-form-item :label="$t('form.taskWorker.statusId')" name="statusId">

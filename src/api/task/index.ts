@@ -1,6 +1,6 @@
 import { $delete, $get, $patch, $post } from "@/utils/http/axios";
 import { IRequestParams, IResponseData } from "@/api/types";
-import { ITask, ITaskInput } from "./types";
+import { ITask, ITaskFilter, ITaskInput } from "./types";
 
 enum URLS {
   path = "/task",
@@ -10,6 +10,11 @@ const find = async (params: IRequestParams<ITask> | Partial<ITask>) =>
   $get<IResponseData<ITask>>({
     url: URLS.path,
     params,
+  });
+const findPopulate = async (data: ITaskFilter) =>
+  $post<IResponseData<ITask>>({
+    url: `${URLS.path}/populate`,
+    data,
   });
 const get = async (id: string | number) =>
   $get<ITask>({
@@ -40,4 +45,4 @@ const remove = async (id: string | number, data: ITaskInput) =>
     data,
   });
 
-export { find, get, create, patch, sort, remove };
+export { find, get, create, patch, sort, remove, findPopulate };

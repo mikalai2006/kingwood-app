@@ -40,9 +40,12 @@ export const useSocket = () => {
       // }, 5000);
     };
     _socket.onmessage = function (event) {
-      console.log("event.data: ", event.data);
       const data: IWsMessage = JSON.parse(event.data);
       const { method, content, service } = data;
+
+      console.groupCollapsed(`Event > ${service}: ${method}`);
+      console.dir(JSON.parse(event.data));
+      console.groupEnd();
 
       if (!content || !service) {
         return;
@@ -51,14 +54,15 @@ export const useSocket = () => {
       try {
         switch (service) {
           case "user":
-            if (method === "REMOVE") {
+            if (method === "DELETE") {
             } else {
               userStore.onAddItemToStore(content);
             }
             break;
 
           case "task":
-            if (method === "REMOVE") {
+            if (method === "DELETE") {
+              taskStore.onRemoveItemFromStore(content.id);
             } else {
               taskStore.onAddItemToStore(content);
               // window?.ipcRenderer?.show("title", "body");
@@ -72,14 +76,15 @@ export const useSocket = () => {
             break;
 
           case "taskWorker":
-            if (method === "REMOVE") {
+            if (method === "DELETE") {
+              taskWorkerStore.onRemoveItemFromStore(content.id);
             } else {
               taskWorkerStore.onAddItemToStore(content);
             }
             break;
 
           case "order":
-            if (method === "REMOVE") {
+            if (method === "DELETE") {
             } else {
               orderStore.onAddItemToStore(content);
             }

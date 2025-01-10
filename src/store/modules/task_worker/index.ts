@@ -1,7 +1,11 @@
 import { defineStore } from "pinia";
-import { find, get } from "@/api/task_worker";
+import { find, findPopulate, get, remove } from "@/api/task_worker";
 import { IRequestParams } from "@/api/types";
-import { ITaskWorker } from "@/api/task_worker/types";
+import {
+  ITaskWorker,
+  ITaskWorkerFilter,
+  ITaskWorkerInput,
+} from "@/api/task_worker/types";
 // import sift from 'sift'
 
 export const useTaskWorkerStore = defineStore("taskWorker", {
@@ -16,11 +20,11 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
     },
   },
   actions: {
-    async find(params?: IRequestParams<ITaskWorker> | Partial<ITaskWorker>) {
+    async find(data?: ITaskWorkerFilter) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
-      const data = await find(params || {});
-      data.data?.forEach((el) => this.onAddItemToStore(el));
+      const _data = await findPopulate(data || {});
+      _data.data?.forEach((el) => this.onAddItemToStore(el));
       // }
       return data;
     },
@@ -52,6 +56,34 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
           item
         );
       }
+    },
+    onRemoveItemFromStore(
+      id: string | number,
+      params?: ITaskWorkerInput
+    ): number {
+      let itemIndex = -1;
+      if (params) {
+        // search by params
+      } else {
+        itemIndex = this._items.findIndex((el: ITaskWorker) => el.id == id);
+      }
+
+      if (itemIndex !== -1) {
+        this._items.splice(itemIndex, 1);
+      }
+
+      return itemIndex;
+    },
+    async onRemove(id: string | undefined) {
+      if (!id) {
+        return;
+      }
+
+      const data = await remove(id, {}).then(() => {
+        this.onRemoveItemFromStore(id);
+      });
+
+      return data;
     },
     /**
      * Get page by id from server.

@@ -64,7 +64,7 @@ export const useAuthStore = defineStore("auth", {
     async login(body: ILoginData) {
       try {
         const data = await login(body);
-        if (data) {
+        if (data?.access_token) {
           this.setTokenData(data);
           setAxiosHeader("Authorization", `Bearer ${this.token}`);
 
@@ -75,6 +75,8 @@ export const useAuthStore = defineStore("auth", {
 
           // and get iam.
           await this.getIAm();
+        } else {
+          throw data;
         }
         return data;
       } catch (e) {

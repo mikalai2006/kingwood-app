@@ -1,4 +1,5 @@
 import { IObject } from "../object/types";
+import { IPaginationParams } from "../types";
 
 export interface IOrder {
   id: string;
@@ -9,6 +10,7 @@ export interface IOrder {
   constructorId: string;
   term: string;
   termMontaj: string;
+  dateStart: string;
   objectId: string;
   priority: number;
   group: string[];
@@ -18,6 +20,7 @@ export interface IOrder {
   stolyarComplete: number;
   malyarComplete: number;
   goComplete: number;
+  dateOtgruzka: string;
   montajComplete: number;
 
   createdAt: Date;
@@ -27,3 +30,15 @@ export interface IOrder {
 export type IOrderInput = {
   [Property in keyof IOrder]?: IOrder[Property];
 };
+
+export interface IOrderFilter extends IPaginationParams<IOrderInput> {
+  id?: string[];
+  name?: string;
+  group?: string[];
+  status?: number;
+  objectId?: string[];
+  stolyarComplete?: number;
+  malyarComplete?: number;
+  goComplete?: number;
+  montajComplete?: number;
+}

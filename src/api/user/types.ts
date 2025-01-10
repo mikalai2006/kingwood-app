@@ -1,3 +1,4 @@
+import { IAuthPublicData } from "../auth/types";
 import { IImage } from "../image/types";
 import { IPost } from "../post/types";
 import { IRole } from "../role/types";
@@ -20,6 +21,9 @@ export interface IUser {
   typePay: number;
   oklad: number;
   lastTime: Date;
+
+  auth: IAuthPublicData;
+
   createdAt: Date;
   updatedAt: Date;
 }

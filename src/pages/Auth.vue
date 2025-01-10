@@ -3,8 +3,13 @@ import { reactive, ref } from "vue";
 import VTitle from "../components/VTitle.vue";
 import { useAuthStore } from "@/store";
 import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import { useI18n } from "vue-i18n";
+import { IFailedFinishForm, useError } from "@/composable/useError";
 
 const router = useRouter();
+
+const { t } = useI18n();
 
 const authStore = useAuthStore();
 
@@ -19,17 +24,27 @@ const formState = reactive<FormState>({
   password: "",
   remember: true,
 });
+
 const onFinish = async (values: any) => {
-  console.log("Success:", values);
-  const result = await authStore.login(formState).then((r) => {
-    router.replace("/");
-    return r;
-  });
-  console.log("result auth: ", result);
+  try {
+    await authStore
+      .login(formState)
+      .then((r) => {
+        router.replace("/");
+        return r;
+      })
+      .catch((e) => {
+        throw e;
+      });
+  } catch (e: any) {
+    message.error(t(e?.message));
+  }
 };
 
-const onFinishFailed = (errorInfo: any) => {
-  console.log("Failed:", errorInfo);
+const { onGetValidateError } = useError();
+
+const onFinishFailed = (errorInfo: IFailedFinishForm) => {
+  message.error(onGetValidateError(errorInfo));
 };
 </script>
 

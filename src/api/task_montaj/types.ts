@@ -1,8 +1,11 @@
+import { IObject } from "../object/types";
+
 export interface ITaskMontaj {
   id: string;
   userId: string;
+  object: IObject;
   objectId: string;
-  orderId: string;
+  // orderId: string;
   workerId: string;
   operationId: string;
   name: string;

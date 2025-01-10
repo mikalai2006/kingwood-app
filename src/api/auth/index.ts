@@ -1,6 +1,11 @@
 import { $post, $get, $patch } from "@/utils/http/axios";
 import { IUser } from "../user/types";
-import { ILoginData, IResResultLogin, ILoginRefreshToken } from "./types";
+import {
+  ILoginData,
+  IResResultLogin,
+  ILoginRefreshToken,
+  IAuthInput,
+} from "./types";
 
 enum URLS {
   auth = "/auth",
@@ -20,7 +25,10 @@ const login = async (data: ILoginData): Promise<IResResultLogin> =>
     body: JSON.stringify({ ...data }),
   })
     .then((r) => r.json())
-    .then((r) => r);
+    .then((r) => r)
+    .catch((e) => {
+      throw e;
+    });
 // $post<IResResultLogin>({
 //   url: URLS.auth_login,
 //   data,
@@ -67,10 +75,17 @@ const logout = async (data: ILoginRefreshToken): Promise<IResResultLogin> =>
     data,
   });
 
-const patch = async (id: string | number, data: IUser) =>
-  $patch<IUser>({
-    url: `${URLS.auth}/${id}`,
+const resetPassword = async (id: string | number, data: IAuthInput) =>
+  $post<string>({
+    url: `${URLS.auth}/reset-password/${id}`,
     data,
   });
 
-export { patch, login, refresh_token, getIamFromServer, register, logout };
+export {
+  resetPassword,
+  login,
+  refresh_token,
+  getIamFromServer,
+  register,
+  logout,
+};

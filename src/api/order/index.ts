@@ -1,12 +1,12 @@
 import { $get, $patch, $post } from "@/utils/http/axios";
 import { IRequestParams, IResponseData } from "@/api/types";
-import { IOrder, IOrderInput } from "./types";
+import { IOrder, IOrderFilter, IOrderInput } from "./types";
 
 enum URLS {
   path = "/order",
 }
 
-const find = async (data: IRequestParams<IOrder> | Partial<IOrder>) =>
+const find = async (data: IOrderFilter) =>
   $post<IResponseData<IOrder>>({
     url: `${URLS.path}/find`,
     data,

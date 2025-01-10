@@ -155,11 +155,6 @@ const columnsData = computed(() => {
     });
 });
 const defaultData: IUserInput = {
-  name: "",
-  phone: "",
-  roleId: "",
-  postId: "",
-  birthday: "",
   typeWork: [],
 };
 const dataForm = ref(defaultData);
@@ -170,9 +165,9 @@ const onAddNewItem = () => {
 };
 
 const onEditItem = (item: IUser) => {
-  console.log("item: ", item);
+  // console.log("Edit user: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 
@@ -269,7 +264,11 @@ const activeKey = ref("current");
               </div>
             </template>
             <template v-if="column.key === 'birthday'">
-              <p>{{ dayjs(record.birthday).format("DD MMMM YYYY") }}</p>
+              <p v-if="record.birthday">
+                {{
+                  dayjs(record.birthday, "DD.MM.YYYY").format("DD MMMM YYYY")
+                }}
+              </p>
             </template>
             <template v-if="column.key === 'typePay'">
               <a-tag>
@@ -304,7 +303,7 @@ const activeKey = ref("current");
 
   <a-modal
     v-model:open="open"
-    :destroyOnClose="false"
+    :destroyOnClose="true"
     :key="dataForm.id"
     :title="dataForm.id ? $t('form.user.edit') : $t('form.user.new')"
     :ok-button-props="{ hidden: true }"

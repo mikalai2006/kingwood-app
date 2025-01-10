@@ -16,6 +16,7 @@ import Account from "./pages/Account.vue";
 import MontajList from "./pages/MontajList.vue";
 import MontajListDay from "./pages/MontajListDay.vue";
 import ObjectOrder from "./pages/ObjectOrder.vue";
+import Montaj from "./pages/Montaj.vue";
 
 const routes = [
   {
@@ -76,6 +77,12 @@ const routes = [
     path: "/account",
     name: "account",
     component: Account,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/montaj",
+    name: "montaj",
+    component: Montaj,
     meta: { requiresAuth: true },
   },
   {

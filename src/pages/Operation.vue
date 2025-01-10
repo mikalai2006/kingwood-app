@@ -82,11 +82,11 @@ const onEditItem = (item: IOperation) => {
           </a-button>
         </template>
         <template v-if="column.key === 'name'">
-          <a-tag
-            :color="record.color"
-            :style="{ color: invertColor(record.color, true) }"
-            >{{ record.name }}</a-tag
-          >
+          <!-- :color="record.color"
+            :style="{ color: invertColor(record.color, true) }" -->
+          <a-tag :bordered="false">
+            {{ record.name }}
+          </a-tag>
         </template>
         <template v-if="column.key === 'group'">
           <a-tag :bordered="false">{{

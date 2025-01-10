@@ -8,6 +8,11 @@ import VFormPost from "@/components/Form/VFormPost.vue";
 import { invertColor } from "@/utils/utils";
 import { IObject, IObjectInput } from "@/api/object/types";
 import VFormObject from "@/components/Form/VFormObject.vue";
+import { useI18n } from "vue-i18n";
+import { iArrowRight, iPen } from "@/utils/icons";
+import VIcon from "@/components/UI/VIcon.vue";
+
+const { t } = useI18n();
 
 dayjs.locale("ru");
 const userStore = useUserStore();
@@ -16,21 +21,26 @@ const objectStore = useObjectStore();
 await objectStore.find({ $limit: 1000 });
 
 const columns = ref([
-  { title: "name", dataIndex: "name", key: "name", fixed: true },
   {
-    title: "updatedAt",
-    dataIndex: "updatedAt",
-    key: "updatedAt",
-    fixed: false,
+    title: t("table.object.name"),
+    dataIndex: "name",
+    key: "name",
+    fixed: true,
   },
   {
-    title: "createdAt",
+    title: t("table.object.createdAt"),
     dataIndex: "createdAt",
     key: "createdAt",
     fixed: false,
   },
   {
-    title: "action",
+    title: t("table.object.updatedAt"),
+    dataIndex: "updatedAt",
+    key: "updatedAt",
+    fixed: false,
+  },
+  {
+    title: t("table.object.action"),
     dataIndex: "action",
     key: "action",
     fixed: false,
@@ -86,10 +96,22 @@ const onEditItem = (item: IObject) => {
             <template #title>
               {{ $t("form.object.edit") }}
             </template>
-            <a-button @click="onEditItem(record)">
-              {{ $t("button.edit") }}
+
+            <a-button type="link" @click="onEditItem(record)">
+              <!-- {{ $t("button.edit") }} -->
+              <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
             </a-button>
           </a-tooltip>
+        </template>
+        <template v-if="column.key === 'createdAt'">
+          <div>
+            {{ dayjs(record.createdAt).fromNow() }}
+          </div>
+        </template>
+        <template v-if="column.key === 'updatedAt'">
+          <div>
+            {{ dayjs(record.createdAt).fromNow() }}
+          </div>
         </template>
         <template v-if="column.key === 'name'">
           <RouterLink
@@ -99,8 +121,10 @@ const onEditItem = (item: IObject) => {
                 objectId: record.id,
               },
             }"
+            class="flex items-center gap-2"
           >
             {{ record.name }}
+            <VIcon :path="iArrowRight" />
           </RouterLink>
           <!-- <a-tag :bordered="false">
           </a-tag> -->

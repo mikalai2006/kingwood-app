@@ -1,0 +1,106 @@
+<table
+  ref="tblRef"
+  class="mt-4 border-collapse border border-s-200 dark:border-g-700 w-full overflow-x-auto rounded"
+>
+  <thead>
+    <tr>
+      <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+        Объект
+      </td>
+      <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+              Изделия
+            </td> -->
+      <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+              Исполнитель
+            </td> -->
+      <th
+        v-for="day in daysOfSelectWeek"
+        :key="day.day"
+        class="px-4 text-normal border border-s-200 dark:border-g-700"
+      >
+        <div>
+          {{ day.dayString .split(",") .slice(0, day.dayString.split(" ").length
+          - 3) .join(" ") }}
+        </div>
+        <p class="font-normal">
+          {{ day.dayString .split(",") .slice(1, day.dayString.split(" ").length
+          - 2) .join(" ") }}
+        </p>
+        <!-- <RouterLink
+                :to="{
+                  name: 'montajListDay',
+                  params: {
+                    day: day.day,
+                  },
+                }"
+              >
+                {{ $t("button.edit") }}
+              </RouterLink> -->
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <template v-for="taskMontaj in taskMontajes" :key="taskMontaj.id">
+      <tr class="rowBody">
+        <th class="w-64 py-4 border border-s-200 dark:border-g-700">
+          <span class="text-base font-bold leading-4">
+            {{ taskMontaj.object?.name }}
+          </span>
+          <MontajObjectOrders :object-id="taskMontaj.objectId" />
+        </th>
+        <!-- <th class="py-4 border border-s-200 dark:border-g-700"></th> -->
+        <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
+              <span class="text-base font-normal leading-4">
+                Исполнитель 1
+              </span>
+            </th> -->
+        <td
+          v-for="(day, index) in daysOfSelectWeek"
+          :key="day.dayString"
+          class="relative border border-s-200 dark:border-g-700 m-0 p-0 group tdDay w-auto"
+          :style="{
+                  height: `${
+                    Object.values(newTaskMontajWorkers[taskMontaj.objectId])
+                      .length * 50
+                  }px`,
+                }"
+        >
+          <div
+            v-if="index === 0"
+            v-for="(taskMW, taskMontajId, indexM) in newTaskMontajWorkers[
+                    taskMontaj.objectId
+                  ]"
+            class="text-left text-sm w-full px-1 text-nowrap"
+          >
+            <a-tooltip>
+              <template #title> Change </template>
+              <div
+                class="bg-s-100 dark:bg-s-500 absolute"
+                :style="{
+                        left: `${taskMW.stat.startCol * 100}px`,
+                        top: `${indexM * 40}px`,
+                      }"
+              >
+                <a-button
+                  type="text"
+                  @click="
+                          onEditTaskWorker(taskMW.item, taskMontaj.objectId)
+                        "
+                >
+                  {{ getShortFIO(taskMW?.item?.user?.name) }} - {{
+                  taskMW.item.id }}
+                </a-button>
+              </div>
+            </a-tooltip>
+          </div>
+          <a-button
+            class="invisible group-hover:visible"
+            @click="onAddNewItemTaskWorker(day, taskMontaj)"
+          >
+            {{ $t("form.create") }}
+          </a-button>
+        </td>
+      </tr>
+    </template>
+  </tbody>
+</table>

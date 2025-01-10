@@ -1,6 +1,6 @@
-import { $get, $patch, $post } from "@/utils/http/axios";
+import { $delete, $get, $patch, $post } from "@/utils/http/axios";
 import { IRequestParams, IResponseData } from "@/api/types";
-import { ITaskWorker, ITaskWorkerInput } from "./types";
+import { ITaskWorker, ITaskWorkerFilter, ITaskWorkerInput } from "./types";
 
 enum URLS {
   path = "/task_worker",
@@ -12,6 +12,12 @@ const find = async (
   $get<IResponseData<ITaskWorker>>({
     url: URLS.path,
     params,
+  });
+
+const findPopulate = async (data: ITaskWorkerFilter) =>
+  $post<IResponseData<ITaskWorker>>({
+    url: `${URLS.path}/populate`,
+    data,
   });
 const get = async (id: string | number) =>
   $get<ITaskWorker>({
@@ -30,4 +36,10 @@ const patch = async (id: string | number, data: ITaskWorkerInput) =>
     data,
   });
 
-export { find, get, create, patch };
+const remove = async (id: string | number, data: ITaskWorkerInput) =>
+  $delete<ITaskWorker>({
+    url: `${URLS.path}/${id}`,
+    data,
+  });
+
+export { find, get, create, patch, remove, findPopulate };

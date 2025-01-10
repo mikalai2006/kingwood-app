@@ -77,11 +77,14 @@ const onEditItem = (item: IPost) => {
           </a-button>
         </template>
         <template v-if="column.key === 'name'">
-          <a-tag
+          <!-- <a-tag
             :color="record.color"
             :style="{ color: invertColor(record.color, true) }"
-            >{{ record.name }}</a-tag
-          >
+            >
+            {{ record.name }}
+            </a-tag
+          > -->
+          {{ record.name }}
         </template>
       </template>
 

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { find, get } from "@/api/order";
 import { IRequestParams } from "@/api/types";
-import { IOrder } from "@/api/order/types";
+import { IOrder, IOrderFilter } from "@/api/order/types";
 import { useObjectStore } from "../object";
 // import sift from 'sift'
 
@@ -17,7 +17,7 @@ export const useOrderStore = defineStore("order", {
     },
   },
   actions: {
-    async find(params?: IRequestParams<IOrder> | Partial<IOrder>) {
+    async find(params?: IOrderFilter) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
       const data = await find(params || {});

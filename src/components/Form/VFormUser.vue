@@ -8,11 +8,24 @@ import dayjs from "@/utils/dayjs";
 import { transliterate } from "@/utils/translit";
 import { randomIntFromInterval, replaceSubstringByArray } from "@/utils/utils";
 import { Rule } from "ant-design-vue/es/form";
-import { computed, reactive, ref, toRaw, UnwrapRef, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  reactive,
+  ref,
+  toRaw,
+  UnwrapRef,
+  watch,
+} from "vue";
 import { useI18n } from "vue-i18n";
 import { PlusOutlined } from "@ant-design/icons-vue";
 import { message, UploadProps } from "ant-design-vue";
 import VImg from "../UI/VImg.vue";
+import VFormResetPassword from "./VFormResetPassword.vue";
+import { useError } from "@/composable/useError";
+import { dateFormat } from "@/utils/date";
+import { remove } from "@/api/image";
+import { IImageUpload } from "@/api/image/types";
 
 // export interface IFormStateRole {
 //   name: string;
@@ -87,6 +100,8 @@ const rules: Record<string, Rule[]> = {
   ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -111,7 +126,9 @@ const onSubmit = async () => {
         for (const el of data.typeWork) {
           dataForm.append("typeWork", el);
         }
-        dataForm.append("birthday", new Date(data.birthday).toISOString());
+        if (data.birthday) {
+          dataForm.append("birthday", dayjs(data.birthday).format(dateFormat));
+        }
         const result = await patch(
           data.id,
           dataForm
@@ -127,14 +144,15 @@ const onSubmit = async () => {
       }
       message.success(t("form.message.successSave"));
       emit("callback");
+      // formRef.value?.resetFields();
     })
-    .catch((error: Error) => {
+    .catch((error: any) => {
       message.error(
         replaceSubstringByArray(t("form.message.errorSave"), [
-          error?.message || "",
+          error?.errorFields ? onGetValidateError(error) : error.message,
         ])
       );
-      console.log("error", error);
+      // console.log("error", error);
     });
 };
 const resetForm = () => {
@@ -190,7 +208,7 @@ watch(
     if (newValue.length < 7) {
       const fragmentName =
         transliterate(newValue).slice(0, 5) + randomIntFromInterval(0, 1000);
-      console.log(newValue, fragmentName);
+      // console.log(newValue, fragmentName);
 
       formState.login = fragmentName;
     }
@@ -207,29 +225,26 @@ const previewFile = ({
   if (file) {
     fileRef.value = file;
   }
-  console.log(file);
+  // console.log("file: ", file);
+
+  message.info(t("form.user.addImageUpload"));
 
   setTimeout(() => {
     onSuccess("ok");
   }, 0);
 };
 
-const imageList = ref(
-  formState.images?.map((x) => {
-    return {
-      image: x,
-      url: `${import.meta.env.VITE_HOSTIMAGE}/images/${x.userId}/${x.service}/${
-        x.serviceId
-      }/${x.path}${x.ext}`,
-      uid: formState?.id || "1",
-      name: formState.name,
-      status: "done",
-    };
-  })
-);
+const imageList = ref();
 
-const onRemoveImage = (e) => {
-  console.log("Remove", e);
+const onRemoveImage = async (data: IImageUpload) => {
+  try {
+    await remove(data.image.id).then(() => {
+      userStore.get(data.uid);
+    });
+  } catch (e: any) {
+    message.error(e.message);
+  }
+  // console.log("Remove", data);
 };
 
 const previewVisible = ref(false);
@@ -237,7 +252,9 @@ const previewImage = ref("");
 const previewTitle = ref("");
 
 const handlePreview = async (file: UploadProps["fileList"][number]) => {
-  if (!file.url && !file.preview) {
+  // console.log(file);
+
+  if (file?.originFileObj) {
     file.preview = (await getBase64(file.originFileObj)) as string;
   }
   previewImage.value = file.url || file.preview;
@@ -253,71 +270,93 @@ const handleCancel = () => {
   previewVisible.value = false;
   previewTitle.value = "";
 };
+
+const activeKey = ref("user");
+
+onMounted(() => {
+  imageList.value = formState.images?.map((x) => {
+    return {
+      image: x,
+      url: `${import.meta.env.VITE_HOSTIMAGE}/images/${x.userId}/${x.service}/${
+        x.serviceId
+      }/${x.path}${x.ext}`,
+      uid: formState?.id || "1",
+      name: formState.name,
+      status: "done",
+    };
+  });
+});
 </script>
+
 <template>
   <div>
-    <!-- {{ JSON.stringify(formState) }} -->
-    <a-form
-      ref="formRef"
-      layout="horizontal"
-      style="max-width: 600px"
-      :model="formState"
-      :rules="rules"
-    >
-      <!-- <a-form-item ref="name" :label="$t('form.user.login')" name="login">
+    <a-tabs v-model:activeKey="activeKey">
+      <a-tab-pane key="user" :tab="$t('tabs.user.user')" force-render>
+        <!-- {{ JSON.stringify(formState) }} -->
+        <a-form
+          ref="formRef"
+          layout="horizontal"
+          style="max-width: 600px"
+          :model="formState"
+          :rules="rules"
+        >
+          <!-- <a-form-item ref="name" :label="$t('form.user.login')" name="login">
         <a-input v-model:value="formState.login" disabled />
       </a-form-item> -->
-      <a-form-item :label="$t('form.user.name')" name="name">
-        <a-input v-model:value="formState.name" />
-      </a-form-item>
-      <a-form-item :label="$t('form.user.phone')" name="phone">
-        <a-input v-model:value="formState.phone" />
-      </a-form-item>
+          <a-form-item :label="$t('form.user.name')" name="name">
+            <a-input v-model:value="formState.name" />
+          </a-form-item>
 
-      <a-form-item :label="$t('form.user.birthday')" name="birthday">
-        <a-date-picker
-          v-model:value="formState.birthday"
-          format="DD.MM.YYYY"
-          value-format="YYYY-MM-DD"
-          style="width: 100%"
-          :placeholder="$t('form.user.selectBirthday')"
-        />
-      </a-form-item>
+          <a-form-item :label="$t('form.user.phone')" name="phone">
+            <a-input v-model:value="formState.phone" />
+          </a-form-item>
 
-      <a-form-item :label="$t('form.user.image')">
-        <!-- <template v-if="formState.images">
+          <a-form-item :label="$t('form.user.birthday')" name="birthday">
+            <a-date-picker
+              v-model:value="formState.birthday"
+              :format="dateFormat"
+              :value-format="dateFormat"
+              style="width: 100%"
+              :placeholder="$t('form.user.selectBirthday')"
+            />
+          </a-form-item>
+
+          <a-form-item :label="$t('form.user.image')">
+            <!-- <template v-if="formState.images">
           <VImg :image="formState?.images[0]" />
         </template> -->
-        <!-- <input
+            <!-- <input
           type="file"
           @change="previewFile($event)"
           accept="image/*"
           capture
         /> -->
-        <a-upload
-          v-model:file-list="imageList"
-          :customRequest="previewFile"
-          :maxCount="1"
-          list-type="picture-card"
-          @remove="onRemoveImage"
-          @preview="handlePreview"
-        >
-          <div>
-            <PlusOutlined />
-            <div style="margin-top: 8px">{{ $t("form.user.uploadImage") }}</div>
-          </div>
-        </a-upload>
-        <a-modal
-          :open="previewVisible"
-          :title="previewTitle"
-          :footer="null"
-          @cancel="handleCancel"
-        >
-          <img alt="example" style="width: 100%" :src="previewImage" />
-        </a-modal>
-      </a-form-item>
+            <a-upload
+              v-model:file-list="imageList"
+              :customRequest="previewFile"
+              :maxCount="1"
+              list-type="picture-card"
+              @remove="onRemoveImage"
+              @preview="handlePreview"
+            >
+              <div>
+                <PlusOutlined />
+                <div style="margin-top: 8px">
+                  {{ $t("form.user.uploadImage") }}
+                </div>
+              </div>
+            </a-upload>
+            <a-modal
+              :open="previewVisible"
+              :title="previewTitle"
+              :footer="null"
+              @cancel="handleCancel"
+            >
+              <img alt="example" style="width: 100%" :src="previewImage" />
+            </a-modal>
+          </a-form-item>
 
-      <!-- <a-form-item label="Activity type" name="type">
+          <!-- <a-form-item label="Activity type" name="type">
         <a-checkbox-group v-model:value="formState.type">
           <a-checkbox value="1" name="type">Online</a-checkbox>
           <a-checkbox value="2" name="type">Promotion</a-checkbox>
@@ -325,65 +364,79 @@ const handleCancel = () => {
         </a-checkbox-group>
       </a-form-item> -->
 
-      <a-form-item :label="$t('form.user.roleId')" name="roleId">
-        <a-select
-          v-model:value="formState.roleId"
-          style="width: 100%"
-          :placeholder="$t('form.user.selectRole')"
-          :options="rolesList"
-        ></a-select>
-      </a-form-item>
+          <a-form-item :label="$t('form.user.roleId')" name="roleId">
+            <a-select
+              v-model:value="formState.roleId"
+              style="width: 100%"
+              :placeholder="$t('form.user.selectRole')"
+              :options="rolesList"
+            ></a-select>
+          </a-form-item>
 
-      <a-form-item :label="$t('form.user.typePay')" name="typePay">
-        <a-select
-          v-model:value="formState.typePay"
-          style="width: 100%"
-          :placeholder="$t('form.user.selectTypePay')"
-          :options="typePayList"
-        ></a-select>
-      </a-form-item>
+          <a-form-item :label="$t('form.user.typePay')" name="typePay">
+            <a-select
+              v-model:value="formState.typePay"
+              style="width: 100%"
+              :placeholder="$t('form.user.selectTypePay')"
+              :options="typePayList"
+            ></a-select>
+          </a-form-item>
 
-      <a-form-item
-        v-if="formState.typePay === 1"
-        :label="$t('form.user.oklad')"
-        name="oklad"
+          <a-form-item
+            v-if="formState.typePay === 1"
+            :label="$t('form.user.oklad')"
+            name="oklad"
+          >
+            <a-input-number
+              v-model:value="formState.oklad"
+              :min="1"
+              :max="10000"
+            />
+          </a-form-item>
+
+          <a-form-item :label="$t('form.user.postId')" name="postId">
+            <a-select
+              v-model:value="formState.postId"
+              style="width: 100%"
+              :placeholder="$t('form.user.selectPost')"
+              :options="postsList"
+            ></a-select>
+          </a-form-item>
+
+          <a-form-item :label="$t('form.user.typeWork')" name="typeWork">
+            <a-select
+              v-model:value="formState.typeWork"
+              style="width: 100%"
+              mode="multiple"
+              :placeholder="$t('form.user.selectTypeWork')"
+              :options="worksList"
+            ></a-select>
+          </a-form-item>
+
+          <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+            <a-button type="primary" @click="onSubmit">
+              {{ formState.id ? $t("form.save") : $t("form.create") }}
+            </a-button>
+            <a-button
+              v-if="!formState.id"
+              style="margin-left: 10px"
+              @click="resetForm"
+            >
+              {{ $t("form.reset") }}
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </a-tab-pane>
+      <a-tab-pane
+        v-if="formState.userId"
+        key="password"
+        :tab="$t('tabs.user.password')"
       >
-        <a-input-number v-model:value="formState.oklad" :min="1" :max="10000" />
-      </a-form-item>
-
-      <a-form-item :label="$t('form.user.postId')" name="postId">
-        <a-select
-          v-model:value="formState.postId"
-          style="width: 100%"
-          :placeholder="$t('form.user.selectPost')"
-          :options="postsList"
-        ></a-select>
-      </a-form-item>
-
-      <a-form-item :label="$t('form.user.typeWork')" name="typeWork">
-        <a-select
-          v-model:value="formState.typeWork"
-          style="width: 100%"
-          mode="multiple"
-          :placeholder="$t('form.user.selectTypeWork')"
-          :options="worksList"
-        ></a-select>
-      </a-form-item>
-
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-button type="primary" @click="onSubmit">
-          {{ formState.id ? $t("form.save") : $t("form.create") }}
-        </a-button>
-        <a-button
-          v-if="!formState.id"
-          style="margin-left: 10px"
-          @click="resetForm"
-        >
-          {{ $t("form.reset") }}
-        </a-button>
-      </a-form-item>
-    </a-form>
+        <div class="mb-4">
+          {{ $t("form.user.login") }}: {{ formState.auth?.login }}
+        </div>
+        <VFormResetPassword :auth-id="formState.userId" />
+      </a-tab-pane>
+    </a-tabs>
   </div>
 </template>
-
-<style scoped></style>

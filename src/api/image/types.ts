@@ -11,3 +11,11 @@ export interface IImage {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IImageUpload {
+  image: IImage;
+  url: string;
+  uid: string;
+  name: "string";
+  status: string;
+}
