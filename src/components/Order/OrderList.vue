@@ -394,17 +394,6 @@ onMounted(async () => {
           group="5"
           :status="!!record.montajComplete"
         />
-        <!-- <OrderGroupBadgeMontaj
-          :order-id="record.id"
-          :object-id="record.objectId"
-          :status="!!record.montajComplete"
-        /> -->
-        <!-- <OrderMontajBadge
-          group="5"
-          :order-id="record.id"
-          :object-id="record.objectId"
-          :status="!!record.montajComplete"
-        /> -->
       </template>
 
       <template v-if="column.key === 'goComplete'">

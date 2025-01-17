@@ -1,6 +1,6 @@
 <script setup lang="ts" async>
 import { useUserStore } from "@/store/modules/user";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 import {
   useAuthStore,
@@ -8,21 +8,14 @@ import {
   useOrderStore,
   useTaskStatusStore,
 } from "@/store";
-import { IOrder, IOrderInput } from "@/api/order/types";
-import { ITask, ITaskInput } from "@/api/task/types";
+import { IOrder } from "@/api/order/types";
+import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
-import OrderActiveTask from "@/components/Order/OrderActiveTask.vue";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iChevronRight, iCog, iPen, iSearch } from "@/utils/icons";
-import colors from "tailwindcss/colors";
+import { iCog } from "@/utils/icons";
 import { Dayjs } from "dayjs";
-import { getShortFIO } from "@/utils/utils";
-import OrderGroupInfo from "@/components/Order/OrderGroupInfo.vue";
 import VHeader from "@/components/V/VHeader.vue";
-import OrderGroupBadge from "@/components/Order/OrderGroupBadge.vue";
-import { dateTimeFormat, timeZone } from "@/utils/date";
-import OrderMontajBadge from "@/components/Order/OrderMontajBadge.vue";
 import OrderList from "@/components/Order/OrderList.vue";
 import useOrder from "@/composable/useOrder";
 
