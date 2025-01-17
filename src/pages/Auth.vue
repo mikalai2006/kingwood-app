@@ -30,7 +30,9 @@ const onFinish = async (values: any) => {
     await authStore
       .login(formState)
       .then((r) => {
-        router.replace("/");
+        router.replace("/").then(() => {
+          // window.location.reload();
+        });
         return r;
       })
       .catch((e) => {

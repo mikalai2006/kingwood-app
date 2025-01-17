@@ -11,7 +11,7 @@ import {
   UnwrapRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { useOrderStore, useUserStore } from "@/store";
+import { useAuthStore, useOrderStore, useUserStore } from "@/store";
 import { IOrder } from "@/api/order/types";
 import { dateFormat } from "@/utils/date";
 import dayjs from "@/utils/dayjs";
@@ -23,6 +23,7 @@ const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 
+const authStore = useAuthStore();
 const orderStore = useOrderStore();
 const userStore = useUserStore();
 
@@ -130,7 +131,10 @@ onBeforeUnmount(() => {
         />
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-form-item
+        v-if="authStore.roles.includes('order-add-design')"
+        :wrapper-col="{ span: 14, offset: 4 }"
+      >
         <a-button v-if="!formState?.id" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>

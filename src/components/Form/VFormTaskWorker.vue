@@ -13,6 +13,7 @@ import { useI18n } from "vue-i18n";
 import { create, patch } from "@/api/task_worker";
 import { Rule } from "ant-design-vue/es/form";
 import {
+  useAuthStore,
   usePostStore,
   useTaskStatusStore,
   useTaskWorkerStore,
@@ -31,6 +32,7 @@ const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 
+const authStore = useAuthStore();
 const taskWorkerStore = useTaskWorkerStore();
 const userStore = useUserStore();
 const taskStatusStore = useTaskStatusStore();
@@ -278,6 +280,7 @@ onMounted(() => {
           style="width: 100%"
           :placeholder="$t('form.taskWorker.selectTypeGo')"
           :options="typesGo"
+          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
         ></a-select>
       </a-form-item>
 
@@ -290,6 +293,7 @@ onMounted(() => {
           v-model:value="taskRange"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
         />
         <!-- :disabled="!!formState.id" -->
       </a-form-item>
@@ -303,6 +307,7 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
         />
       </a-form-item>
 
@@ -312,6 +317,7 @@ onMounted(() => {
           style="width: 100%"
           :placeholder="$t('form.taskWorker.selectStatusId')"
           :options="taskStatuses"
+          :disabled="!authStore.roles.includes('taskWorker-statusId')"
         ></a-select>
       </a-form-item>
       <!-- <a-form-item :label="$t('form.post.color')" name="color">
@@ -330,7 +336,14 @@ onMounted(() => {
         </a-checkbox-group>
       </a-form-item> -->
 
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-form-item
+        v-if="
+          formState?.id
+            ? authStore.roles.includes('taskWorker-patch')
+            : authStore.roles.includes('taskWorker-create')
+        "
+        :wrapper-col="{ span: 14, offset: 4 }"
+      >
         <a-button v-if="!formState?.id" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>

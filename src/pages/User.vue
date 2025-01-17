@@ -175,7 +175,9 @@ const activeKey = ref("current");
 </script>
 <template>
   <div class="p-4">
-    <VTitle :text="$t('page.user.title')" />
+    <VHeader :title="$t('page.user.title')" class="mb-4">
+      <template #back>&nbsp;</template>
+    </VHeader>
     <div class="flex flex-row items-center">
       <div class="flex-auto">
         <a-button type="primary" @click="onAddNewItem">
@@ -256,11 +258,15 @@ const activeKey = ref("current");
                 src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
               /> -->
               <div class="relative w-12 h-12">
-                <VImg :image="record.images?.[0]" class="w-full h-full" />
-                <div
+                <VImg
+                  :image="record.images?.[0]"
+                  class="w-full h-full"
+                  :class="[{ 'border-4 border-green-500': record.online }]"
+                />
+                <!-- <div
                   v-if="record.online"
-                  class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-s-800"
-                ></div>
+                  class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-g-900"
+                ></div> -->
               </div>
             </template>
             <template v-if="column.key === 'birthday'">

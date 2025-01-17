@@ -125,7 +125,7 @@ const allWorkers = computed(() =>
     v-if="allWorkers.length"
     class="relative min-w-32 min-h-16 rounded-md"
     :class="[
-      { 'bg-s-200 dark:bg-g-700': !status },
+      { 'bg-s-100 dark:bg-g-700': !status },
       { 'bg-green-600 dark:bg-green-700': status },
     ]"
   >

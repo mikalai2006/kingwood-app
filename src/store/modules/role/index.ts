@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { find, get } from "@/api/role";
 import { IRequestParams } from "@/api/types";
 // import sift from 'sift'
-import { IRole } from "@/api/role/types";
+import { IRole, IRoleFilter } from "@/api/role/types";
 
 export const useRoleStore = defineStore("role", {
   state() {
@@ -16,11 +16,11 @@ export const useRoleStore = defineStore("role", {
     },
   },
   actions: {
-    async find(params?: IRequestParams<IRole> | Partial<IRole>) {
+    async find(filter?: IRoleFilter) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
-      const data = await find(params || {});
-      data.data.forEach((el) => this.onAddItemToStore(el));
+      const data = await find(filter || {});
+      data.data?.forEach((el) => this.onAddItemToStore(el));
       // }
       return data;
     },

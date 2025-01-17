@@ -2,27 +2,31 @@
 import { useUserStore } from "@/store/modules/user";
 import { computed, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { usePostStore } from "@/store";
-import { IPost } from "@/api/post/types";
+import { useAuthStore, usePostStore } from "@/store";
+import { IPost, IPostInput } from "@/api/post/types";
 import VFormPost from "@/components/Form/VFormPost.vue";
-import { invertColor } from "@/utils/utils";
+import { useI18n } from "vue-i18n";
 
 dayjs.locale("ru");
+
+const { t } = useI18n();
+
 const userStore = useUserStore();
 const postStore = usePostStore();
+const authStore = useAuthStore();
 
 await postStore.find({ $limit: 200 });
 
 const columns = ref([
-  { title: "name", dataIndex: "name", key: "name", fixed: true },
+  { title: t("table.post.name"), dataIndex: "name", key: "name", fixed: true },
   {
-    title: "updatedAt",
-    dataIndex: "updatedAt",
-    key: "updatedAt",
+    title: t("table.post.createdAt"),
+    dataIndex: "createdAt",
+    key: "createdAt",
     fixed: false,
   },
   {
-    title: "action",
+    title: t("table.post.action"),
     dataIndex: "action",
     key: "action",
     fixed: false,
@@ -43,7 +47,7 @@ const columnsData = computed(() => {
     };
   });
 });
-const defaultData: IPost = {
+const defaultData: IPostInput = {
   name: "",
   sortOrder: 0,
 };
@@ -65,9 +69,14 @@ const onEditItem = (item: IPost) => {
   <div class="p-4">
     <VTitle :text="$t('page.post.title')" />
     <div class="my-2">
-      <a-button type="primary" @click="onAddNewItem">{{
-        $t("form.add")
-      }}</a-button>
+      <a-tooltip v-if="authStore.roles.includes('post-create')">
+        <template #title>
+          {{ $t("form.post.new") }}
+        </template>
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
+      </a-tooltip>
     </div>
     <a-table :columns="columns" :data-source="columnsData">
       <template #bodyCell="{ column, record }">
@@ -86,6 +95,9 @@ const onEditItem = (item: IPost) => {
           > -->
           {{ record.name }}
         </template>
+        <template v-if="column.key === 'createdAt'">
+          {{ dayjs(record.createdAt).fromNow() }}
+        </template>
       </template>
 
       <!-- <template #expandedRowRender="{ record }">
@@ -103,7 +115,7 @@ const onEditItem = (item: IPost) => {
     v-model:open="open"
     :destroyOnClose="false"
     :key="dataForm.id"
-    :title="$t('form.user.new')"
+    :title="dataForm.id ? $t('form.post.edit') : $t('form.post.new')"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >

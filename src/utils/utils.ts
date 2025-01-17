@@ -1,11 +1,14 @@
-export function getShortFIO(fio: string | undefined) {
+export function getShortFIO(fio: string | undefined, trimSecondName?: boolean) {
   if (!fio) {
     return "Noname";
   }
 
   const _arr = fio.split(" ");
   const _newArr = _arr.map((x, index) => (index > 0 ? x[0] + "." : x));
-  return _newArr.join(" ");
+  const _trimArr = trimSecondName
+    ? _newArr.slice(_newArr.length - 3, 2)
+    : _newArr;
+  return _trimArr.join(" ");
 }
 
 export function randomIntFromInterval(min: number, max: number) {

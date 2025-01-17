@@ -1,7 +1,9 @@
+import { IObject } from "../object/types";
 import { IOrder } from "../order/types";
 import { ITask } from "../task/types";
 import { ITaskStatus } from "../task_status/types";
 import { IPaginationParams } from "../types";
+import { IUser } from "../user/types";
 
 export interface ITaskWorker {
   id: string;
@@ -21,6 +23,8 @@ export interface ITaskWorker {
   task: ITask;
   taskStatus: ITaskStatus;
   order: IOrder;
+  worker: IUser;
+  object: IObject;
 
   createdAt: Date;
   updatedAt: Date;

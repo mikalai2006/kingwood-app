@@ -2,14 +2,19 @@
 import { useUserStore } from "@/store/modules/user";
 import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useObjectStore, useOrderStore, useTaskStatusStore } from "@/store";
+import {
+  useAuthStore,
+  useObjectStore,
+  useOrderStore,
+  useTaskStatusStore,
+} from "@/store";
 import { IOrder, IOrderInput } from "@/api/order/types";
 import { ITask, ITaskInput } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
 import OrderActiveTask from "@/components/Order/OrderActiveTask.vue";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iChevronRight, iPen, iSearch } from "@/utils/icons";
+import { iChevronRight, iCog, iPen, iSearch } from "@/utils/icons";
 import colors from "tailwindcss/colors";
 import { Dayjs } from "dayjs";
 import { getShortFIO } from "@/utils/utils";
@@ -26,6 +31,7 @@ const userStore = useUserStore();
 const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
 const objectStore = useObjectStore();
+const authStore = useAuthStore();
 
 const { t } = useI18n();
 
@@ -78,26 +84,45 @@ const {
 //         return <SomeOtherCustomIcon onClick={e=>{onExpand(record, e)}}
 //     }
 //   }
+const querySearch = ref("");
+
 const dateFormat = "DD.MM.YYYY";
-const rangeSearch = ref<[Dayjs, Dayjs]>([
-  dayjs("01.01.2015", dateFormat),
-  dayjs("01.01.2015", dateFormat),
+const rangeSearch = ref<Dayjs[]>([
+  // dayjs("01.01.2015", dateFormat),
+  // dayjs("01.01.2015", dateFormat),
+
+  dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
+  dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
 ]);
 
 const activeKey = ref("all");
 
 const nameKeyLocalStorageColumns = ref("order.column");
+const nameKeyLocalStorageRange = computed(() => "range.all");
+
+const onChangeRange = (value: Dayjs[]) => {
+  const _range = value.map((x) => x.format());
+  console.log("_range: ", _range);
+
+  localStorage.setItem(nameKeyLocalStorageRange.value, JSON.stringify(_range));
+};
 
 onMounted(() => {
-  rangeSearch.value = [
-    dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
-    dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
-  ];
+  // rangeSearch.value = [
+  //   dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
+  //   dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
+  // ];
 
   // sync columns from localStorage.
   const _columns = localStorage.getItem(nameKeyLocalStorageColumns.value);
   if (_columns) {
     columnKeys.value = JSON.parse(_columns);
+  }
+  // sync range from localStorage.
+  const _range = localStorage.getItem(nameKeyLocalStorageRange.value);
+  if (_range) {
+    const _data: string[] = JSON.parse(_range);
+    rangeSearch.value = _data.map((x) => dayjs(x));
   }
 });
 </script>
@@ -110,7 +135,7 @@ onMounted(() => {
 
     <div class="flex flex-row items-center">
       <div class="flex-auto">
-        <a-tooltip>
+        <a-tooltip v-if="authStore.roles.includes('order-create')">
           <template #title>
             {{ $t("form.order.new") }}
           </template>
@@ -121,26 +146,32 @@ onMounted(() => {
         </a-tooltip>
       </div>
       <div class="flex gap-2 items-center">
-        <span class="whitespace-nowrap">
-          {{ $t("table.order.fields") }}
-        </span>
-        <a-select
-          v-model:value="columnKeys"
-          mode="multiple"
-          style="width: 100%; min-width: 200px"
-          :placeholder="$t('table.order.fields')"
-          :max-tag-count="3"
-          :removeIcon="null"
-          :options="optionsForSelect"
-          @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
+        <a-popover
+          :title="$t('table.order.fields')"
+          trigger="click"
+          placement="topRight"
         >
-          <template #maxTagPlaceholder="omittedValues">
-            <span style="color: red">+ {{ omittedValues.length }} ...</span>
-          </template>
-          <!-- <template #option="{ value, label }">
+          <template #content>
+            <div class="flex gap-2 items-center">
+              <a-select
+                v-model:value="columnKeys"
+                mode="multiple"
+                style="width: 100%; min-width: 200px"
+                :placeholder="$t('table.order.fields')"
+                :max-tag-count="3"
+                :removeIcon="null"
+                :options="optionsForSelect"
+                @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
+              >
+                <template #maxTagPlaceholder="omittedValues">
+                  <span style="color: red">
+                    + {{ omittedValues.length }} ...
+                  </span>
+                </template>
+                <!-- <template #option="{ value, label }">
             {{ label }}
           </template> -->
-          <!-- <a-select-option
+                <!-- <a-select-option
             v-for="col in columns"
             :value="col.key"
             :label="$t(`tabs.order.${col.key}`)"
@@ -148,23 +179,44 @@ onMounted(() => {
             <span role="img" aria-label="Japan">🇯🇵</span>
             {{ $t(`tabs.order.${col.key}`) }}
           </a-select-option> -->
-        </a-select>
+              </a-select>
+            </div>
+          </template>
+          <a-button type="text">
+            <VIcon :path="iCog" class="text-lg" />
+          </a-button>
+        </a-popover>
       </div>
     </div>
 
     <a-tabs v-model:activeKey="activeKey">
       <a-tab-pane key="all" :tab="$t('tabs.order.all')" force-render>
         <div class="flex flex-row items-center">
-          <div class="flex-auto"></div>
+          <div class="flex-auto">
+            <!-- <a-input
+              placeholder="Текст для поиска"
+              v-model:value="querySearch"
+            /> -->
+          </div>
           <div>
-            <a-range-picker v-model:value="rangeSearch" :format="dateFormat" />
+            {{ $t("form.order.rangeSearch") }}
+            <a-range-picker
+              v-model:value="rangeSearch"
+              :format="dateFormat"
+              @change="onChangeRange"
+            />
           </div>
         </div>
         <!-- :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'custom cursor-pointer bg-red-500/50' : 'cursor-pointer')"
         :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'cursor-pointer font-medium text-red-500 dark:text-red-300' : 'cursor-pointer')" 
         -->
         <OrderList
-          :params="{}"
+          :key="rangeSearch.map((x) => x.toString()).join('-')"
+          keyList="all"
+          :params="{
+            from: rangeSearch[0].format(),
+            to: rangeSearch[1].format(),
+          }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
@@ -174,6 +226,7 @@ onMounted(() => {
       </a-tab-pane>
       <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
         <OrderList
+          keyList="notWork"
           :params="{ status: 0 }"
           :columns="columns"
           @show-order-info="showOrderInfo"
@@ -184,6 +237,7 @@ onMounted(() => {
       </a-tab-pane>
       <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
         <OrderList
+          keyList="stolyarComplete"
           :params="{ stolyarComplete: 1 }"
           :columns="columns"
           @show-order-info="showOrderInfo"
@@ -194,6 +248,7 @@ onMounted(() => {
       </a-tab-pane>
       <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
         <OrderList
+          keyList="malyarComplete"
           :params="{ malyarComplete: 1 }"
           :columns="columns"
           @show-order-info="showOrderInfo"
@@ -204,7 +259,8 @@ onMounted(() => {
       </a-tab-pane>
       <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
         <OrderList
-          :params="{ malyarComplete: 1, stolyarComplete: 1 }"
+          keyList="goComplete"
+          :params="{ goComplete: 1, montajComplete: 0 }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
@@ -224,6 +280,7 @@ onMounted(() => {
       </a-tab-pane> -->
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
+          keyList="completed"
           :params="{ status: 100 }"
           :columns="columns"
           @show-order-info="showOrderInfo"
@@ -337,7 +394,14 @@ onMounted(() => {
         :order-id="currentOrderInModal.id"
         @on-edit-task="onEditTask"
       />
-      <a-button @click="onAddNewTask(currentOrderInModal)" class="mt-2">
+      <a-button
+        v-if="
+          // currentOrderInModal.status < 100 &&
+          authStore.roles.includes('task-create')
+        "
+        @click="onAddNewTask(currentOrderInModal)"
+        class="mt-2"
+      >
         {{ $t("form.task.add") }}
       </a-button>
     </div>

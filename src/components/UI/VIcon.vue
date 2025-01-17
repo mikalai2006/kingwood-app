@@ -13,5 +13,3 @@ const props = defineProps<{ path: string }>();
     <path :d="props.path"></path>
   </svg>
 </template>
-
-<style scoped></style>

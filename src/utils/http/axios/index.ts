@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { showMessage } from "./status";
 import { IResponse } from "./type";
 import { useAuthStore } from "@/store";
+import { useI18n } from "vue-i18n";
 // import { useUniversalCookies } from '@/plugins/universal-cookies'
 // const cookie = useUniversalCookies()
 // import { getToken } from '/@/utils/auth'
@@ -93,7 +94,9 @@ const request = async <T = any>(config: AxiosRequestConfig): Promise<T> => {
   const _tokens = await onSyncToken();
   // console.log("_tokens: ", _tokens);
   if (!_tokens) {
-    throw new Error("general:httpError.notFoundToken");
+    console.log("Error:", conf);
+
+    throw new Error("error.notToken");
   }
   // const stateNet = await NetInfo.fetch();
   // console.log('onFetch:::::', stateNet);

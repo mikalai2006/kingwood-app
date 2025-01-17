@@ -1,26 +1,20 @@
 <script setup lang="ts">
 import { create, patch } from "@/api/role";
-import { IRole } from "@/api/role/types";
-import { useRoleStore } from "@/store";
+import { IRole, IRoleInput } from "@/api/role/types";
+import { useAuthStore, useRoleStore } from "@/store";
 import { roles } from "@/utils/roles";
 import { Rule } from "ant-design-vue/es/form";
 import { reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
 
-export interface IFormStateRole {
-  name: string;
-  code: string;
-  sortOrder: number;
-  value: string[];
-}
-
-const props = defineProps<{ data: IFormStateRole; defaultData: IRole }>();
+const props = defineProps<{ data: IRoleInput; defaultData: IRoleInput }>();
 const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 const roleStore = useRoleStore();
+const authStore = useAuthStore();
 
-const formState: UnwrapRef<IFormStateRole> = reactive(props.data);
+const formState: UnwrapRef<IRoleInput> = reactive(props.data);
 const formRef = ref();
 
 const rules: Record<string, Rule[]> = {
@@ -108,6 +102,7 @@ const rolesList = roles.map((x) => {
           style="width: 100%"
           :placeholder="$t('form.role.selectValue')"
           :options="rolesList"
+          :max-tag-count="20"
         ></a-select>
       </a-form-item>
 
@@ -119,7 +114,18 @@ const rolesList = roles.map((x) => {
         <a-input-number v-model:value="formState.sortOrder" />
       </a-form-item>
 
-      <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+      <a-form-item ref="code" :label="$t('form.role.code')" name="code">
+        <a-input v-model:value="formState.code" />
+      </a-form-item>
+
+      <a-form-item
+        v-if="
+          formState?.id
+            ? authStore.roles.includes('role-patch')
+            : authStore.roles.includes('role-create')
+        "
+        :wrapper-col="{ span: 14, offset: 4 }"
+      >
         <a-button v-if="!formState?.id" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>

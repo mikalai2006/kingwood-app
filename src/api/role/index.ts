@@ -1,15 +1,15 @@
 import { $get, $patch, $post } from "@/utils/http/axios";
 import { IRequestParams, IResponseData } from "@/api/types";
-import { IRole } from "./types";
+import { IRole, IRoleFilter } from "./types";
 
 enum URLS {
   path = "/role",
 }
 
-const find = async (params: IRequestParams<IRole> | Partial<IRole>) =>
-  $get<IResponseData<IRole>>({
-    url: URLS.path,
-    params,
+const find = async (data: IRoleFilter) =>
+  $post<IResponseData<IRole>>({
+    url: `${URLS.path}/populate`,
+    data,
   });
 const get = async (id: string | number) =>
   $get<IRole>({

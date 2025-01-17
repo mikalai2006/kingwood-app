@@ -13,7 +13,7 @@ const menuItems = ref([
   // "object",
   // "order",
   // "montajList",
-  "task_status",
+  "taskStatus",
 ]);
 </script>
 <template>

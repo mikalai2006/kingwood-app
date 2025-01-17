@@ -19,14 +19,25 @@ const role = computed(() =>
   roleStore.items.find((x) => x.id === authStore.iam.roleId)
 );
 
-const menuItems = ref([]);
+const menuItems = ref<string[]>([
+  // "auth",
+  "role",
+  "post",
+  // "user",
+  "operation",
+  "object",
+  // "order",
+  // "montajList",
+  "taskStatus",
+]);
 
 const handleButtonClick = (e: Event) => {
-  console.log("click left button", e);
+  router.push({ name: "account" });
+  // console.log("click left button", e);
 };
 
 const handleMenuClick: MenuProps["onClick"] = (e) => {
-  console.log("click", e.key);
+  // console.log("click", e.key);
   router.push({ name: e.key.toString() });
 };
 </script>
@@ -52,13 +63,22 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
           {{ role?.name }}
         </span>
       </div>
+
+      <!-- <div class="flex items-center px-2">
+        <VIcon :path="iDotsHorizontal" class="self-center" />
+      </div> -->
     </div>
     <template #overlay>
       <a-menu @click="handleMenuClick" placement="right">
         <template v-if="menuItems.length">
-          <a-menu-item v-for="item in menuItems" :key="item">
-            {{ $t(`page.${item}.title`) }}
-          </a-menu-item>
+          <template v-for="item in menuItems" :key="item">
+            <a-menu-item
+              v-if="authStore.roles.includes(`${item}-list`)"
+              :key="item"
+            >
+              {{ $t(`page.${item}.title`) }}
+            </a-menu-item>
+          </template>
           <a-menu-divider />
         </template>
         <a-menu-item key="account">
@@ -67,7 +87,7 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
       </a-menu>
     </template>
   </a-dropdown>
-  <a-spin v-else />
+  <!-- <a-spin v-else /> -->
 </template>
 
 <style scoped></style>

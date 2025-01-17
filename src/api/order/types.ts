@@ -41,4 +41,7 @@ export interface IOrderFilter extends IPaginationParams<IOrderInput> {
   malyarComplete?: number;
   goComplete?: number;
   montajComplete?: number;
+
+  from?: string;
+  to?: string;
 }

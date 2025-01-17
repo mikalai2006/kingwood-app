@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { find, get } from "@/api/user";
-import { IUser } from "@/api/user/types";
+import { IUser, IUserFilter } from "@/api/user/types";
 import { IRequestParams } from "@/api/types";
 // import sift from 'sift'
 import { useAuthStore } from "../auth";
@@ -34,7 +34,7 @@ export const useUserStore = defineStore("user", {
       data && this.onAddItemToStore(data);
       return data;
     },
-    async find(params?: IRequestParams<IUser> | Partial<IUser>) {
+    async find(params?: IUserFilter) {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
       const data = await find(params || {});

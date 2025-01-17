@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ITask } from "@/api/task/types";
 import {
+  useAuthStore,
   useOperationStore,
   useOrderStore,
   usePostStore,
@@ -23,6 +24,7 @@ import VImg from "../UI/VImg.vue";
 const props = defineProps<{ taskId: string }>();
 const emit = defineEmits(["onEditTask"]);
 
+const authStore = useAuthStore();
 const userStore = useUserStore();
 const orderStore = useOrderStore();
 const taskStore = useTaskStore();
@@ -36,12 +38,14 @@ const taskWorkers = computed(() => {
     .map((x) => {
       const worker = userStore.items.find((y) => y.id === x.workerId);
       const post = postStore.items.find((y) => y.id === worker?.postId);
-      const status = taskStatusStore.items.find((z) => z.id === x?.statusId);
+      const statusObject = taskStatusStore.items.find(
+        (z) => z.id === x?.statusId
+      );
       return {
         ...x,
         worker,
         post,
-        status,
+        statusObject,
       };
     });
 });
@@ -217,7 +221,8 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
   <div class="pl-2 flex-auto group pb-2">
     <div class="flex flex-row items-center gap-1">
       <div class="font-medium pb-2 text-base">
-        {{ task?.sortOrder + 1 }}) {{ task?.name }}
+        {{ typeof task?.sortOrder == "number" && task.sortOrder + 1 }})
+        {{ task?.name }}
         <a-tag v-if="task?.active" color="#0d913d"> Активное задание </a-tag>
       </div>
       <!-- <a-popconfirm
@@ -246,36 +251,38 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
           <VIcon :path="iWraningTriangle" class="text-2xl text-red-500" />
         </template>
       </a-popconfirm> -->
-      <a-tooltip>
-        <template #title>
-          {{ $t("button.deleteTask") }}
-        </template>
-        <a-button
-          size="small"
-          danger
-          class="hidden group-hover:block"
-          @click="onDeleteTask(task)"
-        >
-          <div class="flex gap-1 items-center">
-            <VIcon :path="iTrashFill" />
-          </div>
-        </a-button>
-      </a-tooltip>
-      <a-tooltip>
-        <template #title>
-          {{ $t("button.editTask") }}
-        </template>
-        <a-button
-          size="small"
-          class="hidden group-hover:block"
-          @click="$emit('onEditTask', task)"
-        >
-          <div class="flex gap-1 items-center">
-            <VIcon :path="iPen" />
-          </div>
-          <!-- {{ $t("button.editTask") }} -->
-        </a-button>
-      </a-tooltip>
+      <div class="flex flex-row items-center gap-2">
+        <!-- v-if="task?.status !== 'finish'" -->
+        <a-tooltip v-if="authStore.roles?.includes('task-delete')">
+          <template #title>
+            {{ $t("button.deleteTask") }}
+          </template>
+          <a-button
+            size="small"
+            danger
+            class="hidden group-hover:block"
+            @click="onDeleteTask(task)"
+          >
+            <div class="flex gap-1 items-center">
+              <VIcon :path="iTrashFill" />
+            </div>
+          </a-button>
+        </a-tooltip>
+        <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
+          <template #title>
+            {{ $t("button.editTask") }}
+          </template>
+          <a-button
+            size="small"
+            class="hidden group-hover:block"
+            @click="$emit('onEditTask', task)"
+          >
+            <div class="flex gap-1 items-center">
+              <VIcon :path="iPen" />
+            </div>
+          </a-button>
+        </a-tooltip>
+      </div>
     </div>
 
     <div
@@ -292,11 +299,21 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
           {{ item.worker?.name }}
         </div>
       </div>
-      <div class="self-center pl-4 hidden group-hover:block">
-        <a-button @click="onEditTaskWorker(item)">
-          {{ $t("button.edit") }}
-        </a-button>
+      <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
+        <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
+          <template #title>
+            {{ $t("button.patchTaskWorker") }}
+          </template>
+          <a-button size="small" @click="onEditTaskWorker(item)">
+            <div class="flex gap-1 items-center">
+              <VIcon :path="iPen" class="text-xs" />
+              <!-- {{ $t("button.edit") }} -->
+            </div>
+          </a-button>
+        </a-tooltip>
+
         <a-popconfirm
+          v-if="authStore.roles?.includes('taskWorker-delete')"
           :cancelText="$t('button.cancel')"
           :okText="$t('button.delete')"
           :okButtonProps="{
@@ -330,9 +347,15 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
           <template #icon>
             <VIcon :path="iWraningTriangle" class="text-2xl text-red-500" />
           </template>
-          <a-button>
-            {{ $t("button.delete") }}
-          </a-button>
+          <a-tooltip>
+            <template #title>
+              {{ $t("button.deleteTaskWorker") }}
+            </template>
+            <a-button danger size="small">
+              <!-- {{ $t("button.delete") }} -->
+              <VIcon :path="iTrashFill" />
+            </a-button>
+          </a-tooltip>
         </a-popconfirm>
       </div>
       <div>
@@ -341,7 +364,10 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
     </div>
 
     <div
-      v-if="task?.statusId !== 'finish'"
+      v-if="
+        authStore.roles?.includes('taskWorker-create') &&
+        task?.status != 'finish'
+      "
       class="flex flex-row items-center gap-4 py-1 px-4"
     >
       <div class="flex flex-row flex-auto items-center gap-1">

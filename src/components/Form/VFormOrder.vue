@@ -206,6 +206,14 @@ onBeforeUnmount(() => {
       <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
         <a-input v-model:value="formState.object" />
       </a-form-item> -->
+      <a-form-item
+        v-if="formState.number"
+        ref="number"
+        :label="$t('form.order.number')"
+        name="number"
+      >
+        <a-input v-model:value="formState.number" :disabled="true" />
+      </a-form-item>
 
       <a-form-item :label="$t('form.order.objectId')" name="objectId">
         <a-select
@@ -301,7 +309,11 @@ onBeforeUnmount(() => {
         ></a-select>
       </a-form-item> -->
 
-      <a-form-item :label="$t('form.order.status')" name="status">
+      <a-form-item
+        v-if="formState.status"
+        :label="$t('form.order.status')"
+        name="status"
+      >
         <a-select
           v-model:value="formState.status"
           style="width: 100%"

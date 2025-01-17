@@ -1,14 +1,13 @@
 import { defineStore } from "pinia";
-import { find, get, remove } from "@/api/order";
-import { IRequestParams } from "@/api/types";
-import { IOrder, IOrderFilter, IOrderInput } from "@/api/order/types";
-import { useObjectStore } from "../object";
+import { findPopulate, patch, remove } from "@/api/notify";
+import { INotify, INotifyFilter, INotifyInput } from "@/api/notify/types";
+import { useUserStore } from "..";
 // import sift from 'sift'
 
-export const useOrderStore = defineStore("order", {
+export const useNotifyStore = defineStore("notify", {
   state() {
     return {
-      _items: [] as IOrder[],
+      _items: [] as INotify[],
     };
   },
   getters: {
@@ -17,20 +16,37 @@ export const useOrderStore = defineStore("order", {
     },
   },
   actions: {
-    async find(params?: IOrderFilter) {
-      const objectStore = useObjectStore();
-      // const existsItem = this.onExists(params)
-      // if (existsItem.index == -1) {
-      const data = await find(params || {});
-      data.data?.forEach((el) => {
-        // add object.
-        if (el?.object) {
-          objectStore.onAddItemToStore(el.object);
-        }
+    async find(params?: INotifyFilter) {
+      const userStore = useUserStore();
 
+      const data = await findPopulate(params || {});
+      data.data?.forEach((el) => {
         this.onAddItemToStore(el);
+
+        if (el?.user) {
+          userStore.onAddItemToStore(el.user);
+        }
+        if (el?.recepient) {
+          userStore.onAddItemToStore(el.recepient);
+        }
       });
-      // }
+
+      return data;
+    },
+    async patch(id: string, data?: INotifyInput) {
+      const userStore = useUserStore();
+
+      const _item = await patch(id, data || {});
+      if (_item) {
+        this.onAddItemToStore(_item);
+
+        if (_item?.user) {
+          userStore.onAddItemToStore(_item.user);
+        }
+        if (_item?.recepient) {
+          userStore.onAddItemToStore(_item.recepient);
+        }
+      }
 
       return data;
     },
@@ -40,7 +56,7 @@ export const useOrderStore = defineStore("order", {
      * @returns
      */
     onExists(id: string): {
-      item: IOrder | null;
+      item: INotify | null;
       index: number;
     } {
       const pageIndex = this._items.findIndex((x) => x.id === id);
@@ -51,7 +67,7 @@ export const useOrderStore = defineStore("order", {
     //   console.log('user: findInStore params=', params)
     //   return item[0] || null
     // },
-    onAddItemToStore(item: IOrder) {
+    onAddItemToStore(item: INotify) {
       const existsItem = this.onExists(item.id);
       if (existsItem.index == -1) {
         this._items.push(item);
@@ -62,39 +78,23 @@ export const useOrderStore = defineStore("order", {
           item
         );
       }
-
-      if (item.object) {
-        const objectStore = useObjectStore();
-        objectStore.onAddItemToStore(item.object);
-      }
     },
-    /**
-     * Get page by id from server.
-     * @param id
-     * @param params
-     * @returns
-     */
-    async onGet(id: string, params?: IRequestParams<IOrder> | Partial<IOrder>) {
-      const data = await get(id);
-      this.onAddItemToStore(data);
-      return data;
-    },
-    onGetInStore(id: string | number, params?: IOrder): IOrder | null {
+    onGetInStore(id: string | number, params?: INotify): INotify | null {
       let item = null;
       if (params) {
         // search by params
       } else {
-        item = this._items.find((el: IOrder) => el.id == id);
+        item = this._items.find((el: INotify) => el.id == id);
       }
       return item || null;
     },
 
-    onRemoveItemFromStore(id: string | number, params?: IOrderInput): number {
+    onRemoveItemFromStore(id: string | number, params?: INotifyInput): number {
       let itemIndex = -1;
       if (params) {
         // search by params
       } else {
-        itemIndex = this._items.findIndex((el: IOrder) => el.id == id);
+        itemIndex = this._items.findIndex((el: INotify) => el.id == id);
       }
 
       if (itemIndex !== -1) {
@@ -103,12 +103,12 @@ export const useOrderStore = defineStore("order", {
 
       return itemIndex;
     },
-    async deleteItem(id: string | undefined) {
+    async onRemove(id: string | undefined) {
       if (!id) {
         return;
       }
 
-      const data = await remove(id, {}).then(() => {
+      const data = await remove(id).then(() => {
         this.onRemoveItemFromStore(id);
       });
 

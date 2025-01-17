@@ -4,18 +4,21 @@ import { Rule } from "ant-design-vue/es/form";
 import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTaskStatusStore } from "@/store";
-import { ITaskStatus } from "@/api/task_status/types";
+import { ITaskStatus, ITaskStatusInput } from "@/api/task_status/types";
 import * as icons from "@/utils/icons";
 import VIcon from "../UI/VIcon.vue";
 
-const props = defineProps<{ data: ITaskStatus; defaultData: ITaskStatus }>();
+const props = defineProps<{
+  data: ITaskStatusInput;
+  defaultData: ITaskStatusInput;
+}>();
 const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 
 const taskStatusStore = useTaskStatusStore();
 
-const formState: UnwrapRef<ITaskStatus> = reactive(props.data);
+const formState: UnwrapRef<ITaskStatusInput> = reactive(props.data);
 const formRef = ref();
 
 const iconsOptions = computed(() =>

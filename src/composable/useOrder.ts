@@ -124,7 +124,7 @@ const useOrder = () => {
     {
       key: "objectId",
       sorter: (a: IOrder, b: IOrder) =>
-        a.object && b.object && a.object?.name.localeCompare(b.object?.name),
+        a.object && b.object ? a.object?.name.localeCompare(b.object?.name) : 0,
       // customFilterDropdown: true,
       // onFilter: (value: string, record: IOrder) =>
       //   record.objectId.toLowerCase().indexOf(value.toLowerCase()),
@@ -132,6 +132,7 @@ const useOrder = () => {
     {
       key: "name",
       sorter: (a: IOrder, b: IOrder) => a.name.localeCompare(b.name),
+      // defaultSortOrder: "descend" as const,
       // customFilterDropdown: true,
       // onFilter: (value: string, record: IOrder) =>
       //   record.name.toLowerCase().indexOf(value.toLowerCase()),
@@ -142,7 +143,7 @@ const useOrder = () => {
     },
     {
       key: "constructorId",
-      customFilterDropdown: true,
+      // customFilterDropdown: true,
       onFilter: (value: string, record: IOrder) => {
         const user = userStore.items.find((x) => x.id === record.constructorId);
         return user?.name.indexOf(value) === 0;

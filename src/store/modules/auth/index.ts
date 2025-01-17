@@ -11,6 +11,7 @@ import { IAmUser, ILoginData, IResResultLogin } from "@/api/auth/types";
 import { useCookies } from "@vueuse/integrations/useCookies";
 import { deleteAxiosHeader, setAxiosHeader } from "@/utils/http/axios";
 import { IUser } from "@/api/user/types";
+import { useRoleStore } from "../role";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -26,6 +27,12 @@ export const useAuthStore = defineStore("auth", {
       return !!state.tokenData?.access_token;
     },
     iam: (state) => state._iam,
+    roles: (state) => {
+      const roleStore = useRoleStore();
+      return (
+        roleStore.items.find((x) => x.id == state._iam.roleId)?.value || []
+      );
+    },
   },
   actions: {
     isExpiredRefreshToken() {
@@ -103,7 +110,7 @@ export const useAuthStore = defineStore("auth", {
         ? JSON.parse(_tokens)
         : null;
       if (tokens?.access_token) {
-        console.log("init tokens: ", tokens, this.isExpiredAccessToken());
+        // console.log("init tokens: ", tokens, this.isExpiredAccessToken());
         this.setTokenData(tokens);
 
         // if (!this.isExpiredAccessToken) {
@@ -220,11 +227,22 @@ export const useAuthStore = defineStore("auth", {
     //   });
     // },
     async logout() {
+      // await fetch("api/v1/auth/logout", {
+      //   method: "POST",
+      //   body: JSON.stringify({ token: "" }),
+      // }).then(() => {});
+      await logout({ token: "" });
+
       this.tokenData = null;
       this._iam = {};
+
+      const cookies = useCookies(["jwt"]);
+      cookies.remove("jwt");
+
+      localStorage.removeItem("tokens");
+
       setAxiosHeader("Authorization", `Bearer ${this.token}`);
       deleteAxiosHeader("Authorization");
-      logout({ token: "" });
     },
     async initAuth() {
       try {

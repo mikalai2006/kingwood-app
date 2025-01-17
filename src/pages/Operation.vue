@@ -1,32 +1,40 @@
 <script setup lang="ts" async>
 import { computed, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useOperationStore } from "@/store";
-import { IOperation } from "@/api/operation/types";
-import { invertColor } from "@/utils/utils";
+import { useAuthStore, useOperationStore } from "@/store";
+import { IOperation, IOperationInput } from "@/api/operation/types";
+import { useI18n } from "vue-i18n";
 
 dayjs.locale("ru");
 
+const { t } = useI18n();
+
+const authStore = useAuthStore();
 const operationStore = useOperationStore();
 
 await operationStore.find({ $limit: 200 });
 
 const columns = ref([
-  { title: "name", dataIndex: "name", key: "name", fixed: true },
   {
-    title: "group",
+    title: t("table.operation.name"),
+    dataIndex: "name",
+    key: "name",
+    fixed: true,
+  },
+  {
+    title: t("table.operation.group"),
     dataIndex: "group",
     key: "group",
     fixed: false,
   },
   {
-    title: "updatedAt",
+    title: t("table.operation.updatedAt"),
     dataIndex: "updatedAt",
     key: "updatedAt",
     fixed: false,
   },
   {
-    title: "action",
+    title: t("table.operation.action"),
     dataIndex: "action",
     key: "action",
     fixed: false,
@@ -47,10 +55,7 @@ const columnsData = computed(() => {
     };
   });
 });
-const defaultData: IOperation = {
-  name: "",
-  color: "",
-};
+const defaultData: IOperationInput = {};
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
@@ -70,14 +75,22 @@ const onEditItem = (item: IOperation) => {
   <div class="p-4">
     <VTitle :text="$t('page.operation.title')" />
     <div class="my-2">
-      <a-button type="primary" @click="onAddNewItem">{{
-        $t("form.add")
-      }}</a-button>
+      <a-tooltip v-if="authStore.roles.includes('operation-create')">
+        <template #title>
+          {{ $t("form.operation.new") }}
+        </template>
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
+      </a-tooltip>
     </div>
     <a-table :columns="columns" :data-source="columnsData">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
-          <a-button @click="onEditItem(record)">
+          <a-button
+            v-if="authStore.roles.includes('operation-create')"
+            @click="onEditItem(record)"
+          >
             {{ $t("button.edit") }}
           </a-button>
         </template>
@@ -92,6 +105,9 @@ const onEditItem = (item: IOperation) => {
           <a-tag :bordered="false">{{
             $t(`groupOperation.${record.group}`)
           }}</a-tag>
+        </template>
+        <template v-if="column.key === 'updatedAt'">
+          {{ dayjs(record.updatedAt).fromNow() }}
         </template>
       </template>
 

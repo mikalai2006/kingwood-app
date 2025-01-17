@@ -16,7 +16,7 @@ import Account from "./pages/Account.vue";
 import MontajList from "./pages/MontajList.vue";
 import MontajListDay from "./pages/MontajListDay.vue";
 import ObjectOrder from "./pages/ObjectOrder.vue";
-import Montaj from "./pages/Montaj.vue";
+import Notify from "./pages/Notify.vue";
 
 const routes = [
   {
@@ -56,8 +56,8 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/task_status",
-    name: "task_status",
+    path: "/taskStatus",
+    name: "taskStatus",
     component: TaskStatus,
     meta: { requiresAuth: true },
   },
@@ -65,6 +65,12 @@ const routes = [
     path: "/user",
     name: "user",
     component: User,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/notify",
+    name: "notify",
+    component: Notify,
     meta: { requiresAuth: true },
   },
   {
@@ -77,12 +83,6 @@ const routes = [
     path: "/account",
     name: "account",
     component: Account,
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/montaj",
-    name: "montaj",
-    component: Montaj,
     meta: { requiresAuth: true },
   },
   {

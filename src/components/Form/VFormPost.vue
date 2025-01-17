@@ -1,25 +1,19 @@
 <script setup lang="ts">
-import { IPost } from "@/api/post/types";
+import { IPost, IPostInput } from "@/api/post/types";
 import { create, patch } from "@/api/post";
 import { Rule } from "ant-design-vue/es/form";
-import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
+import { reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { usePostStore } from "@/store";
 
-export interface IFormStatePost {
-  name: string;
-  sortOrder: number;
-  color: string;
-}
-
-const props = defineProps<{ data: IFormStatePost; defaultData: IPost }>();
+const props = defineProps<{ data: IPostInput; defaultData: IPostInput }>();
 const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 
 const postStore = usePostStore();
 
-const formState: UnwrapRef<IFormStatePost> = reactive(props.data);
+const formState: UnwrapRef<IPostInput> = reactive(props.data);
 const formRef = ref();
 
 const rules: Record<string, Rule[]> = {

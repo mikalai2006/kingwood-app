@@ -1,15 +1,15 @@
 import { $get, $patch, $post } from "@/utils/http/axios";
-import { IRequestParams, IResponseData } from "@/api/types";
-import { IUser, IUserInput } from "./types";
+import { IResponseData } from "@/api/types";
+import { IUser, IUserFilter, IUserInput } from "./types";
 
 enum URLS {
   path = "/user",
 }
 
-const find = async (params: IRequestParams<IUser> | Partial<IUser>) =>
-  $get<IResponseData<IUser>>({
-    url: URLS.path,
-    params,
+const find = async (data: IUserFilter) =>
+  $post<IResponseData<IUser>>({
+    url: `${URLS.path}/populate`,
+    data,
   });
 const get = async (id: string | number) =>
   $get<IUser>({

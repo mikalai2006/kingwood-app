@@ -9,18 +9,23 @@ import OrderTaskList from "@/components/Order/OrderTaskList.vue";
 import OrderActiveTask from "@/components/Order/OrderActiveTask.vue";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iPen, iSearch } from "@/utils/icons";
+import { iCog, iPen, iSearch } from "@/utils/icons";
 import colors from "tailwindcss/colors";
 import { Dayjs } from "dayjs";
 import { getShortFIO } from "@/utils/utils";
 import { useRoute } from "vue-router";
 import useOrder from "@/composable/useOrder";
+import OrderList from "@/components/Order/OrderList.vue";
 
 dayjs.locale("ru");
 
 const route = useRoute();
 
 const { objectId } = route.params;
+
+const objectIds = computed(() =>
+  typeof objectId !== "string" ? objectId : [objectId]
+);
 
 const userStore = useUserStore();
 const orderStore = useOrderStore();
@@ -29,7 +34,9 @@ const objectStore = useObjectStore();
 
 const { t } = useI18n();
 
-const object = computed(() => objectStore.items.find((x) => x.id === objectId));
+const object = computed(() =>
+  objectStore.items.find((x) => objectIds.value.includes(x.id))
+);
 
 const {
   onAddNewItem,
@@ -54,12 +61,17 @@ const {
   columns,
   optionsForSelect,
   onSetColumns,
+
+  dateFormStart,
+  openDateStart,
+  onDateStart,
+  defaultDateStart,
 } = useOrder();
 
 const dateFormat = "DD.MM.YYYY";
-const rangeSearch = ref<[Dayjs, Dayjs]>([
-  dayjs("01.01.2015", dateFormat),
-  dayjs("01.01.2015", dateFormat),
+const rangeSearch = ref<Dayjs[]>([
+  dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
+  dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
 ]);
 
 const state = reactive({
@@ -70,17 +82,31 @@ const state = reactive({
 const activeKey = ref("all");
 
 const nameKeyLocalStorageColumns = ref("objectOrder.column");
+const nameKeyLocalStorageRange = computed(() => "range.objectOrder");
+
+const onChangeRange = (value: Dayjs[]) => {
+  const _range = value.map((x) => x.format());
+  console.log("_range: ", _range);
+
+  localStorage.setItem(nameKeyLocalStorageRange.value, JSON.stringify(_range));
+};
 
 onMounted(async () => {
-  rangeSearch.value = [
-    dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
-    dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
-  ];
+  // rangeSearch.value = [
+  //   dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
+  //   dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
+  // ];
 
   // sync columns from localStorage.
   const _columns = localStorage.getItem(nameKeyLocalStorageColumns.value);
   if (_columns) {
     columnKeys.value = JSON.parse(_columns);
+  }
+  // sync range from localStorage.
+  const _range = localStorage.getItem(nameKeyLocalStorageRange.value);
+  if (_range) {
+    const _data: string[] = JSON.parse(_range);
+    rangeSearch.value = _data.map((x) => dayjs(x));
   }
 });
 </script>
@@ -105,27 +131,34 @@ onMounted(async () => {
         </a-button>
       </div>
       <div></div>
-      <div class="flex gap-2">
-        <span class="whitespace-nowrap">
-          {{ $t("table.order.fields") }}
-        </span>
-        <a-select
-          v-model:value="columnKeys"
-          mode="multiple"
-          style="width: 100%; min-width: 200px"
-          :placeholder="$t('table.order.fields')"
-          :max-tag-count="3"
-          :removeIcon="null"
-          :options="optionsForSelect"
-          @change="(value: string) => onSetColumns(value, nameKeyLocalStorageColumns, columnKeys)"
+
+      <div class="flex gap-2 items-center">
+        <a-popover
+          :title="$t('table.order.fields')"
+          trigger="click"
+          placement="topRight"
         >
-          <template #maxTagPlaceholder="omittedValues">
-            <span style="color: red">+ {{ omittedValues.length }} ...</span>
-          </template>
-          <!-- <template #option="{ value, label }">
+          <template #content>
+            <div class="flex gap-2 items-center">
+              <a-select
+                v-model:value="columnKeys"
+                mode="multiple"
+                style="width: 100%; min-width: 200px"
+                :placeholder="$t('table.order.fields')"
+                :max-tag-count="3"
+                :removeIcon="null"
+                :options="optionsForSelect"
+                @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
+              >
+                <template #maxTagPlaceholder="omittedValues">
+                  <span style="color: red">
+                    + {{ omittedValues.length }} ...
+                  </span>
+                </template>
+                <!-- <template #option="{ value, label }">
             {{ label }}
           </template> -->
-          <!-- <a-select-option
+                <!-- <a-select-option
             v-for="col in columns"
             :value="col.key"
             :label="$t(`tabs.order.${col.key}`)"
@@ -133,7 +166,13 @@ onMounted(async () => {
             <span role="img" aria-label="Japan">🇯🇵</span>
             {{ $t(`tabs.order.${col.key}`) }}
           </a-select-option> -->
-        </a-select>
+              </a-select>
+            </div>
+          </template>
+          <a-button type="text">
+            <VIcon :path="iCog" class="text-lg" />
+          </a-button>
+        </a-popover>
       </div>
     </div>
 
@@ -142,67 +181,84 @@ onMounted(async () => {
         <div class="flex flex-row items-center">
           <div class="flex-auto"></div>
           <div>
-            <a-range-picker v-model:value="rangeSearch" :format="dateFormat" />
+            {{ $t("form.order.rangeSearch") }}
+            <a-range-picker
+              v-model:value="rangeSearch"
+              :format="dateFormat"
+              @change="onChangeRange"
+            />
           </div>
         </div>
         <!-- :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'custom cursor-pointer bg-red-500/50' : 'cursor-pointer')"
         :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'cursor-pointer font-medium text-red-500 dark:text-red-300' : 'cursor-pointer')" 
         -->
         <OrderList
-          :params="{ objectId: [objectId] }"
+          key-list="all"
+          :params="{ objectId: objectIds }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
+        <OrderList
+          keyList="notWork"
+          :params="{ status: 0, objectId: objectIds }"
+          :columns="columns"
+          @show-order-info="showOrderInfo"
+          @on-otgruzka="onOtgruzka"
+          @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
         <OrderList
-          :params="{ stolyarComplete: 1, objectId: [objectId] }"
+          key-list="stolyarComplete"
+          :params="{ stolyarComplete: 1, objectId: objectIds }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
         <OrderList
-          :params="{ malyarComplete: 1, objectId: [objectId] }"
+          key-list="malyarComplete"
+          :params="{ malyarComplete: 1, objectId: objectIds }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
         <OrderList
+          key-list="goComplete"
           :params="{
-            malyarComplete: 1,
-            stolyarComplete: 1,
-            objectId: [objectId],
+            goComplete: 1,
+            montajComplete: 0,
+            objectId: objectIds,
           }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-        />
-      </a-tab-pane>
-      <a-tab-pane key="montajComplete" :tab="$t('tabs.order.montajComplete')">
-        <OrderList
-          :params="{ montajComplete: 1, objectId: [objectId] }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
-          @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
-          :params="{ status: 100, objectId: [objectId] }"
+          key-list="completed"
+          :params="{ status: 100, objectId: objectIds }"
           :columns="columns"
           @show-order-info="showOrderInfo"
           @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
         />
       </a-tab-pane>
     </a-tabs>
@@ -275,6 +331,25 @@ onMounted(async () => {
         {{ $t("form.task.add") }}
       </a-button>
     </div>
+  </a-modal>
+
+  <a-modal
+    v-model:open="openDateStart"
+    :destroyOnClose="true"
+    :title="$t('button.dateStart')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormOrderDateStart
+      :data="dateFormStart"
+      :default-data="defaultDateStart"
+      @callback="
+        () => {
+          openDateStart = false;
+        }
+      "
+    />
   </a-modal>
 
   <a-modal

@@ -1,26 +1,36 @@
 <script setup lang="ts" async>
-import { IRole } from "@/api/role/types";
+import { IRole, IRoleInput } from "@/api/role/types";
 import VFormRole from "@/components/Form/VFormRole.vue";
 import { useRoleStore } from "@/store/modules/role";
-import { Rule } from "ant-design-vue/es/form";
-import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
+import { computed, ref } from "vue";
+import { useI18n } from "vue-i18n";
+import dayjs from "@/utils/dayjs";
+import { useAuthStore } from "@/store";
+
+const { t } = useI18n();
 
 const roleStore = useRoleStore();
+const authStore = useAuthStore();
 
 await roleStore.find();
 
 const columns = ref([
-  { title: "Name", dataIndex: "name", key: "name", fixed: true },
-  { title: "code", dataIndex: "code", key: "code", fixed: false },
-  { title: "value", dataIndex: "value", key: "value", fixed: false },
+  { title: t("table.role.name"), dataIndex: "name", key: "name", fixed: true },
+  { title: t("table.role.code"), dataIndex: "code", key: "code", fixed: false },
   {
-    title: "updatedAt",
+    title: t("table.role.value"),
+    dataIndex: "value",
+    key: "value",
+    fixed: false,
+  },
+  {
+    title: t("table.role.updatedAt"),
     dataIndex: "updatedAt",
     key: "updatedAt",
     fixed: false,
   },
   {
-    title: "action",
+    title: t("table.role.action"),
     dataIndex: "action",
     key: "action",
     fixed: false,
@@ -41,9 +51,7 @@ const columnsData = computed(() => {
     };
   });
 });
-const defaultData: IRole = {
-  name: "",
-  code: "",
+const defaultData: IRoleInput = {
   value: [],
   sortOrder: 0,
 };
@@ -70,14 +78,22 @@ const onEditItem = (item: IRole) => {
     <VTitle :text="$t('page.role.title')" />
     <!-- <div>{{ JSON.stringify(roleStore.roles) }}</div> -->
     <div class="my-2">
-      <a-button type="primary" @click="onAddNewItem">{{
-        $t("form.add")
-      }}</a-button>
+      <a-tooltip v-if="authStore.roles.includes('role-create')">
+        <template #title>
+          {{ $t("form.role.new") }}
+        </template>
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
+      </a-tooltip>
     </div>
     <a-table :columns="columns" :data-source="columnsData">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
-          <a-button @click="onEditItem(record)">
+          <a-button
+            v-if="authStore.roles.includes('role-patch')"
+            @click="onEditItem(record)"
+          >
             {{ $t("button.edit") }}
           </a-button>
         </template>
@@ -85,6 +101,10 @@ const onEditItem = (item: IRole) => {
           <a-tag :bordered="false" v-for="item in record.value" :key="item">
             {{ $t(`privilege.${item}`) }}
           </a-tag>
+        </template>
+
+        <template v-if="column.key === 'createdAt'">
+          {{ dayjs(record.createdAt).fromNow() }}
         </template>
       </template>
       <!-- <template #expandedRowRender="{ record }">
@@ -102,7 +122,7 @@ const onEditItem = (item: IRole) => {
     v-model:open="open"
     :destroyOnClose="false"
     :key="dataForm.id"
-    :title="$t('form.role.new')"
+    :title="dataForm?.id ? $t('form.role.edit') : $t('form.role.new')"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >

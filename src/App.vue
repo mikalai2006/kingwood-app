@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import ruRU from "ant-design-vue/es/locale/ru_RU";
 import {
   useAuthStore,
@@ -13,7 +13,14 @@ import {
   useUserStore,
 } from "./store";
 import dayjs from "@/utils/dayjs";
-import { computed, onMounted, onUnmounted, watch } from "vue";
+import {
+  computed,
+  onErrorCaptured,
+  onMounted,
+  onUnmounted,
+  ref,
+  watch,
+} from "vue";
 import { useRoleStore } from "./store/modules/role";
 import UserInfoAside from "./components/User/UserInfoAside.vue";
 import { useSocket } from "./composable/useSocket";
@@ -21,8 +28,11 @@ import VNavbar from "./components/VNavbar.vue";
 import VChangerMode from "./components/VChangerMode.vue";
 import { message, theme } from "ant-design-vue";
 import { Colors } from "./utils/colors";
-import UserMessage from "./components/User/UserMessage.vue";
+import UserNotify from "./components/User/UserNotify.vue";
 import VNavbarCMS from "./components/VNavbarCMS.vue";
+import UserExitButton from "./components/User/UserExitButton.vue";
+import { useI18n } from "vue-i18n";
+import useNotification from "./composable/useNotification";
 
 const generalStore = useGeneralStore();
 
@@ -40,8 +50,18 @@ const taskStatus = useTaskStatusStore();
 
 let socket: WebSocket;
 
+const router = useRouter();
+
+const { t } = useI18n();
+
+const noty = useNotification();
+
 const onInitData = async () => {
   try {
+    if (socket?.OPEN) {
+      socket.close();
+    }
+
     await roleStore.find({ $limit: 100 });
     await postStore.find({ $limit: 100 });
     await userStore.find({ $limit: 100 });
@@ -51,21 +71,21 @@ const onInitData = async () => {
     await taskWorkerStore.find({ $limit: 100 });
     await taskStatus.find();
 
-    setTimeout(() => {
-      const { socket: _socket } = useSocket();
-      socket = _socket;
+    // setTimeout(() => {
+    const { socket: _socket } = useSocket({ router, t, noty });
+    socket = _socket;
 
-      // check auth token.
-      socket.onopen = () => {
-        socket.send(
-          JSON.stringify({
-            type: "jwt",
-            content: authStore.tokenData?.access_token,
-          })
-        );
-      };
-    }, 500);
-  } catch (e) {
+    // check auth token.
+    socket.onopen = () => {
+      socket.send(
+        JSON.stringify({
+          type: "jwt",
+          content: authStore.tokenData?.access_token,
+        })
+      );
+    };
+    // }, 500);
+  } catch (e: any) {
     message.error(e.message);
   }
 };
@@ -73,7 +93,11 @@ const onInitData = async () => {
 watch(
   () => authStore.tokenData,
   (val, oldVal) => {
-    onInitData();
+    if (authStore.tokenData) {
+      onInitData();
+    } else {
+      socket?.close();
+    }
   }
 );
 
@@ -104,7 +128,7 @@ onMounted(async () => {
     //       );
     //     };
     //   }, 500);
-  } catch (e) {
+  } catch (e: any) {
     message.error(e.message);
   }
 });
@@ -121,6 +145,7 @@ const tokenTheme = computed(() => {
     result.colorBgBase = Colors.g[951];
     result.colorTextBase = Colors.white;
     result.colorPrimary = Colors.p[400];
+    result.colorError = Colors.r[400];
     result.colorInfo = Colors.p[400];
     result.colorLink = Colors.p[500];
     result.colorLinkHover = Colors.p[500];
@@ -136,6 +161,16 @@ const tokenTheme = computed(() => {
   }
 
   return result;
+});
+
+const errorApp = ref<Error | null>(null);
+
+onErrorCaptured((error, vm, info) => {
+  // this.error = error;
+  // this.errorMessage = info;
+  console.log("Error onErrorCaptured: ", error, vm, info);
+  errorApp.value = error;
+  return false; // Prevents the error from propagating further
 });
 </script>
 
@@ -155,7 +190,27 @@ const tokenTheme = computed(() => {
       <div
         class="min-h-screen flex flex-row items-stretch bg-white dark:bg-g-800"
       >
-        <!-- <div class="w-screen-sm min-w-48 p-4 bg-s-700">
+        <div v-if="errorApp" class="flex items-center mx-auto">
+          <a-result status="500" title="500" :sub-title="errorApp?.message">
+            <template #extra>
+              <!-- <a-button type="primary">Back Home</a-button> -->
+
+              <a-button
+                type="primary"
+                @click="
+                  () => {
+                    router.go(0);
+                  }
+                "
+              >
+                reload
+              </a-button>
+            </template>
+          </a-result>
+          {{ JSON.stringify(errorApp) }}
+        </div>
+        <template v-else>
+          <!-- <div class="w-screen-sm min-w-48 p-4 bg-s-700">
             
             <nav class="sticky top-14 flex flex-col bg-white p-4 rounded-lg">
               <RouterLink to="/">Go to Home</RouterLink>
@@ -171,43 +226,42 @@ const tokenTheme = computed(() => {
               <RouterLink to="/dashboard">Go to Dashboard</RouterLink>
             </nav>
           </div> -->
-        <div class="flex-auto flex flex-col h-screen overflow-y-hidden">
-          <header
-            class="shrink-0 h-16 bg-s-50 dark:bg-g-800 z-50 shadow-md flex items-center"
-          >
-            <div class="bg-s-900 dark:bg-g-950 w-64 h-full">
-              <a
-                href="#"
-                class="text-white flex items-center space-x-2 px-4"
-                title="Your App is cool"
+          <div class="flex-auto flex flex-col h-screen overflow-y-hidden">
+            <!-- <header
+              class="shrink-0 h-16 bg-s-50 dark:bg-g-800 z-50 shadow-md flex items-center"
+            >
+              <div
+                class="flex flex-row items-center bg-s-900 dark:bg-g-950 w-64 h-full"
               >
-                <img src="/logo-t-white.png" />
-              </a>
-            </div>
-            <div
-              v-if="authStore.tokenData"
-              class="flex-auto px-4 py-2 flex flex-row items-center gap-4"
-            >
-              <div class="flex-auto">{{ route.meta.title }}</div>
-              <!-- <div>
-                <UserMessage />
+                <div class="flex-auto flex items-center justify-center">
+                  <a href="#" class="" :title="$t('nameApp')">
+                    <img src="/logo-t-white.png" class="" />
+                  </a>
+                </div>
               </div>
-              <div>
-                <UserInfoAside />
-              </div> -->
-            </div>
-          </header>
-          <div
-            class="flex-auto flex flex-col md:flex-row overflow-auto b-scroll"
-          >
-            <aside
-              id="sidebar"
-              class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 space-y-6 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between"
+              <div
+                v-if="authStore.tokenData"
+                class="flex-auto px-4 py-2 flex flex-row items-center gap-4"
+              >
+                <div class="flex-auto">{{ route.meta.title }}</div>
+              </div>
+            </header> -->
+            <div
+              class="flex-auto flex flex-col md:flex-row overflow-auto b-scroll"
             >
-              <div class="flex flex-col space-y-6">
-                <VNavbar v-if="authStore.tokenData" />
-                <VNavbarCMS v-if="authStore.tokenData" />
-                <!-- <nav data-dev-hint="main navigation">
+              <aside
+                id="sidebar"
+                class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between py-4"
+              >
+                <div class="flex items-center justify-center">
+                  <a href="#" class="" :title="$t('nameApp')">
+                    <img src="/logo-t-white.png" class="" />
+                  </a>
+                </div>
+                <div class="flex flex-col">
+                  <VNavbar v-if="authStore.tokenData" />
+                  <!-- <VNavbarCMS v-if="authStore.tokenData" /> -->
+                  <!-- <nav data-dev-hint="main navigation">
               <a
                 href="#"
                 class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
@@ -248,59 +302,77 @@ const tokenTheme = computed(() => {
                 <span>Without Icon And a bit longer than usual</span>
               </a>
             </nav> -->
-              </div>
-              <div class="flex-auto"></div>
-              <div class="bg-white/5 mx-4 p-2 rounded-lg">
-                <UserInfoAside />
-              </div>
-              <nav class="flex pr-4">
-                <div class="">
-                  <VChangerMode />
                 </div>
+                <div class="flex-auto"></div>
 
-                <UserMessage />
-                <!-- <a
-                  href="#"
-                  class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
+                <div class="flex flex-row px-4 mb-6">
+                  <VChangerMode />
+                  <!-- <a
+                    href="#"
+                    class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
+                  >
+                    asd
+                  </a> -->
+
+                  <!-- <a
+                href="#"
+                class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
+              >
+                asd
+              </a>
+              <a
+                href="#"
+                class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
+              >
+                asd
+              </a> -->
+                  <div class="flex-auto"></div>
+                  <UserNotify v-if="authStore.iam?.id" />
+                </div>
+                <div
+                  v-if="authStore.iam?.id"
+                  class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2"
                 >
-                  asd
-                </a> -->
+                  <UserInfoAside />
+                  <UserExitButton />
+                </div>
+              </aside>
+              <div
+                class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
+              >
+                <div class="flex-auto">
+                  <RouterView v-slot="{ Component }">
+                    <template v-if="Component">
+                      <!-- <Transition mode="out-in"> -->
+                      <!-- <KeepAlive> -->
+                      <Suspense>
+                        <!-- main content -->
+                        <component :is="Component"></component>
 
-                <!-- <a
-              href="#"
-              class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
-            >
-              asd
-            </a>
-            <a
-              href="#"
-              class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
-            >
-              asd
-            </a> -->
-              </nav>
-            </aside>
-            <div
-              class="flex-auto overflow-auto b-scroll bg-white dark:bg-g-900"
-            >
-              <RouterView v-slot="{ Component }">
-                <template v-if="Component">
-                  <!-- <Transition mode="out-in"> -->
-                  <!-- <KeepAlive> -->
-                  <Suspense>
-                    <!-- main content -->
-                    <component :is="Component"></component>
-
-                    <!-- loading state -->
-                    <template #fallback> Loading... </template>
-                  </Suspense>
-                  <!-- </KeepAlive> -->
-                  <!-- </Transition> -->
-                </template>
-              </RouterView>
+                        <!-- loading state -->
+                        <template #fallback> Loading... </template>
+                      </Suspense>
+                      <!-- </KeepAlive> -->
+                      <!-- </Transition> -->
+                    </template>
+                  </RouterView>
+                </div>
+                <!-- <footer
+                  class="flex flex-row bg-s-50 border-t border-s-200 dark:bg-g-950"
+                >
+                  <div class="flex flex-row items-center w-64 h-full">
+                    <div
+                      class="flex-auto flex items-center justify-center"
+                    ></div>
+                  </div>
+                  <div>
+                    <VChangerMode />
+                  </div>
+                </footer> -->
+              </div>
             </div>
           </div>
-        </div>
+        </template>
       </div>
     </a-app>
   </a-config-provider>

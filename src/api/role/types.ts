@@ -1,3 +1,5 @@
+import { IPaginationParams } from "../types";
+
 export interface IRole {
   id: string;
   name: string;
@@ -11,3 +13,9 @@ export interface IRole {
 export type IRoleInput = {
   [Property in keyof IRole]?: IRole[Property];
 };
+
+export interface IRoleFilter extends IPaginationParams<IRoleInput> {
+  id?: string[];
+  name?: string[];
+  code?: string[];
+}

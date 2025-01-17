@@ -1,27 +1,36 @@
 <script setup lang="ts" async>
 import { computed, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useTaskStatusStore } from "@/store";
+import { useAuthStore, useTaskStatusStore } from "@/store";
 import { invertColor } from "@/utils/utils";
-import { ITaskStatus } from "@/api/task_status/types";
+import { ITaskStatus, ITaskStatusInput } from "@/api/task_status/types";
 import VFormTaskStatus from "@/components/Form/VFormTaskStatus.vue";
 import VTitle from "@/components/VTitle.vue";
+import { useI18n } from "vue-i18n";
 
 dayjs.locale("ru");
+const { t } = useI18n();
+
+const authStore = useAuthStore();
 const taskStatusStore = useTaskStatusStore();
 
 await taskStatusStore.find({ $limit: 200 });
 
 const columns = ref([
-  { title: "name", dataIndex: "name", key: "name", fixed: true },
   {
-    title: "updatedAt",
+    title: t("table.taskStatus.name"),
+    dataIndex: "name",
+    key: "name",
+    fixed: true,
+  },
+  {
+    title: t("table.taskStatus.updatedAt"),
     dataIndex: "updatedAt",
     key: "updatedAt",
     fixed: false,
   },
   {
-    title: "action",
+    title: t("table.taskStatus.action"),
     dataIndex: "action",
     key: "action",
     fixed: false,
@@ -42,7 +51,7 @@ const columnsData = computed(() => {
     };
   });
 });
-const defaultData: ITaskStatus = {};
+const defaultData: ITaskStatusInput = {};
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
@@ -59,16 +68,24 @@ const onEditItem = (item: ITaskStatus) => {
 </script>
 <template>
   <div class="p-4">
-    <VTitle :text="$t('page.task_status.title')" />
+    <VTitle :text="$t('page.taskStatus.title')" />
     <div class="my-2">
-      <a-button type="primary" @click="onAddNewItem">{{
-        $t("form.add")
-      }}</a-button>
+      <a-tooltip v-if="authStore.roles.includes('taskStatus-create')">
+        <template #title>
+          {{ $t("form.taskStatus.new") }}
+        </template>
+        <a-button type="primary" @click="onAddNewItem">
+          {{ $t("form.add") }}
+        </a-button>
+      </a-tooltip>
     </div>
     <a-table :columns="columns" :data-source="columnsData">
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
-          <a-button @click="onEditItem(record)">
+          <a-button
+            v-if="authStore.roles.includes('taskStatus-patch')"
+            @click="onEditItem(record)"
+          >
             {{ $t("button.edit") }}
           </a-button>
         </template>
@@ -79,6 +96,9 @@ const onEditItem = (item: ITaskStatus) => {
           >
             {{ record.name }}
           </a-tag>
+        </template>
+        <template v-if="column.key === 'updatedAt'">
+          {{ dayjs(record.updatedAt).fromNow() }}
         </template>
       </template>
 
@@ -97,7 +117,9 @@ const onEditItem = (item: ITaskStatus) => {
     v-model:open="open"
     :destroyOnClose="false"
     :key="dataForm.id"
-    :title="$t('form.user.new')"
+    :title="
+      dataForm?.id ? $t('form.taskStatus.edit') : $t('form.taskStatus.new')
+    "
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >

@@ -1,18 +1,41 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, h, onMounted, reactive, ref, watch } from "vue";
 import dayjs from "@/utils/dayjs";
 
 import { IOrder, IOrderFilter } from "@/api/order/types";
-import { useObjectStore, useOrderStore, useUserStore } from "@/store";
-import { iChevronRight, iPen, iSearch } from "@/utils/icons";
+import {
+  useAuthStore,
+  useObjectStore,
+  useOrderStore,
+  useUserStore,
+} from "@/store";
+import {
+  iChevronRight,
+  iPen,
+  iSearch,
+  iTrashFill,
+  iWraningTriangle,
+} from "@/utils/icons";
 import { dateFormat, dateTimeFormat } from "@/utils/date";
-import { getShortFIO } from "@/utils/utils";
+import { getShortFIO, replaceSubstringByArray } from "@/utils/utils";
 import colors from "tailwindcss/colors";
 import sift from "sift";
 import OrderGroupBadge from "./OrderGroupBadge.vue";
-import { TableProps } from "ant-design-vue";
+import { message, Modal, TableProps } from "ant-design-vue";
+import VIcon from "../UI/VIcon.vue";
+import { useI18n } from "vue-i18n";
+
+export interface IConfigTable {
+  sort: { field: string; order: number }[];
+  pagination: {
+    total: number;
+    current: number;
+    pageSize: number;
+  };
+}
 
 const props = defineProps<{
+  keyList: string;
   params: IOrderFilter;
   columns: {
     key: string;
@@ -31,23 +54,34 @@ const emit = defineEmits([
   "onDateStart",
 ]);
 
+const nameKeyLocalStorage = computed(
+  () => `tableConfig.order.${props.keyList}`
+);
+
+const { t } = useI18n();
+
+const authStore = useAuthStore();
 const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const userStore = useUserStore();
 
 const siftParams = computed(() => {
   const _result = Object.fromEntries(
-    Object.entries(props.params).map(([key, value]) => {
-      if (value?.length) {
-        return [key, { $in: value }];
-      }
-      // else if (["$sort"].includes(key)) {
-      //   return [];
-      // }
-      else {
-        return [key, value];
-      }
-    })
+    Object.entries(props.params)
+      .filter(([key, value]) => !["to"].includes(key))
+      .map(([key, value]) => {
+        if (typeof value === "object" && value?.length) {
+          return [key, { $in: value }];
+        }
+        // else if (["$sort"].includes(key)) {
+        //   return [];
+        // }
+        else if (["from"].includes(key)) {
+          return ["createdAt", { $gte: value, $lte: props.params.to }];
+        } else {
+          return [key, value];
+        }
+      })
   );
   return _result;
 });
@@ -87,14 +121,14 @@ const sort = ref([{ field: "number", order: 1 }]);
 const pagination = ref({
   total: 10,
   current: 1,
-  pageSize: 10,
+  pageSize: 20,
 });
 
 const onChangePagintaion = async (_page: number, _pageSize: number) => {
   // console.log("load ", _page, _pageSize, _pageSize * _page - 1);
   pagination.value.current = _page;
   pagination.value.pageSize = _pageSize;
-  onQueryData();
+  // onQueryData();
 };
 
 const onQueryData = async () => {
@@ -116,6 +150,12 @@ const onQueryData = async () => {
     })
     .then((result) => {
       pagination.value.total = result.total;
+      localStorage.setItem(
+        nameKeyLocalStorage.value,
+        JSON.stringify(
+          Object.assign({}, { sort: sort.value, pagination: pagination.value })
+        )
+      );
     })
     .finally(() => {
       loading.value = false;
@@ -150,9 +190,100 @@ const handleTableChange: TableProps["onChange"] = (
   // });
 };
 
+const onDeleteOrder = (input: IOrder) => {
+  orderStore.deleteItem(input.id);
+};
+
+const onDeleteAlert = (record: IOrder) => {
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.order.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.removeOrder"), [
+                record?.name,
+                record?.number,
+                record?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.delete"),
+    cancelText: t("button.cancel"),
+    // title: t("form.task.delete"),
+    onOk() {
+      return new Promise((resolve, reject) => {
+        try {
+          onDeleteOrder(record);
+
+          resolve("");
+        } catch (e) {
+          message.error("Error: delete task");
+        }
+      }).catch(() => console.log("Oops errors!"));
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+
+  // console.log("Delete task: ", item);
+  // //   await emit("onDeleteTask", item);
+  // return new Promise((resolve) => {
+  //   setTimeout(() => resolve(true), 3000);
+  // });
+};
+
 onMounted(async () => {
+  // // sync columns from localStorage.
+  // const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
+  // if (_configTable) {
+  //   const _config = JSON.parse(_configTable) as IConfigTable;
+  //   pagination.value = _config.pagination;
+  //   sort.value = _config.sort;
+  // }
+
   await onQueryData();
 });
+
+// watch(
+//   () => props.params,
+//   (o, n) => {
+//     console.log(o, n);
+
+//     console.log(props.params);
+//     console.log(siftParams.value);
+
+//     onQueryData();
+//   },
+//   {
+//     immediate: false,
+//   }
+// );
 </script>
 
 <template>
@@ -187,23 +318,43 @@ onMounted(async () => {
     <template #bodyCell="{ column, record }">
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
-        <a-tooltip>
+        <div class="flex gap-0">
+          <a-tooltip v-if="authStore.roles.includes('order-patch')">
+            <template #title>
+              {{ $t("button.edit") }}
+            </template>
+            <a-button
+              type="link"
+              @click="(e: Event) => {emit('onEditItem', record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip v-if="authStore.roles.includes('order-delete')">
+            <template #title>
+              {{ $t("button.delete") }}
+            </template>
+            <a-button
+              danger
+              type="link"
+              @click="(e: Event) => {onDeleteAlert(record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <!-- {{ $t("button.delete") }} -->
+              <VIcon :path="iTrashFill" />
+            </a-button>
+          </a-tooltip>
+
+          <!-- <a-tooltip>
           <template #title>
-            {{ $t("button.edit") }}
+            {{ $t("button.delete") }}
           </template>
-          <a-button
-            type="link"
-            @click="(e: Event) => {emit('onEditItem', record); e.preventDefault(); e.stopPropagation()}"
-          >
+          <a-button type="link" danger @click="">
             <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
           </a-button>
-        </a-tooltip>
+        </a-tooltip> -->
+        </div>
       </template>
-      <!-- <template v-if="column.key === 'name'">
-              <div>
-                {{ record.name }}
-              </div>
-            </template> -->
       <template v-if="column.key === 'image'">
         <a-avatar
           class="bg-s-500 dark:bg-s-800 border-0"
@@ -258,7 +409,7 @@ onMounted(async () => {
 
       <template v-if="column.key === 'goComplete'">
         <div
-          v-if="record.malyarComplete && record.stolyarComplete"
+          v-if="record.goComplete"
           class="relative min-w-32 min-h-16 rounded-md bg-green-600 dark:bg-green-700 flex items-center justify-center"
         >
           <div
@@ -270,6 +421,7 @@ onMounted(async () => {
                 {{ $t("groupOperation.4") }}
               </div>
               <a-button
+                v-if="authStore.roles.includes('order-otgruzka')"
                 size="small"
                 @click="
                   (e: Event) => {
@@ -284,7 +436,7 @@ onMounted(async () => {
             </template>
             <template v-else>
               {{ $t("info.otgruzkaYes") }}:<br />
-              {{ dayjs(record.dateOtgruzka).utc(true).format(dateTimeFormat) }}
+              {{ dayjs(record.dateOtgruzka).utc(true).format(dateFormat) }}
             </template>
             <!-- <OrderGroupBadge
                     :orderId="record.id"
@@ -309,6 +461,19 @@ onMounted(async () => {
       <template v-if="column.key === 'activeOperation'">
         <OrderActiveTask :order-id="record.id" />
         <!-- <OrderGroupInfo :order-id="record.id" /> -->
+      </template>
+
+      <template v-if="column.key === 'name'">
+        <p class="">
+          {{ record.name }}
+        </p>
+        <a-tag
+          v-if="record.priority"
+          :bordered="false"
+          :color="colors.red[500]"
+        >
+          {{ $t("table.order.priority") }}
+        </a-tag>
       </template>
 
       <template v-if="column.key === 'objectId'">
@@ -342,10 +507,14 @@ onMounted(async () => {
 
       <template v-if="column.key === 'dateStart'">
         <div v-if="dayjs(record.dateStart).year() != 1">
+          <div>
+            {{ $t("info.designFrom") }}
+          </div>
           {{ dayjs(record.dateStart).format(dateFormat) }}
         </div>
         <div v-else>
           <a-button
+            v-if="authStore.roles.includes('order-add-design')"
             size="small"
             @click="
                   (e: Event) => {

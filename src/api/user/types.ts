@@ -2,6 +2,7 @@ import { IAuthPublicData } from "../auth/types";
 import { IImage } from "../image/types";
 import { IPost } from "../post/types";
 import { IRole } from "../role/types";
+import { IPaginationParams } from "../types";
 
 export interface IUser {
   id: string;
@@ -31,3 +32,9 @@ export interface IUser {
 export type IUserInput = {
   [Property in keyof IUser]?: IUser[Property];
 };
+
+export interface IUserFilter extends IPaginationParams<IUserInput> {
+  id?: string[];
+  userId?: string[];
+  roleId?: string[];
+}

@@ -244,6 +244,7 @@ onMounted(() => {
           :placeholder="$t('form.task.selectOperationId')"
           :options="operations"
           :filter-option="filterOption"
+          :disabled="!!formState.id"
           @change="onChangeOperation"
         ></a-select>
         <!-- <a-select

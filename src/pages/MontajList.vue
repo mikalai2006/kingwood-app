@@ -6,8 +6,6 @@ import {
   useObjectStore,
   useOperationStore,
   useOrderStore,
-  useTaskMontajStore,
-  useTaskMontajWorkerStore,
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
@@ -16,15 +14,14 @@ import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
 import { iPlusLg, iSearch } from "@/utils/icons";
 import { Dayjs } from "dayjs";
-import VFormTaskMontaj from "@/components/Form/VFormTaskMontaj.vue";
 import { ITask, ITaskInput } from "@/api/task/types";
 import MontajObjectOrders from "@/components/Montaj/MontajObjectOrders.vue";
 import { ITaskWorker, ITaskWorkerInput } from "@/api/task_worker/types";
-import VFormTaskMontajWorker from "@/components/Form/VFormTaskMontajWorker.vue";
-import { getShortFIO, invertColor } from "@/utils/utils";
 import { groupBy } from "lodash-es";
 import VFormTaskWorker from "@/components/Form/VFormTaskWorker.vue";
 import { IObject } from "@/api/object/types";
+import MontajListItem from "@/components/Montaj/MontajListItem.vue";
+import VFormTask from "@/components/Form/VFormTask.vue";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
@@ -83,20 +80,6 @@ const objects = computed(() => {
 
   return _result;
 });
-
-const defaultData: ITaskInput = {};
-
-const dataForm = ref(defaultData);
-
-const open = ref<boolean>(false);
-
-const showModal = () => {
-  open.value = true;
-};
-const onAddNewItem = () => {
-  dataForm.value = defaultData;
-  showModal();
-};
 
 const defaultDataTaskWorker: ITaskWorkerInput = {};
 
@@ -271,14 +254,14 @@ const newTaskMontajWorkers = computed(() => {
     for (const taskW of _allTaskWorkers) {
       if (
         !_taskMontajWorkers[taskW.objectId] ||
-        !_taskMontajWorkers[taskW.objectId][taskW.id]
+        !_taskMontajWorkers[taskW.objectId][taskW.workerId]
       ) {
         const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
         const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
         _taskMontajWorkers[taskW.objectId] = Object.assign(
           _taskMontajWorkers[taskW.objectId] || {},
           {
-            [taskW.id]: {
+            [taskW.workerId]: {
               item: taskW,
               stat: {
                 startCol: diffFrom > 0 ? diffFrom : 0,
@@ -292,6 +275,33 @@ const newTaskMontajWorkers = computed(() => {
       }
     }
   }
+
+  // for (const objectKey in _taskMontajWorkers) {
+  //   for (const taskKey in _taskMontajWorkers[objectKey]) {
+  //     if (
+  //       !_taskMontajWorkers[objectKey] ||
+  //       !_taskMontajWorkers[taskW.objectId][taskW.id]
+  //     ) {
+  //       const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+  //       const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+  //       _taskMontajWorkers[taskW.objectId] = Object.assign(
+  //         _taskMontajWorkers[taskW.objectId] || {},
+  //         {
+  //           [taskW.id]: {
+  //             item: taskW,
+  //             stat: {
+  //               startCol: diffFrom > 0 ? diffFrom : 0,
+  //               length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+  //               diffFrom,
+  //               diffTo,
+  //             },
+  //           },
+  //         }
+  //       );
+  //     }
+  //   }
+  // }
+
   // console.log(_taskMontajWorkers);
 
   return _taskMontajWorkers;
@@ -344,13 +354,15 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div class="h-full flex flex-row items-stretch">
-    <div class="flex-auto p-4">
-      <VTitle :text="$t('page.montajList.title')" />
+  <div class="p-4">
+    <VHeader :title="$t('page.montajList.title')" class="mb-4">
+      <template #back>&nbsp;</template>
+    </VHeader>
+    <div class="flex-auto">
       <div class="flex-auto">
-        <a-button type="primary" @click="onAddNewItem">
+        <!-- <a-button type="primary" @click="onAddNewItem">
           {{ $t("form.add") }}
-        </a-button>
+        </a-button> -->
       </div>
       <div class="">
         <div class="flex flex-row items-center">
@@ -461,33 +473,16 @@ onBeforeUnmount(() => {
                   ]"
                   class="text-left text-sm text-nowrap"
                 >
-                  <div
-                    class="absolute z-50 rounded-sm"
-                    :style="{
-                      background: taskMW.item.taskStatus?.color,
-                      color: invertColor(taskMW.item.taskStatus?.color, true),
-                      left: `${taskMW.stat.startCol * sizeColumn[0] + 3}px`,
-                      top: `${indexM * 35 + 3}px`,
-                      width: `${taskMW.stat.length * sizeColumn[0] - 5}px`,
-                    }"
-                  >
-                    <a-tooltip>
-                      <template #title>
-                        {{ $t("button.editTask") }}
-                      </template>
-                      <div
-                        class="flex gap-1 p-1 w-32 cursor-pointer"
-                        @click="onEditTaskWorker(taskMW.item, objectMontaj.id)"
-                      >
-                        <TaskMontajWorkerStatusTagDot
-                          :task-worker-id="taskMW.item.id"
-                        />
-                        {{ getShortFIO(taskMW?.item?.user?.name) }}
-                      </div>
-                    </a-tooltip>
-                  </div>
+                  <MontajListItem
+                    v-if="sizeColumn.length"
+                    :index="indexM"
+                    :size-column="sizeColumn[0]"
+                    :task-m-w="taskMW"
+                    :object-id="objectMontaj.id"
+                    @on-edit-task-worker="onEditTaskWorker"
+                  />
                 </div>
-                <a-tooltip>
+                <!-- <a-tooltip>
                   <template #title>
                     {{ $t("button.addTask") }}
                   </template>
@@ -499,47 +494,24 @@ onBeforeUnmount(() => {
                   >
                     <VIcon :path="iPlusLg" />
                   </a-button>
-                </a-tooltip>
+                </a-tooltip> -->
               </div>
             </div>
           </template>
         </div>
       </div>
 
-      <div>
-        <!-- {{ JSON.stringify(taskMontajWorkers, null, 2) }} -->
+      <!-- <div>
+        {{ JSON.stringify(taskMontajWorkers, null, 2) }}
         <h4>Изделия готовые к монтажу</h4>
         <div v-for="item in ordersForMontaj">
           <a-button type="primary">
             Начать монтаж {{ item.name }}-{{ item.object?.name }}
           </a-button>
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
-
-  <a-modal
-    v-model:open="open"
-    :key="dataForm?.id"
-    :title="dataForm.id ? $t('form.montaj.edit') : $t('form.montaj.new')"
-    :ok-button-props="{ hidden: true }"
-    :cancel-button-props="{ hidden: true }"
-    @ok="
-      () => {
-        open = false;
-      }
-    "
-  >
-    <VFormTaskMontaj
-      :data="dataForm"
-      :default-data="defaultData"
-      @callback="
-        () => {
-          open = false;
-        }
-      "
-    />
-  </a-modal>
 
   <a-modal
     v-model:open="openTaskWorker"

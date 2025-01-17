@@ -1,21 +1,34 @@
 import type { IWsMessage } from "@/api/types";
-// import router from "@/router";
+import VIcon from "@/components/UI/VIcon.vue";
 import {
   useAuthStore,
+  useNotifyStore,
   useOrderStore,
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
   useUserStore,
 } from "@/store";
+import { iWraningTriangle } from "@/utils/icons";
+import modal from "ant-design-vue/es/modal";
+import { h } from "vue";
+import { Router } from "vue-router";
+import composableNotification from "@/composable/useNotification";
 
-export const useSocket = () => {
+export interface IUseSocketProps {
+  router: Router;
+  t: any;
+  noty: ReturnType<typeof composableNotification>;
+}
+
+export const useSocket = (props: IUseSocketProps) => {
   const authStore = useAuthStore();
   const userStore = useUserStore();
   const taskStore = useTaskStore();
   const taskStatusStore = useTaskStatusStore();
   const taskWorkerStore = useTaskWorkerStore();
   const orderStore = useOrderStore();
+  const notifyStore = useNotifyStore();
 
   // console.log("router0", router.currentRoute);
 
@@ -29,16 +42,44 @@ export const useSocket = () => {
       ]
     );
     _socket.onclose = function (event) {
-      console.log("socket onclose: ", event);
-      // console.log("router1", router);
+      if (authStore.tokenData) {
+        // console.log("socket onclose: ", event);
+        modal.confirm({
+          title: h(
+            "span",
+            { class: "flex-auto text-red-500 dark:text-red-400" },
+            props?.t("info.disableServer")
+          ),
+          icon: h("span", { class: "anticon flex-none inline-flex " }, [
+            h(VIcon, {
+              path: iWraningTriangle,
+              class: "text-2xl text-red-500 dark:text-red-400",
+            }),
+          ]),
+          content: h(
+            "div",
+            { class: "text-red-500 dark:text-red-400" },
+            props?.t("info.disableServerDescription")
+          ),
+          onOk() {
+            props?.router.go(0);
+          },
+          onCancel() {
+            props?.router.go(0);
+          },
+          class: "test",
+        });
+        // console.log("router1", router);
 
-      // setTimeout(() => {
-      //   // connect();
-      //   console.log("router2", router);
+        // setTimeout(() => {
+        //   // connect();
+        //   console.log("router2", router);
 
-      //   router.go(0);
-      // }, 5000);
+        //   router.go(0);
+        // }, 5000);}
+      }
     };
+
     _socket.onmessage = function (event) {
       const data: IWsMessage = JSON.parse(event.data);
       const { method, content, service } = data;
@@ -80,6 +121,15 @@ export const useSocket = () => {
               taskWorkerStore.onRemoveItemFromStore(content.id);
             } else {
               taskWorkerStore.onAddItemToStore(content);
+            }
+            break;
+
+          case "notify":
+            if (method === "DELETE") {
+              notifyStore.onRemoveItemFromStore(content.id);
+            } else {
+              notifyStore.onAddItemToStore(content);
+              props.noty.onShowNotify(content.message, content.title);
             }
             break;
 
