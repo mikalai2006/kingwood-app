@@ -2,7 +2,12 @@
 import { register } from "@/api/auth";
 import { patch } from "@/api/user";
 import { IUser, IUserInput } from "@/api/user/types";
-import { useOperationStore, usePostStore, useUserStore } from "@/store";
+import {
+  useAuthStore,
+  useOperationStore,
+  usePostStore,
+  useUserStore,
+} from "@/store";
 import { useRoleStore } from "@/store/modules/role";
 import dayjs from "@/utils/dayjs";
 import { transliterate } from "@/utils/translit";
@@ -22,7 +27,7 @@ import { PlusOutlined } from "@ant-design/icons-vue";
 import { message, UploadProps } from "ant-design-vue";
 import VImg from "../UI/VImg.vue";
 import VFormResetPassword from "./VFormResetPassword.vue";
-import { useError } from "@/composable/useError";
+import { IValidateError, useError } from "@/composable/useError";
 import { dateFormat } from "@/utils/date";
 import { remove } from "@/api/image";
 import { IImageUpload } from "@/api/image/types";
@@ -40,6 +45,7 @@ const emit = defineEmits(["callback"]);
 const { t } = useI18n();
 const roleStore = useRoleStore();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const postStore = usePostStore();
 const operationStore = useOperationStore();
 
@@ -115,6 +121,7 @@ const onSubmit = async () => {
         dataForm.append("roleId", data.roleId);
         dataForm.append("postId", data.postId);
         dataForm.append("typePay", data.typePay.toString());
+        dataForm.append("archive", data.archive.toString());
         if (data.typePay === 1) {
           dataForm.append("oklad", data.oklad.toString());
         } else {
@@ -128,6 +135,8 @@ const onSubmit = async () => {
         }
         if (data.birthday) {
           dataForm.append("birthday", dayjs(data.birthday).format(dateFormat));
+        } else {
+          dataForm.append("birthday", "");
         }
         const result = await patch(
           data.id,
@@ -147,12 +156,11 @@ const onSubmit = async () => {
       // formRef.value?.resetFields();
     })
     .catch((error: any) => {
-      message.error(
-        replaceSubstringByArray(t("form.message.errorSave"), [
-          error?.errorFields ? onGetValidateError(error) : error.message,
-        ])
-      );
-      // console.log("error", error);
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
 };
 const resetForm = () => {
@@ -160,12 +168,14 @@ const resetForm = () => {
 };
 
 const rolesList = computed(() =>
-  roleStore.items.map((x) => {
-    return {
-      label: x.name,
-      value: x.id,
-    };
-  })
+  roleStore.items
+    .filter((x) => !x.hidden)
+    .map((x) => {
+      return {
+        label: x.name,
+        value: x.id,
+      };
+    })
 );
 
 const typePayList = [
@@ -277,7 +287,7 @@ onMounted(() => {
   imageList.value = formState.images?.map((x) => {
     return {
       image: x,
-      url: `${import.meta.env.VITE_HOSTIMAGE}/images/${x.userId}/${x.service}/${
+      url: `${import.meta.env.VITE_HOSTIMAGE}/images/${x.service}/${
         x.serviceId
       }/${x.path}${x.ext}`,
       uid: formState?.id || "1",
@@ -291,7 +301,7 @@ onMounted(() => {
 <template>
   <div>
     <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="user" :tab="$t('tabs.user.user')" force-render>
+      <a-tab-pane key="user" :tab="$t('tabs.user.user')">
         <!-- {{ JSON.stringify(formState) }} -->
         <a-form
           ref="formRef"
@@ -364,7 +374,14 @@ onMounted(() => {
         </a-checkbox-group>
       </a-form-item> -->
 
-          <a-form-item :label="$t('form.user.roleId')" name="roleId">
+          <a-form-item
+            v-if="
+              authStore.roles.includes('user-change-role') ||
+              authStore.code === 'superadmin'
+            "
+            :label="$t('form.user.roleId')"
+            name="roleId"
+          >
             <a-select
               v-model:value="formState.roleId"
               style="width: 100%"
@@ -373,28 +390,42 @@ onMounted(() => {
             ></a-select>
           </a-form-item>
 
-          <a-form-item :label="$t('form.user.typePay')" name="typePay">
-            <a-select
-              v-model:value="formState.typePay"
-              style="width: 100%"
-              :placeholder="$t('form.user.selectTypePay')"
-              :options="typePayList"
-            ></a-select>
-          </a-form-item>
+          <template
+            v-if="
+              authStore.roles.includes('user-change-typePay') ||
+              authStore.code === 'superadmin'
+            "
+          >
+            <a-form-item name="typePay" :label="$t('form.user.typePay')">
+              <a-select
+                v-model:value="formState.typePay"
+                style="width: 100%"
+                :placeholder="$t('form.user.selectTypePay')"
+                :options="typePayList"
+              ></a-select>
+            </a-form-item>
+
+            <a-form-item
+              v-if="formState.typePay === 1"
+              :label="$t('form.user.oklad')"
+              name="oklad"
+            >
+              <a-input-number
+                v-model:value="formState.oklad"
+                :min="1"
+                :max="10000"
+              />
+            </a-form-item>
+          </template>
 
           <a-form-item
-            v-if="formState.typePay === 1"
-            :label="$t('form.user.oklad')"
-            name="oklad"
+            v-if="
+              authStore.roles.includes('user-change-post') ||
+              authStore.code === 'superadmin'
+            "
+            :label="$t('form.user.postId')"
+            name="postId"
           >
-            <a-input-number
-              v-model:value="formState.oklad"
-              :min="1"
-              :max="10000"
-            />
-          </a-form-item>
-
-          <a-form-item :label="$t('form.user.postId')" name="postId">
             <a-select
               v-model:value="formState.postId"
               style="width: 100%"
@@ -403,7 +434,14 @@ onMounted(() => {
             ></a-select>
           </a-form-item>
 
-          <a-form-item :label="$t('form.user.typeWork')" name="typeWork">
+          <a-form-item
+            v-if="
+              authStore.roles.includes('user-change-typeWork') ||
+              authStore.code === 'superadmin'
+            "
+            :label="$t('form.user.typeWork')"
+            name="typeWork"
+          >
             <a-select
               v-model:value="formState.typeWork"
               style="width: 100%"
@@ -411,6 +449,21 @@ onMounted(() => {
               :placeholder="$t('form.user.selectTypeWork')"
               :options="worksList"
             ></a-select>
+          </a-form-item>
+
+          <a-form-item
+            v-if="
+              authStore.roles.includes('user-archiv') ||
+              authStore.code === 'superadmin'
+            "
+            :label="$t('form.user.archive')"
+            name="archive"
+          >
+            <a-switch
+              v-model:checked="formState.archive"
+              :checkedValue="1"
+              :unCheckedValue="0"
+            />
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
@@ -428,7 +481,11 @@ onMounted(() => {
         </a-form>
       </a-tab-pane>
       <a-tab-pane
-        v-if="formState.userId"
+        v-if="
+          formState.userId &&
+          (authStore.roles.includes('auth-resetpass') ||
+            authStore.code === 'superadmin')
+        "
         key="password"
         :tab="$t('tabs.user.password')"
       >

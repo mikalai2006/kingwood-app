@@ -6,6 +6,7 @@ import {
   useGeneralStore,
   useOperationStore,
   useOrderStore,
+  usePayTemplateStore,
   usePostStore,
   useTaskStatusStore,
   useTaskStore,
@@ -33,11 +34,13 @@ import VNavbarCMS from "./components/VNavbarCMS.vue";
 import UserExitButton from "./components/User/UserExitButton.vue";
 import { useI18n } from "vue-i18n";
 import useNotification from "./composable/useNotification";
+import { useError } from "./composable/useError";
 
 const generalStore = useGeneralStore();
 
 dayjs.locale("ru");
 const route = useRoute();
+const payTemplateStore = usePayTemplateStore();
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const roleStore = useRoleStore();
@@ -56,12 +59,15 @@ const { t } = useI18n();
 
 const noty = useNotification();
 
+const { onShowError } = useError();
+
 const onInitData = async () => {
   try {
     if (socket?.OPEN) {
       socket.close();
     }
 
+    await payTemplateStore.find({ $limit: 100 });
     await roleStore.find({ $limit: 100 });
     await postStore.find({ $limit: 100 });
     await userStore.find({ $limit: 100 });
@@ -86,7 +92,8 @@ const onInitData = async () => {
     };
     // }, 500);
   } catch (e: any) {
-    message.error(e.message);
+    onShowError(e);
+    //errorApp.value = e;
   }
 };
 
@@ -129,7 +136,9 @@ onMounted(async () => {
     //     };
     //   }, 500);
   } catch (e: any) {
-    message.error(e.message);
+    onShowError(e);
+
+    errorApp.value = e;
   }
 });
 
@@ -163,13 +172,45 @@ const tokenTheme = computed(() => {
   return result;
 });
 
-const errorApp = ref<Error | null>(null);
+const errorApp = ref<any>(null);
 
-onErrorCaptured((error, vm, info) => {
+onErrorCaptured((error: any, vm, info) => {
   // this.error = error;
   // this.errorMessage = info;
   console.log("Error onErrorCaptured: ", error, vm, info);
-  errorApp.value = error;
+  if (error?.code == 500) {
+    errorApp.value = error;
+  }
+  //  else {
+
+  //   modal.confirm({
+  //         title: h(
+  //           "span",
+  //           { class: "flex-auto text-red-500 dark:text-red-400" },
+  //           props?.t("info.disableServer")
+  //         ),
+  //         icon: h("span", { class: "anticon flex-none inline-flex " }, [
+  //           h(VIcon, {
+  //             path: iWraningTriangle,
+  //             class: "text-2xl text-red-500 dark:text-red-400",
+  //           }),
+  //         ]),
+  //         content: h(
+  //           "div",
+  //           { class: "text-red-500 dark:text-red-400" },
+  //           props?.t("info.disableServerDescription")
+  //         ),
+  //         onOk() {
+  //           props?.router.go(0);
+  //         },
+  //         onCancel() {
+  //           props?.router.go(0);
+  //         },
+  //         class: "test",
+  //       });
+  // }
+
+  onShowError(error);
   return false; // Prevents the error from propagating further
 });
 </script>
@@ -191,9 +232,8 @@ onErrorCaptured((error, vm, info) => {
         class="min-h-screen flex flex-row items-stretch bg-white dark:bg-g-800"
       >
         <div v-if="errorApp" class="flex items-center mx-auto">
-          <a-result status="500" title="500" :sub-title="errorApp?.message">
+          <!-- <a-result status="500" title="500" :sub-title="errorApp?.message">
             <template #extra>
-              <!-- <a-button type="primary">Back Home</a-button> -->
 
               <a-button
                 type="primary"
@@ -206,8 +246,43 @@ onErrorCaptured((error, vm, info) => {
                 reload
               </a-button>
             </template>
-          </a-result>
-          {{ JSON.stringify(errorApp) }}
+          </a-result> -->
+          <section class="bg-white dark:bg-g-800">
+            <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+              <div class="mx-auto max-w-screen-sm text-center">
+                <h1
+                  class="mb-4 text-7xl tracking-tight font-extrabold lg:text-9xl text-p-600 dark:text-p-500"
+                >
+                  {{ errorApp?.code }}
+                </h1>
+                <!-- <p
+                  class="mb-4 text-3xl tracking-tight font-bold text-gray-900 md:text-4xl dark:text-white"
+                >
+                  {{ errorApp?.message }}
+                </p> -->
+                <p class="mb-4 text-lg font-light text-g-500 dark:text-g-300">
+                  {{ errorApp?.message }}
+                </p>
+                <!-- <a
+                  href="#"
+                  class="inline-flex text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4"
+                >
+                  Back to Homepage
+                </a> -->
+                <a-button
+                  type="primary"
+                  @click="
+                    () => {
+                      router.go(0);
+                    }
+                  "
+                >
+                  {{ $t("button.refresh") }}
+                </a-button>
+              </div>
+            </div>
+          </section>
+          <!-- {{ JSON.stringify(errorApp) }} -->
         </div>
         <template v-else>
           <!-- <div class="w-screen-sm min-w-48 p-4 bg-s-700">
@@ -340,7 +415,7 @@ onErrorCaptured((error, vm, info) => {
               <div
                 class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
               >
-                <div class="flex-auto">
+                <div class="flex-auto flex">
                   <RouterView v-slot="{ Component }">
                     <template v-if="Component">
                       <!-- <Transition mode="out-in"> -->
@@ -350,7 +425,11 @@ onErrorCaptured((error, vm, info) => {
                         <component :is="Component"></component>
 
                         <!-- loading state -->
-                        <template #fallback> Loading... </template>
+                        <template #fallback>
+                          <div class="p-4">
+                            <a-spin />
+                          </div>
+                        </template>
                       </Suspense>
                       <!-- </KeepAlive> -->
                       <!-- </Transition> -->

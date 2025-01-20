@@ -7,7 +7,7 @@ import {
   useTaskWorkerStore,
   useUserStore,
 } from "@/store";
-import { iArrowClockWise, iPauseCircleFill, iSpinThree } from "@/utils/icons";
+import dayjs from "@/utils/dayjs";
 import { invertColor } from "@/utils/utils";
 import { computed } from "vue";
 
@@ -23,6 +23,11 @@ const taskStatusStore = useTaskStatusStore();
 const taskIds = computed(
   () =>
     taskWorkerStore.items
+      .filter((y) =>
+        dayjs(new Date())
+          // .subtract(1, "day")
+          .isBetween(dayjs(y.from), dayjs(y.to), "day", "[]")
+      )
       .map((x) => {
         const task = taskStore.items.find((z) => z.id === x.taskId);
         const order = orderStore.items.find((y) => y.id === task?.orderId);
@@ -36,7 +41,12 @@ const taskIds = computed(
           taskStatus,
         };
       })
-      .filter((x) => x.workerId === props.workerId && !x.taskStatus?.finish)
+      .filter(
+        (x) =>
+          x.workerId === props.workerId &&
+          x.task &&
+          !["finish", "autofinish"].includes(x.task.status)
+      )
   // .map((x) => {
   //   const task = taskStore.items.find((z) => z.id === x.taskId);
   //   const order = orderStore.items.find((y) => y.id === task?.orderId);
@@ -90,7 +100,7 @@ const post = computed(() =>
         <div class="leading-4 pl-1">
           №{{ item.order?.number }} - {{ item.order?.name }}
           <br />
-          {{ item.task?.name }}
+          {{ item.task?.name }} | {{ item.task?.status }}
         </div>
       </div>
     </a-tag>

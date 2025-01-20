@@ -66,7 +66,7 @@ const onEditItem = (item: IPost) => {
 };
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VTitle :text="$t('page.post.title')" />
     <div class="my-2">
       <a-tooltip v-if="authStore.roles.includes('post-create')">

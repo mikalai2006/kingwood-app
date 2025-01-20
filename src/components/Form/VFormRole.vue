@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { create, patch } from "@/api/role";
 import { IRole, IRoleInput } from "@/api/role/types";
+import { useError } from "@/composable/useError";
 import { useAuthStore, useRoleStore } from "@/store";
 import { roles } from "@/utils/roles";
+import { message } from "ant-design-vue";
 import { Rule } from "ant-design-vue/es/form";
 import { reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
@@ -44,6 +46,8 @@ const rules: Record<string, Rule[]> = {
   ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -57,11 +61,16 @@ const onSubmit = async () => {
         const newRole = await create(data);
         roleStore.onAddItemToStore(newRole);
       }
+      message.success(t("form.message.successSave"));
+      emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
-  emit("callback");
 };
 const resetForm = () => {
   formRef.value.resetFields();
@@ -119,10 +128,23 @@ const rolesList = roles.map((x) => {
       </a-form-item>
 
       <a-form-item
+        v-if="authStore.code === 'superadmin'"
+        :label="$t('form.role.hidden')"
+        name="hidden"
+      >
+        <a-switch
+          v-model:checked="formState.hidden"
+          :checkedValue="1"
+          :unCheckedValue="0"
+        />
+      </a-form-item>
+
+      <a-form-item
         v-if="
-          formState?.id
+          (formState?.id
             ? authStore.roles.includes('role-patch')
-            : authStore.roles.includes('role-create')
+            : authStore.roles.includes('role-create')) ||
+          authStore.code === 'admin'
         "
         :wrapper-col="{ span: 14, offset: 4 }"
       >

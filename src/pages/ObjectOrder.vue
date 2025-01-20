@@ -111,7 +111,7 @@ onMounted(async () => {
 });
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <!-- <VTitle :text="$t('page.order.title')" /> -->
     <!-- <a-page-header
       :title="object?.name"
@@ -177,7 +177,7 @@ onMounted(async () => {
     </div>
 
     <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="all" :tab="$t('tabs.order.all')" force-render>
+      <a-tab-pane key="all" :tab="$t('tabs.order.all')">
         <div class="flex flex-row items-center">
           <div class="flex-auto"></div>
           <div>
@@ -319,6 +319,10 @@ onMounted(async () => {
   >
     <template #title>
       <p class="text-xl">
+        {{ currentOrderInModal?.object?.name }} №{{
+          currentOrderInModal?.number
+        }}
+        -
         {{ currentOrderInModal?.name }}
       </p>
     </template>

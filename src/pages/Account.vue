@@ -22,7 +22,7 @@ const dataForm = ref(defaultData);
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VHeader :title="$t('page.account.title')" class="mb-4">
       <template #back>&nbsp;</template>
     </VHeader>

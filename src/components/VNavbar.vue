@@ -18,6 +18,7 @@ const menuItems = computed(() =>
     "order",
     // "montaj",
     "montajList",
+    "financy",
     // "task_status",
   ].filter((x) => authStore.roles.includes(`${x}-list`))
 );

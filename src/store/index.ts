@@ -1,4 +1,3 @@
-// import { usePage } from './modules/page'
 import { useAuthStore } from "./modules/auth";
 import { useUserStore } from "./modules/user";
 import { useRoleStore } from "./modules/role";
@@ -11,15 +10,12 @@ import { useGeneralStore } from "./modules/general";
 import { useTaskStatusStore } from "./modules/taskStatus";
 import { useObjectStore } from "./modules/object";
 import { useNotifyStore } from "./modules/notify";
-// import { useLibrary } from './modules/library'
-// import { useComponent } from './modules/component'
-// import { useComponentGroup } from './modules/component_group'
-// import { useProduct } from './modules/product'
-// import { useSpace } from './modules/space'
-// import { usePlugin } from './modules/plugin'
+import { useWorkTimeStore } from "./modules/workTime";
+import { usePayStore } from "./modules/pay";
+import { usePayTemplateStore } from "./modules/pay_template";
+import { useAppErrorStore } from "./modules/appError";
 
 export {
-  // usePage,
   useAuthStore,
   useRoleStore,
   usePostStore,
@@ -30,13 +26,10 @@ export {
   useGeneralStore,
   useTaskStatusStore,
   useObjectStore,
-  // useLibrary,
-  // useComponent,
   useUserStore,
   useNotifyStore,
-  // useProduct,
-  // usePlugin,
-  // useCategory,
-  // useComponentGroup,
-  // useSpace,
+  useWorkTimeStore,
+  usePayStore,
+  usePayTemplateStore,
+  useAppErrorStore,
 };

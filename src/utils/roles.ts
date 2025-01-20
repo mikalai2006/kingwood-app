@@ -8,6 +8,11 @@ export const roles = [
   "user-patch",
   "user-delete",
   "user-list",
+  "user-archiv",
+  "user-change-post",
+  "user-change-typeWork",
+  "user-change-typePay",
+  "user-change-role",
   "object-create",
   "object-patch",
   "object-delete",
@@ -40,4 +45,10 @@ export const roles = [
   "taskStatus-patch",
   "taskStatus-delete",
   "taskStatus-list",
+  "financy-list",
+
+  "payTemplate-create",
+  "payTemplate-patch",
+  "payTemplate-delete",
+  "payTemplate-list",
 ];

@@ -38,13 +38,20 @@ axiosInstance.interceptors.response.use(
   },
   // Request failed
   (error: any) => {
+    // console.log("Request failed: ", error);
+
     const { response } = error;
     if (response) {
       // The request has been made, but is not in the scope of 2xx
-      showMessage(response.status);
-      return Promise.reject(response.data);
+      const err: any = new Error(
+        response?.data?.message
+          ? response.data.message
+          : showMessage(response.status)
+      );
+      err.code = response.status;
+      return Promise.reject(err);
     }
-    showMessage("The network connection is abnormal, please try again later!");
+    // showMessage("The network connection is abnormal, please try again later!");
   }
 );
 
@@ -129,37 +136,37 @@ const request = async <T = any>(config: AxiosRequestConfig): Promise<T> => {
         resolve(data as T);
       })
       .catch((error) => {
-        // console.log('err', error)
+        // let err = {
+        //   code: 0,
+        //   message: "",
+        // };
+        // if (axios.isAxiosError(error)) {
+        //   console.error("AXIOS: error message: ", error);
+        //   err.code = error.code ? Number.parseInt(error.code) : 0;
+        //   err.message = error.message;
+        // } else {
+        //   if (error.response) {
+        //     // The request was made and the server responded with a status code
+        //     // that falls out of the range of 2xx
+        //     console.log(error.response.data);
+        //     console.log(error.response.status);
+        //     console.log(error.response.headers);
+        //   } else if (error.request) {
+        //     // The request was made but no response was received
+        //     // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+        //     // http.ClientRequest in node.js
+        //     console.log(error.request);
+        //   } else {
+        //     // console.log('Error', error);
+        //     err = {
+        //       code: error.code ? Number.parseInt(error.code) : 0,
+        //       message: error.message,
+        //     };
+        //   }
+        // }
+        // console.log("axios err", error.response, err);
 
-        let err = {
-          code: 0,
-          message: "",
-        };
-        if (axios.isAxiosError(error)) {
-          console.error("AXIOS: error message: ", error);
-          err.code = error.code ? Number.parseInt(error.code) : 0;
-          err.message = error.message;
-        } else {
-          if (error.response) {
-            // The request was made and the server responded with a status code
-            // that falls out of the range of 2xx
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-          } else if (error.request) {
-            // The request was made but no response was received
-            // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-            // http.ClientRequest in node.js
-            console.log(error.request);
-          } else {
-            // console.log('Error', error);
-            err = {
-              code: error.code ? Number.parseInt(error.code) : 0,
-              message: error.message,
-            };
-          }
-        }
-        reject(err);
+        reject(error);
       });
   });
 };

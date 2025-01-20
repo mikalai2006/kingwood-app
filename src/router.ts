@@ -17,6 +17,8 @@ import MontajList from "./pages/MontajList.vue";
 import MontajListDay from "./pages/MontajListDay.vue";
 import ObjectOrder from "./pages/ObjectOrder.vue";
 import Notify from "./pages/Notify.vue";
+import Financy from "./pages/Financy.vue";
+import PayTemplate from "./pages/PayTemplate.vue";
 
 const routes = [
   {
@@ -41,6 +43,18 @@ const routes = [
     path: "/post",
     name: "post",
     component: Post,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/financy",
+    name: "financy",
+    component: Financy,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/payTemplate",
+    name: "payTemplate",
+    component: PayTemplate,
     meta: { requiresAuth: true },
   },
   {
@@ -117,6 +131,17 @@ const router = createRouter({
 });
 
 router.beforeEach((to) => {
+  const authStore = useAuthStore();
+  // console.log(
+  //   "authStore.isAuthenticated = ",
+  //   authStore.isAuthenticated,
+  //   !authStore.isExpiredAccessToken()
+  // );
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) return "/auth";
+});
+
+router.afterEach((to) => {
   const authStore = useAuthStore();
   // console.log(
   //   "authStore.isAuthenticated = ",

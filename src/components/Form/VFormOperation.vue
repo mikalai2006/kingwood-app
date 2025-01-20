@@ -3,8 +3,10 @@ import { create, patch } from "@/api/operation";
 import { Rule } from "ant-design-vue/es/form";
 import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { useOperationStore } from "@/store";
+import { useAuthStore, useOperationStore } from "@/store";
 import type { IOperation } from "@/api/operation/types";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{ data: IOperation; defaultData: IOperation }>();
 const emit = defineEmits(["callback"]);
@@ -12,6 +14,7 @@ const emit = defineEmits(["callback"]);
 const { t } = useI18n();
 
 const operationStore = useOperationStore();
+const authStore = useAuthStore();
 
 const formState: UnwrapRef<IOperation> = reactive(props.data);
 const formRef = ref();
@@ -35,6 +38,8 @@ const rules: Record<string, Rule[]> = {
   ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -48,11 +53,16 @@ const onSubmit = async () => {
         const result = await create(data);
         operationStore.onAddItemToStore(result);
       }
+      message.success(t("form.message.successSave"));
+      emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
-  emit("callback");
 };
 const resetForm = () => {
   formRef.value.resetFields();
@@ -97,6 +107,14 @@ const groupsOperation = computed(() =>
           :placeholder="$t('form.operation.selectColor')"
           :options="colorsList"
         ></a-select> -->
+      </a-form-item>
+
+      <a-form-item :label="$t('form.role.hidden')" name="hidden">
+        <a-switch
+          v-model:checked="formState.hidden"
+          :checkedValue="1"
+          :unCheckedValue="0"
+        />
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">

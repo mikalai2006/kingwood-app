@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { register } from "@/api/auth";
 import { resetPassword } from "@/api/auth";
-import { IUser, IUserInput } from "@/api/user/types";
 import { useOperationStore, usePostStore, useUserStore } from "@/store";
 import { useRoleStore } from "@/store/modules/role";
-import { transliterate } from "@/utils/translit";
-import { randomIntFromInterval, replaceSubstringByArray } from "@/utils/utils";
 import { Rule } from "ant-design-vue/es/form";
-import { computed, reactive, ref, toRaw, UnwrapRef, watch } from "vue";
+import { reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { PlusOutlined } from "@ant-design/icons-vue";
-import { message, UploadProps } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import { ILoginData } from "@/api/auth/types";
+import { useError } from "@/composable/useError";
 
 const props = defineProps<{ authId: string }>();
 const emit = defineEmits(["callback"]);
@@ -31,6 +27,8 @@ const rules: Record<string, Rule[]> = {};
 
 const password = ref("");
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -42,15 +40,22 @@ const onSubmit = async () => {
       password.value = newPassword;
       emit("callback");
     })
-    .catch((error: Error) => {
-      message.error(
-        // replaceSubstringByArray(t("form.message.errorSave"), [
-        //   error?.message || "",
-        // ])
-        t(error?.message)
-      );
-      // console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        message.error(t(error?.message));
+      }
     });
+  // .catch((error: Error) => {
+  //   message.error(
+  //     // replaceSubstringByArray(t("form.message.errorSave"), [
+  //     //   error?.message || "",
+  //     // ])
+  //     t(error?.message)
+  //   );
+  //   // console.log("error", error);
+  // });
 };
 const resetForm = () => {
   formRef.value.resetFields();

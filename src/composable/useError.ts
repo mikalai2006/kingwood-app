@@ -1,3 +1,6 @@
+import { useAppErrorStore, useAuthStore } from "@/store";
+import { message } from "ant-design-vue";
+
 export interface IFailedFinishForm extends IValidateError {
   values: { [key: string]: any };
   outOfDate: boolean;
@@ -14,6 +17,9 @@ export interface IValidateError extends Error {
 }
 
 export const useError = () => {
+  const appErrorStore = useAppErrorStore();
+  const authStore = useAuthStore();
+
   const onGetValidateError = (
     error: IValidateError,
     countViewError: number = 1
@@ -29,10 +35,40 @@ export const useError = () => {
       _result = _allErrors.slice(0, countViewError);
     }
 
-    return _result.join(",");
+    const result = _result.join(",");
+
+    message.warning(result);
+
+    return result;
+  };
+
+  // const onCreateError = (error: any) => {
+  //   if (error.errorFields) {
+  //     const err = onGetValidateError(error);
+  //     onShowError(err);
+  //   } else {
+  //     onShowError(error.message);
+  //   }
+  // };
+
+  const onShowError = (err: any) => {
+    // code: string = "", stack: string = ""
+    // console.log("onShowError: ", err);
+
+    if (authStore.iam?.id) {
+      appErrorStore.create({
+        error: err.message,
+        stack: err.stack,
+        code: err?.code?.toString(),
+      });
+    }
+
+    message.error(err.message);
   };
 
   return {
+    // onCreateError,
     onGetValidateError,
+    onShowError,
   };
 };

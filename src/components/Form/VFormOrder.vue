@@ -81,7 +81,7 @@ const rules: Record<string, Rule[]> = {
   // ],
 };
 
-const { onGetValidateError } = useError();
+const { onGetValidateError, onShowError } = useError();
 
 const onSubmit = async () => {
   await formRef.value
@@ -103,14 +103,13 @@ const onSubmit = async () => {
       message.success(t("form.order.successAdd"));
       resetForm();
     })
-    .catch((error: IValidateError) => {
+    .catch((error: any) => {
       if (error?.errorFields) {
-        message.error(onGetValidateError(error));
+        onGetValidateError(error);
       } else {
-        message.error(error.message);
+        throw new Error(JSON.stringify(error));
       }
     });
-  // Object.assign(formState, props.defaultData);
 };
 const resetForm = () => {
   formRef.value?.resetFields();

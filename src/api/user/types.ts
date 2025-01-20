@@ -12,6 +12,7 @@ export interface IUser {
   phone: string;
   online: boolean;
   hidden: number;
+  archive: number;
   roleObject: IRole;
   postObject: IPost;
   images: IImage[];
@@ -37,4 +38,6 @@ export interface IUserFilter extends IPaginationParams<IUserInput> {
   id?: string[];
   userId?: string[];
   roleId?: string[];
+  hidden?: number;
+  archive?: number;
 }

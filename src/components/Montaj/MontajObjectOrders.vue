@@ -24,7 +24,7 @@ const ordersByObject = computed(() =>
 <template>
   <div>
     <div v-for="item in ordersByObject" class="font-normal leading-4">
-      - {{ item.name }}
+      №{{ item.number }} {{ item.name }} | {{ item.status }}
     </div>
     <!-- <a-button v-for="item in workersForMontaj">
       {{ item.name }}

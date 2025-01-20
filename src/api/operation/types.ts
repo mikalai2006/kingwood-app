@@ -3,6 +3,7 @@ export interface IOperation {
   name: string;
   color: string;
   group: string;
+  hidden: number;
   createdAt: Date;
   updatedAt: Date;
 }

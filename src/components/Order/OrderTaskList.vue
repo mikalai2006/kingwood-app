@@ -154,7 +154,7 @@ const activeKey = ref("list");
         class="flex flex-row hover:bg-s-100"
       > -->
 
-      <a-tabs
+      <!-- <a-tabs
         v-model:activeKey="activeKey"
         :tabBarStyle="{
           position: 'sticky',
@@ -164,27 +164,27 @@ const activeKey = ref("list");
             generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.white,
         }"
       >
-        <a-tab-pane key="list" :tab="$t('tabs.task.list')" force-render>
+        <a-tab-pane key="list" :tab="$t('tabs.task.list')" force-render> -->
+      <div
+        v-for="task in tasksCompleted"
+        class="p-2 flex flex-row hover:bg-black/5 dark:hover:bg-black/10"
+      >
+        <OrderTaskItem
+          :taskId="task.id"
+          @on-edit-task="emit('onEditTask', task)"
+        />
+      </div>
+      <draggable
+        :list="tasksByOrder"
+        item-key="name"
+        :disabled="true"
+        @end="onSaveSortOrder"
+      >
+        <template #item="{ element }">
           <div
-            v-for="task in tasksCompleted"
             class="p-2 flex flex-row hover:bg-black/5 dark:hover:bg-black/10"
           >
-            <OrderTaskItem
-              :taskId="task.id"
-              @on-edit-task="emit('onEditTask', task)"
-            />
-          </div>
-          <draggable
-            :list="tasksByOrder"
-            item-key="name"
-            :disabled="true"
-            @end="onSaveSortOrder"
-          >
-            <template #item="{ element }">
-              <div
-                class="p-2 flex flex-row hover:bg-black/5 dark:hover:bg-black/10"
-              >
-                <!-- <template
+            <!-- <template
                   v-if="
                     operationMontaj
                       .map((x) => x.id)
@@ -199,16 +199,16 @@ const activeKey = ref("list");
                 </template>
                 <template v-else>
                 </template> -->
-                <OrderTaskItem
-                  :taskId="element.id"
-                  @on-edit-task="emit('onEditTask', element)"
-                />
-              </div>
-            </template>
-          </draggable>
-        </a-tab-pane>
+            <OrderTaskItem
+              :taskId="element.id"
+              @on-edit-task="emit('onEditTask', element)"
+            />
+          </div>
+        </template>
+      </draggable>
+      <!-- </a-tab-pane>
         <a-tab-pane key="history" :tab="$t('tabs.task.log')"> </a-tab-pane>
-      </a-tabs>
+      </a-tabs> -->
 
       <!-- </div> -->
     </div>

@@ -58,14 +58,15 @@ const onSubmit = async () => {
       data.status = 1;
       const result = await patch(data.id, data);
       orderStore.onAddItemToStore(result);
+      message.success(t("form.message.successSave"));
       emit("callback");
       resetForm();
     })
-    .catch((error: IValidateError) => {
+    .catch((error: any) => {
       if (error?.errorFields) {
-        message.error(onGetValidateError(error));
+        onGetValidateError(error);
       } else {
-        message.error(error.message);
+        throw new Error(JSON.stringify(error));
       }
     });
 };

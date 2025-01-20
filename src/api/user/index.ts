@@ -1,4 +1,4 @@
-import { $get, $patch, $post } from "@/utils/http/axios";
+import { $delete, $get, $patch, $post } from "@/utils/http/axios";
 import { IResponseData } from "@/api/types";
 import { IUser, IUserFilter, IUserInput } from "./types";
 
@@ -27,4 +27,9 @@ const patch = async (id: string | number, data: FormData) =>
     url: `${URLS.path}/${id}`,
     data,
   });
-export { find, get, create, patch };
+
+const remove = async (id: string | number) =>
+  $delete<IUser>({
+    url: `${URLS.path}/${id}`,
+  });
+export { find, get, create, patch, remove };

@@ -25,6 +25,8 @@ const formState = reactive<FormState>({
   remember: true,
 });
 
+const { onGetValidateError } = useError();
+
 const onFinish = async (values: any) => {
   try {
     await authStore
@@ -35,23 +37,25 @@ const onFinish = async (values: any) => {
         });
         return r;
       })
-      .catch((e) => {
-        throw e;
+      .catch((error: any) => {
+        if (error?.errorFields) {
+          onGetValidateError(error);
+        } else {
+          throw new Error(JSON.stringify(error));
+        }
       });
   } catch (e: any) {
     message.error(t(e?.message));
   }
 };
 
-const { onGetValidateError } = useError();
-
 const onFinishFailed = (errorInfo: IFailedFinishForm) => {
-  message.error(onGetValidateError(errorInfo));
+  onGetValidateError(errorInfo);
 };
 </script>
 
 <template>
-  <div class="flex flex-col items-center">
+  <div class="flex-auto flex flex-col items-center">
     <div class="p-4 rounded-lg mt-32">
       <!-- {{ authStore.tokenData?.refresh_token }} -->
       <div class="text-center mb-4"><VTitle text="Авторизация" /></div>

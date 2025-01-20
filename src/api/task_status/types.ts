@@ -7,9 +7,9 @@ export interface ITaskStatus {
   enabled: string;
   icon: string;
   animate?: string;
-  start?: number;
-  finish?: number;
-  process?: number;
+  // start?: number;
+  // finish?: number;
+  // process?: number;
   status: string;
   createdAt: Date;
   updatedAt: Date;

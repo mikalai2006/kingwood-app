@@ -56,16 +56,19 @@ const onSubmit = async () => {
       data.description = formState.description;
       const result = await patch(data.id, data);
       orderStore.onAddItemToStore(result);
+
+      message.success(t("form.message.successSave"));
       emit("callback");
     })
-    .catch((error: IValidateError) => {
+    .catch((error: any) => {
       if (error?.errorFields) {
-        message.error(onGetValidateError(error));
+        onGetValidateError(error);
       } else {
-        message.error(error.message);
+        throw new Error(JSON.stringify(error));
       }
     });
 };
+
 const resetForm = () => {
   formRef.value?.resetFields();
 };

@@ -6,6 +6,7 @@ export interface IRole {
   code: string;
   value: string[];
   sortOrder: number;
+  hidden: number;
   createdAt: Date;
   updatedAt: Date;
 }

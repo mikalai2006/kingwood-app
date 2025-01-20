@@ -167,6 +167,8 @@ const handleTableChange: TableProps["onChange"] = (
   filters: any,
   sorter: any
 ) => {
+  console.log("sorter", sorter);
+
   if (Object.values(sorter).length > 0) {
     sort.value = [
       {
@@ -243,7 +245,7 @@ const onDeleteAlert = (record: IOrder) => {
 
           resolve("");
         } catch (e) {
-          message.error("Error: delete task");
+          message.error("Error: delete order");
         }
       }).catch(() => console.log("Oops errors!"));
     },
@@ -259,13 +261,13 @@ const onDeleteAlert = (record: IOrder) => {
 };
 
 onMounted(async () => {
-  // // sync columns from localStorage.
-  // const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
-  // if (_configTable) {
-  //   const _config = JSON.parse(_configTable) as IConfigTable;
-  //   pagination.value = _config.pagination;
-  //   sort.value = _config.sort;
-  // }
+  // sync columns from localStorage.
+  const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
+  if (_configTable) {
+    const _config = JSON.parse(_configTable) as IConfigTable;
+    pagination.value = _config.pagination;
+    sort.value = _config.sort;
+  }
 
   await onQueryData();
 });

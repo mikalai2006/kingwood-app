@@ -3,10 +3,12 @@ import { create, patch } from "@/api/task_status";
 import { Rule } from "ant-design-vue/es/form";
 import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { useTaskStatusStore } from "@/store";
+import { useAuthStore, useTaskStatusStore } from "@/store";
 import { ITaskStatus, ITaskStatusInput } from "@/api/task_status/types";
 import * as icons from "@/utils/icons";
 import VIcon from "../UI/VIcon.vue";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{
   data: ITaskStatusInput;
@@ -17,6 +19,7 @@ const emit = defineEmits(["callback"]);
 const { t } = useI18n();
 
 const taskStatusStore = useTaskStatusStore();
+const authStore = useAuthStore();
 
 const formState: UnwrapRef<ITaskStatusInput> = reactive(props.data);
 const formRef = ref();
@@ -49,6 +52,8 @@ const rules: Record<string, Rule[]> = {
   // ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -62,10 +67,15 @@ const onSubmit = async () => {
         const result = await create(data);
         taskStatusStore.onAddItemToStore(result);
       }
+      message.success(t("form.message.successSave"));
       emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
 };
 const resetForm = () => {
@@ -86,6 +96,7 @@ const resetForm = () => {
       </a-form-item>
 
       <a-form-item
+        v-if="authStore.code === 'superadmin'"
         ref="status"
         :label="$t('form.taskStatus.status')"
         name="status"
@@ -150,7 +161,7 @@ const resetForm = () => {
         </a-select>
       </a-form-item>
 
-      <a-form-item :label="$t('form.taskStatus.start')" name="start">
+      <!-- <a-form-item :label="$t('form.taskStatus.start')" name="start">
         <a-switch
           v-model:checked="formState.start"
           :checkedValue="1"
@@ -172,7 +183,7 @@ const resetForm = () => {
           :checkedValue="1"
           :unCheckedValue="0"
         />
-      </a-form-item>
+      </a-form-item> -->
       <!-- <a-form-item label="Activity type" name="type">
         <a-checkbox-group v-model:value="formState.type">
           <a-checkbox value="1" name="type">Online</a-checkbox>

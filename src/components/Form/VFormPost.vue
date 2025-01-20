@@ -4,7 +4,9 @@ import { create, patch } from "@/api/post";
 import { Rule } from "ant-design-vue/es/form";
 import { reactive, ref, toRaw, UnwrapRef } from "vue";
 import { useI18n } from "vue-i18n";
-import { usePostStore } from "@/store";
+import { useAuthStore, usePostStore } from "@/store";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{ data: IPostInput; defaultData: IPostInput }>();
 const emit = defineEmits(["callback"]);
@@ -12,6 +14,7 @@ const emit = defineEmits(["callback"]);
 const { t } = useI18n();
 
 const postStore = usePostStore();
+const authStore = useAuthStore();
 
 const formState: UnwrapRef<IPostInput> = reactive(props.data);
 const formRef = ref();
@@ -35,6 +38,8 @@ const rules: Record<string, Rule[]> = {
   // ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -48,11 +53,17 @@ const onSubmit = async () => {
         const result = await create(data);
         postStore.onAddItemToStore(result);
       }
+
+      message.success(t("form.message.successSave"));
+      emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
-  emit("callback");
 };
 const resetForm = () => {
   formRef.value.resetFields();
@@ -81,6 +92,14 @@ const resetForm = () => {
           <a-checkbox value="3" name="type">Offline</a-checkbox>
         </a-checkbox-group>
       </a-form-item> -->
+
+      <a-form-item :label="$t('form.role.hidden')" name="hidden">
+        <a-switch
+          v-model:checked="formState.hidden"
+          :checkedValue="1"
+          :unCheckedValue="0"
+        />
+      </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button v-if="!formState?.id" @click="resetForm">

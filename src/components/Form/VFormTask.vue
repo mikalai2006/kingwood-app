@@ -25,6 +25,8 @@ import UIHelp from "../UI/UIHelp.vue";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
 import { dateFormat } from "@/utils/date";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{ data: ITask; defaultData: ITask }>();
 const emit = defineEmits(["callback"]);
@@ -78,6 +80,8 @@ const rules = computed(() => {
   return _rules;
 });
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -97,10 +101,15 @@ const onSubmit = async () => {
         const result = await create(data);
         taskStore.onAddItemToStore(result);
       }
+      message.success(t("form.message.successSave"));
       emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
 };
 const resetForm = () => {
@@ -110,6 +119,7 @@ const resetForm = () => {
 const operations = computed(() => {
   return (
     operationStore.items
+      .filter((x) => !x.hidden)
       // .filter((x) => ["2", "3", "4"].includes(x.group))
       .map((x) => {
         return {

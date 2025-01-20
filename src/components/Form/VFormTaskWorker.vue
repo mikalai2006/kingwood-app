@@ -23,6 +23,8 @@ import { ITaskWorkerInput } from "@/api/task_worker/types";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
 import { dateFormat } from "@/utils/date";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{
   data: ITaskWorkerInput;
@@ -113,6 +115,8 @@ const rules = computed(() => {
   return _rules;
 });
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -133,10 +137,15 @@ const onSubmit = async () => {
         const result = await create(data);
         taskWorkerStore.onAddItemToStore(result);
       }
+      message.success(t("form.message.successSave"));
       emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
 };
 const resetForm = () => {
@@ -147,7 +156,7 @@ const workers = computed(() => {
   return (
     userStore.items
       // .filter((x) => x.typeWork?.includes(formState.operationId))
-      .filter((x) => x.hidden)
+      .filter((x) => !x.hidden && !x.archive)
       .map((x) => {
         const post = postStore.items.find((y) => y.id === x.postId);
         return {

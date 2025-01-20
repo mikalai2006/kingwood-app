@@ -47,9 +47,10 @@ const tasks = computed(() => {
         .filter(
           (y) =>
             y.taskId === z.id &&
-            dayjs(new Date())
+            (dayjs(new Date())
               // .subtract(1, "day")
-              .isBetween(dayjs(y.from), dayjs(y.to), "day", "[]")
+              .isBetween(dayjs(y.from), dayjs(y.to), "day", "[]") ||
+              z.status === "finish")
         )
         .map((u) => {
           const _user = userStore.items.find((us) => us.id === u.workerId);
@@ -141,15 +142,15 @@ const allWorkers = computed(() =>
         :key="worker.id"
         :color="
           status
-            ? Colors.green[600]
+            ? Colors.g[900]
             : generalStore.themeMode === 'dark'
             ? Colors.g[500]
-            : Colors.s[100]
+            : Colors.s[900]
         "
       >
         <template #title>
           <div v-for="task in tasks" :key="task.id" class="mb-4">
-            <div class="text-black dark:text-g-100">
+            <div class="text-g-200 dark:text-g-100">
               {{ task.name }}
             </div>
             <div
@@ -159,7 +160,7 @@ const allWorkers = computed(() =>
               <TaskWorkerStatusTagDot :task-worker-id="item.id" />
               <div
                 class="text-sm text-nowrap"
-                :class="status ? 'text-white' : 'text-black dark:text-g-100'"
+                :class="status ? 'text-white' : 'text-g-200 dark:text-g-100'"
               >
                 {{ getShortFIO(item.user?.name) }}
               </div>

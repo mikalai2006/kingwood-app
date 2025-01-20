@@ -5,6 +5,7 @@ export interface IPost {
   props: any;
   color: string;
   sortOrder: number;
+  hidden: number;
   createdAt: Date;
   updatedAt: Date;
 }

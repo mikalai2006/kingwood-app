@@ -230,6 +230,7 @@ const newTaskMontajWorkers = computed(() => {
         (x) =>
           // dayjs(x.from).diff(d.day, "day") <= 0 &&
           // dayjs(x.to).diff(d.day, "day") <= 0
+          // dayjs(x.order.dateOtgruzka).year() != 1 &&
           operationMontaj.value.map((x) => x.id).includes(x.operationId) &&
           dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
       )
@@ -354,7 +355,7 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VHeader :title="$t('page.montajList.title')" class="mb-4">
       <template #back>&nbsp;</template>
     </VHeader>

@@ -95,7 +95,7 @@ const nameKeyLocalStorageRange = computed(() => "range.all");
 
 const onChangeRange = (value: Dayjs[]) => {
   const _range = value.map((x) => x.format());
-  console.log("_range: ", _range);
+  // console.log("_range: ", _range);
 
   localStorage.setItem(nameKeyLocalStorageRange.value, JSON.stringify(_range));
 };
@@ -120,7 +120,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="p-4">
+  <div class="p-4 flex-auto">
     <!-- <VTitle :text="$t('page.order.title')" /> -->
     <VHeader :title="$t('page.order.title')" class="mb-4">
       <template #back>&nbsp;</template>
@@ -183,7 +183,7 @@ onMounted(() => {
     </div>
 
     <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="all" :tab="$t('tabs.order.all')" force-render>
+      <a-tab-pane key="all" :tab="$t('tabs.order.all')">
         <div class="flex flex-row items-center">
           <div class="flex-auto">
             <!-- <a-input
@@ -379,6 +379,10 @@ onMounted(() => {
   >
     <template #title>
       <p class="text-xl">
+        {{ currentOrderInModal?.object?.name }} №{{
+          currentOrderInModal?.number
+        }}
+        -
         {{ currentOrderInModal?.name }}
       </p>
     </template>

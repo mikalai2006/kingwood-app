@@ -126,7 +126,8 @@ const onDeleteTask = (item: ITask | undefined) => {
         try {
           taskStore.deleteItem(item?.id);
 
-          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          // setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          resolve("");
         } catch (e) {
           message.error("Error: delete task");
         }

@@ -4,6 +4,7 @@ import {
   useAuthStore,
   useNotifyStore,
   useOrderStore,
+  usePayStore,
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
@@ -14,6 +15,7 @@ import modal from "ant-design-vue/es/modal";
 import { h } from "vue";
 import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
+import { replaceSubstringByArray } from "@/utils/utils";
 
 export interface IUseSocketProps {
   router: Router;
@@ -25,6 +27,7 @@ export const useSocket = (props: IUseSocketProps) => {
   const authStore = useAuthStore();
   const userStore = useUserStore();
   const taskStore = useTaskStore();
+  const payStore = usePayStore();
   const taskStatusStore = useTaskStatusStore();
   const taskWorkerStore = useTaskWorkerStore();
   const orderStore = useOrderStore();
@@ -101,6 +104,14 @@ export const useSocket = (props: IUseSocketProps) => {
             }
             break;
 
+          case "pay":
+            if (method === "DELETE") {
+              payStore.onRemoveItemFromStore(content.id);
+            } else {
+              payStore.onAddItemToStore(content);
+            }
+            break;
+
           case "task":
             if (method === "DELETE") {
               taskStore.onRemoveItemFromStore(content.id);
@@ -108,11 +119,27 @@ export const useSocket = (props: IUseSocketProps) => {
               taskStore.onAddItemToStore(content);
               // window?.ipcRenderer?.show("title", "body");
 
-              new window.Notification("Изменение задания", {
-                body: `Тестовое сообщение`,
-              }).onclick = () => {
-                // document.getElementById("output").innerText = CLICK_MESSAGE;
-              };
+              // const allStatus = content?.workers?.map((t: any) => t.status);
+              // console.log("allStatus", allStatus);
+
+              // if (
+              //   content.status == "finish" &&
+              //   allStatus?.every((tt: any) =>
+              //     ["finish", "autofinish"].includes(tt)
+              //   )
+              // ) {
+              //   props.noty.onShowNotify(
+              //     replaceSubstringByArray(props.t(`message.taskComplete`), [
+              //       `№${content?.order.number} ${content?.order.name}`,
+              //       content?.object.name,
+              //     ])
+              //   );
+              // }
+              // new window.Notification("Изменение задания", {
+              //   body: `Тестовое сообщение`,
+              // }).onclick = () => {
+              //   // document.getElementById("output").innerText = CLICK_MESSAGE;
+              // };
             }
             break;
 
@@ -121,6 +148,20 @@ export const useSocket = (props: IUseSocketProps) => {
               taskWorkerStore.onRemoveItemFromStore(content.id);
             } else {
               taskWorkerStore.onAddItemToStore(content);
+
+              if (content.status == "finish") {
+                props.noty.onShowNotify(
+                  replaceSubstringByArray(
+                    props.t(`message.taskWorkerComplete`),
+                    [
+                      content?.worker?.name || "",
+                      content?.task?.name,
+                      `№${content?.order.number} ${content?.order.name}`,
+                      content?.object.name,
+                    ]
+                  )
+                );
+              }
             }
             break;
 

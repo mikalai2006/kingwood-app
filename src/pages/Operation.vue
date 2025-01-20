@@ -72,7 +72,7 @@ const onEditItem = (item: IOperation) => {
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VTitle :text="$t('page.operation.title')" />
     <div class="my-2">
       <a-tooltip v-if="authStore.roles.includes('operation-create')">
@@ -97,14 +97,14 @@ const onEditItem = (item: IOperation) => {
         <template v-if="column.key === 'name'">
           <!-- :color="record.color"
             :style="{ color: invertColor(record.color, true) }" -->
-          <a-tag :bordered="false">
+          <p>
             {{ record.name }}
-          </a-tag>
+          </p>
         </template>
         <template v-if="column.key === 'group'">
-          <a-tag :bordered="false">{{
-            $t(`groupOperation.${record.group}`)
-          }}</a-tag>
+          <p>
+            {{ $t(`groupOperation.${record.group}`) }}
+          </p>
         </template>
         <template v-if="column.key === 'updatedAt'">
           {{ dayjs(record.updatedAt).fromNow() }}

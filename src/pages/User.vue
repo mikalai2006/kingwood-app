@@ -2,14 +2,18 @@
 import { IUser, IUserInput } from "@/api/user/types";
 import VFormUser from "@/components/Form/VFormUser.vue";
 import { useUserStore } from "@/store/modules/user";
-import { computed, reactive, ref, toRaw, UnwrapRef } from "vue";
+import { computed, ref, onMounted, h } from "vue";
 import dayjs from "@/utils/dayjs";
 import { DownOutlined } from "@ant-design/icons-vue";
 import { usePostStore, useTaskStore, useTaskWorkerStore } from "@/store";
 import UserTask from "@/components/User/UserTask.vue";
-import { invertColor } from "@/utils/utils";
+import { invertColor, replaceSubstringByArray } from "@/utils/utils";
 import { useI18n } from "vue-i18n";
 import VImg from "@/components/UI/VImg.vue";
+import UserList from "@/components/User/UserList.vue";
+import { message, Modal } from "ant-design-vue";
+import VIcon from "@/components/UI/VIcon.vue";
+import { iWraningTriangle } from "@/utils/icons";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
@@ -17,7 +21,6 @@ const postStore = usePostStore();
 
 const { t } = useI18n();
 
-await userStore.find({ hidden: 1 });
 const taskStore = useTaskStore();
 const taskWorkerStore = useTaskWorkerStore();
 
@@ -30,7 +33,7 @@ const postsFilter = computed(() => {
   });
 });
 
-const allColumns = ref([
+const allColumns = computed(() => [
   { key: "image" },
   {
     key: "name",
@@ -41,7 +44,7 @@ const allColumns = ref([
     fixed: false,
     sorter: (a: IUser, b: IUser) =>
       a.postObject.name.localeCompare(b.postObject.name),
-    filters: [...postsFilter.value],
+    filters: postsFilter.value,
     onFilter: (value: string, record: IUser) =>
       record.postObject.name.indexOf(value) === 0,
   },
@@ -52,9 +55,9 @@ const allColumns = ref([
   { key: "lastTime" },
   { key: "createdAt" },
   { key: "updatedAt" },
-  { key: "action" },
   { key: "typePay" },
   { key: "oklad" },
+  { key: "action" },
 ]);
 const optionsForSelect = computed(() =>
   allColumns.value.map((x) => {
@@ -90,72 +93,17 @@ const columns = computed(() =>
     })
 );
 
-// const columns = ref([
-//   { title: "image", dataIndex: "image", key: "image", fixed: true },
-//   {
-//     title: "name",
-//     dataIndex: "name",
-//     key: "name",
-//     fixed: true,
-//     sorter: (a: IUser, b: IUser) => a.name.localeCompare(b.name),
-//   },
-//   {
-//     title: "post",
-//     dataIndex: "post",
-//     key: "post",
-//     fixed: false,
-//     sorter: (a: IUser, b: IUser) =>
-//       a.postObject.name.localeCompare(b.postObject.name),
-//     filters: [...postsFilter.value],
-//     onFilter: (value: string, record: IUser) =>
-//       record.postObject.name.indexOf(value) === 0,
-//   },
-//   // { title: "phone", dataIndex: "phone", key: "phone", fixed: false },
-//   { title: "role", dataIndex: "role", key: "role", fixed: false },
-//   { title: "birthday", dataIndex: "birthday", key: "birthday", fixed: false },
-//   { title: "lastTime", dataIndex: "lastTime", key: "lastTime", fixed: false },
-//   {
-//     title: "currentTask",
-//     dataIndex: "currentTask",
-//     key: "currentTask",
-//     fixed: false,
-//   },
-//   {
-//     title: "updatedAt",
-//     dataIndex: "updatedAt",
-//     key: "updatedAt",
-//     fixed: false,
-//   },
-//   {
-//     title: "action",
-//     dataIndex: "action",
-//     key: "action",
-//     fixed: false,
-//   },
-// ]);
-
 const open = ref<boolean>(false);
 
 const showModal = () => {
   open.value = true;
 };
 
-const columnsData = computed(() => {
-  return userStore.items
-    .filter((x) => x.hidden === 1)
-    .map((x) => {
-      const taskWorkers = taskWorkerStore.items.filter(
-        (y) => y.workerId === x.id
-      );
-      return {
-        ...x,
-        key: x.id,
-        taskWorkers,
-      };
-    });
-});
 const defaultData: IUserInput = {
   typeWork: [],
+  oklad: 0,
+  birthday: "",
+  phone: "",
 };
 const dataForm = ref(defaultData);
 
@@ -164,17 +112,107 @@ const onAddNewItem = () => {
   showModal();
 };
 
+const onRemoveItem = (item: IUser) => {
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.task.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.userRemove"), [item?.name])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.delete"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise((resolve, reject) => {
+        try {
+          if (item.id) {
+            userStore
+              .onRemove(item.id)
+              .then(() => {
+                message.success(t("message.userRemoveOk"));
+              })
+              .catch((error: any) => {
+                throw new Error(error);
+              });
+          }
+
+          // setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          resolve("");
+        } catch (e: any) {
+          throw new Error(e);
+        }
+      }).catch((e: any) => {
+        throw new Error(e);
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
+
+const onRemoveUser = (item: IUser) => {
+  if (item.id) {
+    userStore
+      .onRemove(item.id)
+      .then(() => {
+        message.success(t("message.userRemoveOk"));
+      })
+      .catch((error: any) => {
+        throw new Error(error);
+      });
+  }
+};
+
 const onEditItem = (item: IUser) => {
   // console.log("Edit user: ", item);
 
   dataForm.value = Object.assign({}, item);
   showModal();
 };
+const nameKeyLocalStorageColumns = ref("user.column");
+const onSetColumns = (value: string, key: string, data: string[]) => {
+  localStorage.setItem(key, JSON.stringify(data));
+};
 
 const activeKey = ref("current");
+
+onMounted(() => {
+  // sync columns from localStorage.
+  const _columns = localStorage.getItem(nameKeyLocalStorageColumns.value);
+  if (_columns) {
+    columnKeys.value = JSON.parse(_columns);
+  }
+});
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VHeader :title="$t('page.user.title')" class="mb-4">
       <template #back>&nbsp;</template>
     </VHeader>
@@ -196,6 +234,7 @@ const activeKey = ref("current");
           :max-tag-count="3"
           :removeIcon="null"
           :options="optionsForSelect"
+          @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
         >
           <template #maxTagPlaceholder="omittedValues">
             <span style="color: red">+ {{ omittedValues.length }} ...</span>
@@ -215,94 +254,30 @@ const activeKey = ref("current");
       </div>
     </div>
 
-    <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="current" :tab="$t('tabs.user.current')" force-render>
-        <a-table
+    <a-tabs v-model:activeKey="activeKey" destroyInactiveTabPane>
+      <a-tab-pane key="current" :tab="$t('tabs.user.current')">
+        <UserList
           :columns="columns"
-          :data-source="columnsData"
-          :row-class-name="(_record: IUser, index: number) => (_record.taskWorkers.length === 0 ? 'custom priority cursor-pointer bg-s-500/30 hover:!bg-s-500/40' : 'cursor-pointer')"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'action'">
-              <a-button @click="onEditItem(record)">
-                {{ $t("button.edit") }}
-              </a-button>
-            </template>
-            <template v-if="column.key === 'value'">
-              <span
-                v-for="item in record.role"
-                :key="item"
-                class="p-1 border border-zink-200 rounded-lg mr-1"
-              >
-                {{ item }}
-              </span>
-            </template>
-            <template v-if="column.key === 'post'">
-              <!-- :style="{
-                  background: record.postObject.color,
-                  color: invertColor(record.postObject.color, true),
-                }" -->
-              <a-tag :bordered="false">
-                {{ record.postObject?.name }}
-              </a-tag>
-            </template>
-            <template v-if="column.key === 'currentTask'">
-              <UserTask :workerId="record.id" />
-            </template>
-            <template v-if="column.key === 'role'">
-              <a-tag>{{ record.roleObject?.name }}</a-tag>
-            </template>
-            <template v-if="column.key === 'image'">
-              <!-- <a-avatar
-                class="bg-s-500 dark:bg-s-800"
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              /> -->
-              <div class="relative w-12 h-12">
-                <VImg
-                  :image="record.images?.[0]"
-                  class="w-full h-full"
-                  :class="[{ 'border-4 border-green-500': record.online }]"
-                />
-                <!-- <div
-                  v-if="record.online"
-                  class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-g-900"
-                ></div> -->
-              </div>
-            </template>
-            <template v-if="column.key === 'birthday'">
-              <p v-if="record.birthday">
-                {{
-                  dayjs(record.birthday, "DD.MM.YYYY").format("DD MMMM YYYY")
-                }}
-              </p>
-            </template>
-            <template v-if="column.key === 'typePay'">
-              <a-tag>
-                {{ record.typePay ? $t(`typePay.${record.typePay}`) : "?" }}
-              </a-tag>
-            </template>
-            <template v-if="column.key === 'lastTime'">
-              <p>{{ dayjs(record.lastTime).fromNow() }}</p>
-            </template>
-          </template>
-
-          <!-- <template #expandIcon="{ onExpand, record, expanded }">
-            <DownOutlined
-              :class="['transition-transform ', expanded ? 'rotate-180' : '']"
-              @click="onExpand(record)"
-            />
-          </template>
-          <template #expandedRowRender="{ record }">
-            <p style="margin: 0">
-              {{ record.description }}
-            </p>
-          </template>
-          <template #expandColumnTitle>
-            <span style="color: red">More</span>
-          </template> -->
-        </a-table>
+          key-list="current"
+          :params="{
+            archive: 0,
+            hidden: 0,
+          }"
+          @on-edit-item="onEditItem"
+          @on-remove-item="onRemoveItem"
+        />
       </a-tab-pane>
-      <a-tab-pane key="archive" :tab="$t('tabs.user.archive')" force-render>
+      <a-tab-pane key="archive" :tab="$t('tabs.user.archive')">
+        <UserList
+          :columns="columns"
+          key-list="archive"
+          :params="{
+            archive: 1,
+            hidden: 0,
+          }"
+          @on-edit-item="onEditItem"
+          @on-remove-item="onRemoveItem"
+        />
       </a-tab-pane>
     </a-tabs>
   </div>

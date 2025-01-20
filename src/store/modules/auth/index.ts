@@ -27,6 +27,10 @@ export const useAuthStore = defineStore("auth", {
       return !!state.tokenData?.access_token;
     },
     iam: (state) => state._iam,
+    code: (state) => {
+      const roleStore = useRoleStore();
+      return roleStore.items.find((x) => x.id == state._iam.roleId)?.code || "";
+    },
     roles: (state) => {
       const roleStore = useRoleStore();
       return (
@@ -65,8 +69,25 @@ export const useAuthStore = defineStore("auth", {
     setTokenData(data: IResResultLogin | null) {
       this.tokenData = data;
     },
-    async getIAm() {
-      this._iam = await getIamFromServer();
+    async getIAm(): Promise<IUser | null> {
+      return await getIamFromServer()
+        .then((r) => {
+          this._iam = r;
+          return r;
+        })
+        .catch((e) => {
+          this.tokenData = null;
+          this._iam = {};
+
+          const cookies = useCookies(["jwt"]);
+          cookies.remove("jwt");
+
+          localStorage.removeItem("tokens");
+
+          setAxiosHeader("Authorization", `Bearer ${this.token}`);
+          deleteAxiosHeader("Authorization");
+          throw e;
+        });
     },
     async login(body: ILoginData) {
       try {
@@ -104,7 +125,7 @@ export const useAuthStore = defineStore("auth", {
         throw e;
       }
     },
-    initToken() {
+    async initToken(): Promise<IUser | null> {
       const _tokens = localStorage.getItem("tokens");
       const tokens: IResResultLogin | null = _tokens
         ? JSON.parse(_tokens)
@@ -119,8 +140,9 @@ export const useAuthStore = defineStore("auth", {
         //   this.refreshToken();
         // }
 
-        this.getIAm();
+        return this.getIAm();
       }
+      return null;
     },
     async onSyncToken(): Promise<IResResultLogin | null> {
       try {

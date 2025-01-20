@@ -19,7 +19,7 @@ const onPatchNotify = async (id: string, data: INotifyInput) => {
 const activeKey = ref("new");
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VHeader :title="$t('page.notify.title')" class="mb-4">
       <template #back>&nbsp;</template>
     </VHeader>
@@ -34,7 +34,7 @@ const activeKey = ref("new");
             generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.white,
         }"
       >
-        <a-tab-pane key="new" :tab="$t('tabs.notify.new')" force-render>
+        <a-tab-pane key="new" :tab="$t('tabs.notify.new')">
           <NotifyList
             :params="{
               status: 0,

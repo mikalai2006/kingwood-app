@@ -29,6 +29,7 @@ const menuItems = ref<string[]>([
   // "order",
   // "montajList",
   "taskStatus",
+  "payTemplate",
 ]);
 
 const handleButtonClick = (e: Event) => {
@@ -48,7 +49,7 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
       src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=1"
       class="w-8 h-8 rounded-full border-2 border-s-200"
     /> -->
-      <div class="relative w-8 h-8">
+      <div class="relative w-8 h-8 shrink-0 grow-0">
         <VImg :image="user?.images?.[0]" class="w-full h-full" />
         <!-- <div
           v-if="user?.online"

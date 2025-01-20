@@ -11,7 +11,7 @@ import { useError } from "./useError";
 const useObject = () => {
   const { t } = useI18n();
 
-  const { onGetValidateError } = useError();
+  const { onGetValidateError, onShowError } = useError();
 
   const objectStore = useObjectStore();
 
@@ -76,11 +76,13 @@ const useObject = () => {
       callback(result);
       message.success(t("form.object.successAdd"));
     } catch (error: any) {
+      let err = "";
       if (error?.errorFields) {
-        message.error(onGetValidateError(error));
+        err = onGetValidateError(error);
       } else {
-        message.error(error.message);
+        err = error.message;
       }
+      onShowError(err);
     } finally {
       state.fetching = false;
     }

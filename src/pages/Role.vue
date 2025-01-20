@@ -44,12 +44,14 @@ const showModal = () => {
 };
 
 const columnsData = computed(() => {
-  return roleStore.items.map((x) => {
-    return {
-      ...x,
-      key: x.id,
-    };
-  });
+  return roleStore.items
+    .filter((x) => !x.hidden || authStore.code === "superadmin")
+    .map((x) => {
+      return {
+        ...x,
+        key: x.id,
+      };
+    });
 });
 const defaultData: IRoleInput = {
   value: [],
@@ -91,7 +93,10 @@ const onEditItem = (item: IRole) => {
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <a-button
-            v-if="authStore.roles.includes('role-patch')"
+            v-if="
+              authStore.roles.includes('role-patch') ||
+              authStore.code === 'admin'
+            "
             @click="onEditItem(record)"
           >
             {{ $t("button.edit") }}
@@ -131,7 +136,7 @@ const onEditItem = (item: IRole) => {
       :default-data="defaultData"
       @callback="
         () => {
-          // open = false;
+          open = false;
         }
       "
     />

@@ -13,6 +13,8 @@ import VIcon from "../UI/VIcon.vue";
 import { iX } from "@/utils/icons";
 import { IObject, IObjectInput } from "@/api/object/types";
 import { create, patch } from "@/api/object";
+import { useError } from "@/composable/useError";
+import { message } from "ant-design-vue";
 
 const props = defineProps<{ data: IObjectInput; defaultData: IObjectInput }>();
 const emit = defineEmits(["callback"]);
@@ -38,6 +40,8 @@ const rules: Record<string, Rule[]> = {
   ],
 };
 
+const { onGetValidateError } = useError();
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -51,10 +55,15 @@ const onSubmit = async () => {
         const result = await create(data);
         objectStore.onAddItemToStore(result);
       }
+      message.success(t("form.message.successSave"));
       emit("callback");
     })
-    .catch((error: Error) => {
-      console.log("error", error);
+    .catch((error: any) => {
+      if (error?.errorFields) {
+        onGetValidateError(error);
+      } else {
+        throw new Error(JSON.stringify(error));
+      }
     });
 };
 const resetForm = () => {

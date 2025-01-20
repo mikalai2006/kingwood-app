@@ -1,9 +1,10 @@
 import { defineStore } from "pinia";
-import { find, get } from "@/api/user";
-import { IUser, IUserFilter } from "@/api/user/types";
+import { find, get, remove } from "@/api/user";
+import { IUser, IUserFilter, IUserInput } from "@/api/user/types";
 import { IRequestParams } from "@/api/types";
 // import sift from 'sift'
 import { useAuthStore } from "../auth";
+import { getObjectId } from "@/utils/utils";
 
 export const useUserStore = defineStore("user", {
   state() {
@@ -60,6 +61,10 @@ export const useUserStore = defineStore("user", {
     //   return item[0] || null
     // },
     onAddItemToStore(item: IUser) {
+      if (getObjectId(item?.id) == "0") {
+        return;
+      }
+
       const existsItem = this.onExists(item.id);
 
       if (existsItem.index == -1) {
@@ -91,6 +96,31 @@ export const useUserStore = defineStore("user", {
         item = this._items.find((el: IUser) => el.id == id);
       }
       return item || null;
+    },
+    onRemoveItemFromStore(id: string | number, params?: IUserInput): number {
+      let itemIndex = -1;
+      if (params) {
+        // search by params
+      } else {
+        itemIndex = this._items.findIndex((el: IUser) => el.id == id);
+      }
+
+      if (itemIndex !== -1) {
+        this._items.splice(itemIndex, 1);
+      }
+
+      return itemIndex;
+    },
+    async onRemove(id: string | undefined) {
+      if (!id) {
+        return;
+      }
+
+      const data = await remove(id).then(() => {
+        this.onRemoveItemFromStore(id);
+      });
+
+      return data;
     },
   },
 });

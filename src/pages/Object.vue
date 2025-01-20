@@ -77,7 +77,7 @@ const onEditItem = (item: IObject) => {
 };
 </script>
 <template>
-  <div class="p-4">
+  <div class="flex-auto p-4">
     <VTitle :text="$t('page.object.title')" />
     <div class="my-2">
       <a-tooltip>

@@ -4,7 +4,7 @@ import { message } from "ant-design-vue";
 import { debounce } from "lodash-es";
 import { IOrder, IOrderInput } from "@/api/order/types";
 import { ITask, ITaskInput } from "@/api/task/types";
-import { useTaskStatusStore, useUserStore } from "@/store";
+import { useOrderStore, useTaskStatusStore, useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { useI18n } from "vue-i18n";
 
@@ -13,6 +13,7 @@ const useOrder = () => {
 
   const taskStatusStore = useTaskStatusStore();
   const userStore = useUserStore();
+  const orderStore = useOrderStore();
 
   const openOtgruzka = ref<boolean>(false);
 
@@ -191,7 +192,8 @@ const useOrder = () => {
             key: x.key,
             sorter: x.sorter,
             onFilter: x?.onFilter,
-            customFilterDropdown: x?.customFilterDropdown,
+            sortOrder: x.key === "number" ? "ascend" : "",
+            // customFilterDropdown: x?.customFilterDropdown,
             // fixed: true
           };
         })
@@ -242,6 +244,51 @@ const useOrder = () => {
     // ]
   );
 
+  let lastFetchId = 0;
+  const state = reactive<{ data: IOrder[]; value: string; fetching: boolean }>({
+    data: [],
+    value: "",
+    fetching: false,
+  });
+
+  const onSetStateData = (data: IOrder[]) => {
+    const _data = data.map((x) => ({
+      ...x,
+      label: x.name,
+      value: x.id,
+    }));
+    state.data = _data;
+  };
+
+  const onNormalizeStr = (str: string) => {
+    const _str = str.trim();
+
+    return String(_str).charAt(0).toUpperCase() + String(_str).slice(1);
+  };
+
+  const onFetchOrders = debounce((value: string) => {
+    console.log("fetching orders", value);
+    state.value = onNormalizeStr(value);
+    lastFetchId += 1;
+    const fetchId = lastFetchId;
+    state.data = [];
+    state.fetching = true;
+    orderStore
+      .find({
+        name: value,
+      })
+      .then((body) => {
+        if (fetchId !== lastFetchId) {
+          // for fetch callback order
+          return;
+        }
+        onSetStateData(body.data);
+      })
+      .finally(() => {
+        state.fetching = false;
+      });
+  }, 300);
+
   return {
     openOtgruzka,
     dataFormOtgruzka,
@@ -275,6 +322,9 @@ const useOrder = () => {
     defaultDateStart,
     dateFormStart,
     onDateStart,
+
+    state,
+    onFetchOrders,
   };
 };
 
