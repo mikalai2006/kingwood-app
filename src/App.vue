@@ -61,21 +61,35 @@ const noty = useNotification();
 
 const { onShowError } = useError();
 
+const loading = ref(false);
+
+const loadingText = ref("");
+
 const onInitData = async () => {
   try {
+    loading.value = true;
+
     if (socket?.OPEN) {
       socket.close();
     }
 
     await payTemplateStore.find({ $limit: 100 });
+    loadingText.value = t("page.payTemplate.title");
     await roleStore.find({ $limit: 100 });
+    loadingText.value = t("page.role.title");
     await postStore.find({ $limit: 100 });
+    loadingText.value = t("page.post.title");
     await userStore.find({ $limit: 100 });
+    loadingText.value = t("page.user.title");
     await operationStore.find({ $limit: 100 });
+    loadingText.value = t("page.operation.title");
     await taskStore.find({ $limit: 300 });
+    loadingText.value = t("page.task.title");
     // await orderStore.find({ $limit: 100 });
     await taskWorkerStore.find({ $limit: 100 });
+    loadingText.value = t("page.taskWorker.title");
     await taskStatus.find();
+    loadingText.value = t("page.taskStatus.title");
 
     // setTimeout(() => {
     const { socket: _socket } = useSocket({ router, t, noty });
@@ -94,6 +108,8 @@ const onInitData = async () => {
   } catch (e: any) {
     onShowError(e);
     //errorApp.value = e;
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -231,6 +247,15 @@ onErrorCaptured((error: any, vm, info) => {
       <div
         class="min-h-screen flex flex-row items-stretch bg-white dark:bg-g-800"
       >
+        <div v-if="loading" class="absolute inset-0 z-50 flex">
+          <div class="absolute inset-0 bg-s-100 dark:bg-g-900 opacity-80"></div>
+          <div class="flex-auto flex items-center justify-center flex-col z-10">
+            <a-spin size="large" />
+            <div class="text-sm text-black dark:text-g-100">
+              {{ $t(`info.loading`) }}: {{ loadingText }}...
+            </div>
+          </div>
+        </div>
         <div v-if="errorApp" class="flex items-center mx-auto">
           <!-- <a-result status="500" title="500" :sub-title="errorApp?.message">
             <template #extra>

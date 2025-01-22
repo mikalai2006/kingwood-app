@@ -61,14 +61,14 @@ const defaultData: IPayTemplateInput = {};
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
 const onEditItem = (item: IPayTemplateInput) => {
   console.log("edit payTemplate: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 </script>

@@ -117,6 +117,8 @@ const rules = computed(() => {
 
 const { onGetValidateError } = useError();
 
+const loading = ref(false);
+
 const onSubmit = async () => {
   await formRef.value
     .validate()
@@ -146,6 +148,9 @@ const onSubmit = async () => {
       } else {
         throw new Error(JSON.stringify(error));
       }
+    })
+    .finally(() => {
+      loading.value = false;
     });
 };
 const resetForm = () => {
@@ -320,7 +325,11 @@ onMounted(() => {
         />
       </a-form-item>
 
-      <a-form-item :label="$t('form.taskWorker.statusId')" name="statusId">
+      <a-form-item
+        v-if="authStore.roles.includes('taskWorker-statusId')"
+        :label="$t('form.taskWorker.statusId')"
+        name="statusId"
+      >
         <a-select
           v-model:value="formState.statusId"
           style="width: 100%"
@@ -353,10 +362,16 @@ onMounted(() => {
         "
         :wrapper-col="{ span: 14, offset: 4 }"
       >
-        <a-button v-if="!formState?.id" @click="resetForm">
+        <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>
-        <a-button type="primary" style="margin-left: 10px" @click="onSubmit">
+        <a-button
+          type="primary"
+          :disabled="loading"
+          :loading="loading"
+          style="margin-left: 10px"
+          @click="onSubmit"
+        >
           {{ !formState?.id ? $t("form.create") : $t("form.save") }}
         </a-button>
       </a-form-item>

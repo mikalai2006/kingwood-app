@@ -379,7 +379,7 @@ onMounted(() => {
   >
     <template #title>
       <p class="text-xl">
-        {{ currentOrderInModal?.object?.name }} №{{
+        {{ currentOrderInModal?.object?.name }}, №{{
           currentOrderInModal?.number
         }}
         -
@@ -387,17 +387,20 @@ onMounted(() => {
       </p>
     </template>
     <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
-      <OrderTaskList
-        :order-id="currentOrderInModal.id"
-        @on-edit-task="onEditTask"
-      />
+      <template v-if="authStore.roles.includes('task-list')">
+        <OrderTaskList
+          :order-id="currentOrderInModal.id"
+          @on-edit-task="onEditTask"
+        />
+      </template>
+      <template v-else>
+        <a-alert :message="$t('info.notPermission')" banner />
+      </template>
       <a-button
-        v-if="
-          // currentOrderInModal.status < 100 &&
-          authStore.roles.includes('task-create')
-        "
+        v-if="authStore.roles.includes('task-create')"
+        type="primary"
         @click="onAddNewTask(currentOrderInModal)"
-        class="mt-2"
+        class="mt-4"
       >
         {{ $t("form.task.add") }}
       </a-button>

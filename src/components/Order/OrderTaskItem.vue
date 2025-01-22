@@ -13,7 +13,11 @@ import {
 import { iPen, iPlusLg, iTrashFill, iWraningTriangle } from "@/utils/icons";
 import { computed, h, ref } from "vue";
 import VIcon from "../UI/VIcon.vue";
-import { invertColor, replaceSubstringByArray } from "@/utils/utils";
+import {
+  getShortFIO,
+  invertColor,
+  replaceSubstringByArray,
+} from "@/utils/utils";
 import { ITaskWorker, ITaskWorkerInput } from "@/api/task_worker/types";
 import { message, Modal } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
@@ -107,7 +111,80 @@ const onDeleteTask = (item: ITask | undefined) => {
               replaceSubstringByArray(t("message.removeTask"), [
                 task.value?.name,
                 order.value?.number,
-                order.value?.objectId,
+                order.value?.name,
+                order.value?.object?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.delete"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise((resolve, reject) => {
+        try {
+          item?.id &&
+            taskStore
+              .deleteItem(item.id)
+              .then((res) => {
+                message.success(
+                  replaceSubstringByArray(t("message.deleteTaskOk"), [
+                    res?.name,
+                  ])
+                );
+              })
+              .finally(() => {
+                resolve("");
+              });
+        } catch (e) {
+          message.error("Error: delete task");
+        }
+      }).catch(() => console.log("Oops errors!"));
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+
+  // console.log("Delete task: ", item);
+  // //   await emit("onDeleteTask", item);
+  // return new Promise((resolve) => {
+  //   setTimeout(() => resolve(true), 3000);
+  // });
+};
+
+const onDeleteTaskWorker = (item: ITaskWorker | undefined) => {
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.taskWorker.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.removeTaskWorker"), [
+                item?.worker?.name,
+                order.value?.number,
                 order.value?.name,
               ])
             ),
@@ -118,18 +195,24 @@ const onDeleteTask = (item: ITask | undefined) => {
     okButtonProps: { type: "primary", danger: true },
     okText: t("button.delete"),
     cancelText: t("button.cancel"),
-    // title: t("form.task.delete"),
     onOk() {
-      console.log("Delete task: ", item);
-
       return new Promise((resolve, reject) => {
         try {
-          taskStore.deleteItem(item?.id);
-
-          // setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-          resolve("");
+          item?.id &&
+            taskWorkerStore
+              .onRemove(item.id)
+              .then((res) => {
+                message.success(
+                  replaceSubstringByArray(t("message.deleteTaskWorkerOk"), [
+                    getShortFIO(res?.worker.name),
+                  ])
+                );
+              })
+              .finally(() => {
+                resolve("");
+              });
         } catch (e) {
-          message.error("Error: delete task");
+          message.error("Error: delete taskWorker");
         }
       }).catch(() => console.log("Oops errors!"));
     },
@@ -184,13 +267,13 @@ const onEditTaskWorker = (item: ITaskWorker) => {
   showTaskModal();
 };
 
-const onDeleteTaskWorker = async (item: ITaskWorker) => {
-  console.log("Delete taskWorker: ", item);
-  await taskWorkerStore.onRemove(item.id);
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(true), 1000);
-  });
-};
+// const onDeleteTaskWorker = async (item: ITaskWorker) => {
+//   console.log("Delete taskWorker: ", item);
+//   await taskWorkerStore.onRemove(item.id);
+//   return new Promise((resolve) => {
+//     setTimeout(() => resolve(true), 1000);
+//   });
+// };
 </script>
 
 <template>
@@ -222,9 +305,9 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
   <div class="pl-2 flex-auto group pb-2">
     <div class="flex flex-row items-center gap-1">
       <div class="font-medium pb-2 text-base">
-        {{ typeof task?.sortOrder == "number" && task.sortOrder + 1 }})
+        <!-- {{ typeof task?.sortOrder == "number" && task.sortOrder + 1 }}) -->
         {{ task?.name }}
-        <a-tag v-if="task?.active" color="#0d913d"> Активное задание </a-tag>
+        <!-- <a-tag v-if="task?.active" color="#0d913d"> Активное задание </a-tag> -->
       </div>
       <!-- <a-popconfirm
         :cancelText="$t('button.cancel')"
@@ -290,14 +373,14 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
       v-for="(item, key) in taskWorkers"
       class="flex flex-row items-center gap-4 py-1 px-4"
     >
-      <div class="flex flex-row flex-auto items-center gap-1">
+      <div class="flex flex-row items-center gap-1">
         <VImg :image="item.worker?.images?.[0]" />
         <!-- <img
           src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
           class="w-8 h-8 rounded-full border-2 border-s-200"
         /> -->
         <div class="text-s-500 dark:text-s-300 flex-auto">
-          {{ item.worker?.name }}
+          {{ getShortFIO(item.worker?.name) }}
         </div>
       </div>
       <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
@@ -305,7 +388,7 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
           <template #title>
             {{ $t("button.patchTaskWorker") }}
           </template>
-          <a-button size="small" @click="onEditTaskWorker(item)">
+          <a-button size="small" @click="onEditTaskWorker(item as ITaskWorker)">
             <div class="flex gap-1 items-center">
               <VIcon :path="iPen" class="text-xs" />
               <!-- {{ $t("button.edit") }} -->
@@ -313,7 +396,22 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
           </a-button>
         </a-tooltip>
 
-        <a-popconfirm
+        <a-tooltip v-if="authStore.roles?.includes('taskWorker-delete')">
+          <template #title>
+            {{ $t("button.deleteTaskWorker") }}
+          </template>
+          <a-button
+            size="small"
+            danger
+            class="hidden group-hover:block"
+            @click="onDeleteTaskWorker(item as ITaskWorker)"
+          >
+            <div class="flex gap-1 items-center">
+              <VIcon :path="iTrashFill" />
+            </div>
+          </a-button>
+        </a-tooltip>
+        <!-- <a-popconfirm
           v-if="authStore.roles?.includes('taskWorker-delete')"
           :cancelText="$t('button.cancel')"
           :okText="$t('button.delete')"
@@ -322,18 +420,8 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
             type: 'primary',
             danger: true,
           }"
-          @confirm="onDeleteTaskWorker(item)"
+          @confirm="onDeleteTaskWorker(item as ITaskWorker)"
         >
-          <!-- <template #okButton>
-            <a-button
-              type="primary"
-              danger
-              size="small"
-              @click="onDeleteTask(item)"
-            >
-              {{ $t("button.delete") }}
-            </a-button>
-          </template> -->
           <template #title>
             <div class="w-52">
               {{
@@ -353,11 +441,10 @@ const onDeleteTaskWorker = async (item: ITaskWorker) => {
               {{ $t("button.deleteTaskWorker") }}
             </template>
             <a-button danger size="small">
-              <!-- {{ $t("button.delete") }} -->
               <VIcon :path="iTrashFill" />
             </a-button>
           </a-tooltip>
-        </a-popconfirm>
+        </a-popconfirm> -->
       </div>
       <div>
         <TaskWorkerStatusTag :task-worker-id="item.id" />

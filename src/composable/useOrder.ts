@@ -67,14 +67,14 @@ const useOrder = () => {
   const currentOrderInModal = ref<IOrder | null>(null);
 
   const onAddNewItem = () => {
-    dataForm.value = defaultData;
+    dataForm.value = Object.assign({}, defaultData);
     showModal();
   };
 
   const onEditItem = (item: IOrder) => {
     console.log("edit order: ", item);
 
-    dataForm.value = item;
+    dataForm.value = Object.assign({}, item);
     showModal();
   };
 

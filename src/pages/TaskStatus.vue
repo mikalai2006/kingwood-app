@@ -55,14 +55,14 @@ const defaultData: ITaskStatusInput = {};
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
 const onEditItem = (item: ITaskStatus) => {
   console.log("edit taskStatus: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 </script>
@@ -115,7 +115,7 @@ const onEditItem = (item: ITaskStatus) => {
 
   <a-modal
     v-model:open="open"
-    :destroyOnClose="false"
+    :destroyOnClose="true"
     :key="dataForm.id"
     :title="
       dataForm?.id ? $t('form.taskStatus.edit') : $t('form.taskStatus.new')

@@ -29,7 +29,11 @@ const password = ref("");
 
 const { onGetValidateError } = useError();
 
+const loading = ref(false);
+
 const onSubmit = async () => {
+  loading.value = true;
+
   await formRef.value
     .validate()
     .then(async () => {
@@ -46,6 +50,9 @@ const onSubmit = async () => {
       } else {
         message.error(t(error?.message));
       }
+    })
+    .finally(() => {
+      loading.value = false;
     });
   // .catch((error: Error) => {
   //   message.error(
@@ -77,10 +84,19 @@ const resetForm = () => {
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <div class="flex flex-row items-center gap-4">
-          <a-button type="primary" @click="onSubmit">
+          <a-button
+            type="primary"
+            :disabled="loading"
+            :loading="loading"
+            @click="onSubmit"
+          >
             {{ $t("form.user.resetPassword") }}
           </a-button>
-          <a-button style="margin-left: 10px" @click="resetForm">
+          <a-button
+            :disabled="loading"
+            style="margin-left: 10px"
+            @click="resetForm"
+          >
             {{ $t("form.reset") }}
           </a-button>
         </div>

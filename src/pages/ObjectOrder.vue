@@ -2,17 +2,19 @@
 import { useUserStore } from "@/store/modules/user";
 import { computed, onMounted, reactive, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useObjectStore, useOrderStore, useTaskStatusStore } from "@/store";
-import { IOrder, IOrderInput } from "@/api/order/types";
-import { ITask, ITaskInput } from "@/api/task/types";
+import {
+  useAuthStore,
+  useObjectStore,
+  useOrderStore,
+  useTaskStatusStore,
+} from "@/store";
+import { IOrder } from "@/api/order/types";
+import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
-import OrderActiveTask from "@/components/Order/OrderActiveTask.vue";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iCog, iPen, iSearch } from "@/utils/icons";
-import colors from "tailwindcss/colors";
+import { iCog } from "@/utils/icons";
 import { Dayjs } from "dayjs";
-import { getShortFIO } from "@/utils/utils";
 import { useRoute } from "vue-router";
 import useOrder from "@/composable/useOrder";
 import OrderList from "@/components/Order/OrderList.vue";
@@ -27,6 +29,7 @@ const objectIds = computed(() =>
   typeof objectId !== "string" ? objectId : [objectId]
 );
 
+const authStore = useAuthStore();
 const userStore = useUserStore();
 const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
@@ -319,7 +322,7 @@ onMounted(async () => {
   >
     <template #title>
       <p class="text-xl">
-        {{ currentOrderInModal?.object?.name }} №{{
+        {{ currentOrderInModal?.object?.name }}, №{{
           currentOrderInModal?.number
         }}
         -
@@ -327,11 +330,21 @@ onMounted(async () => {
       </p>
     </template>
     <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
-      <OrderTaskList
-        :order-id="currentOrderInModal.id"
-        @on-edit-task="onEditTask"
-      />
-      <a-button @click="onAddNewTask(currentOrderInModal)" class="mt-2">
+      <template v-if="authStore.roles.includes('task-list')">
+        <OrderTaskList
+          :order-id="currentOrderInModal.id"
+          @on-edit-task="onEditTask"
+        />
+      </template>
+      <template v-else>
+        <a-alert :message="$t('info.notPermission')" banner />
+      </template>
+      <a-button
+        v-if="authStore.roles.includes('task-create')"
+        type="primary"
+        class="mt-4"
+        @click="onAddNewTask(currentOrderInModal)"
+      >
         {{ $t("form.task.add") }}
       </a-button>
     </div>

@@ -92,8 +92,9 @@ export const useTaskStore = defineStore("task", {
         return;
       }
 
-      const data = await remove(id, {}).then(() => {
+      const data = await remove(id, {}).then((r) => {
         this.onRemoveItemFromStore(id);
+        return r;
       });
 
       return data;

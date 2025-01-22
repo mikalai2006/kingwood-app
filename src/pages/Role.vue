@@ -45,7 +45,7 @@ const showModal = () => {
 
 const columnsData = computed(() => {
   return roleStore.items
-    .filter((x) => !x.hidden || authStore.code === "superadmin")
+    .filter((x) => !x.hidden || authStore.code === "systemrole")
     .map((x) => {
       return {
         ...x,
@@ -60,14 +60,14 @@ const defaultData: IRoleInput = {
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
 const onEditItem = (item: IRole) => {
   console.log("item: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 // const handleOk = (e: MouseEvent) => {
@@ -93,10 +93,7 @@ const onEditItem = (item: IRole) => {
       <template #bodyCell="{ column, record }">
         <template v-if="column.key === 'action'">
           <a-button
-            v-if="
-              authStore.roles.includes('role-patch') ||
-              authStore.code === 'admin'
-            "
+            v-if="authStore.roles.includes('role-patch')"
             @click="onEditItem(record)"
           >
             {{ $t("button.edit") }}
@@ -106,6 +103,13 @@ const onEditItem = (item: IRole) => {
           <a-tag :bordered="false" v-for="item in record.value" :key="item">
             {{ $t(`privilege.${item}`) }}
           </a-tag>
+          <!-- <div>
+            {{
+              record.value
+                .map((item: string) => $t(`privilege.${item}`))
+                .join(", ")
+            }}
+          </div> -->
         </template>
 
         <template v-if="column.key === 'createdAt'">
@@ -125,7 +129,7 @@ const onEditItem = (item: IRole) => {
 
   <a-modal
     v-model:open="open"
-    :destroyOnClose="false"
+    :destroyOnClose="true"
     :key="dataForm.id"
     :title="dataForm?.id ? $t('form.role.edit') : $t('form.role.new')"
     :ok-button-props="{ hidden: true }"

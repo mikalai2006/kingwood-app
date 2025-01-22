@@ -7,14 +7,10 @@ import {
   useTaskStore,
   useUserStore,
 } from "@/store";
-import { ITaskWorker } from "@/api/task_worker/types";
-import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
 import OrderTaskItem from "./OrderTaskItem.vue";
 import { ITask } from "@/api/task/types";
 import { sort } from "@/api/task";
 import { message } from "ant-design-vue";
-import { Colors } from "@/utils/colors";
-import OrderTaskItemMontaj from "./OrderTaskItemMontaj.vue";
 
 const props = defineProps<{ orderId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -68,7 +64,6 @@ const onSaveSortOrder = async () => {
 
   await sort(data)
     .then((r: ITask[]) => {
-      console.log("sort: ", r);
       r.forEach((element) => {
         taskStore.onAddItemToStore(element);
       });
@@ -165,6 +160,9 @@ const activeKey = ref("list");
         }"
       >
         <a-tab-pane key="list" :tab="$t('tabs.task.list')" force-render> -->
+      <div v-if="tasksByOrder.length === 0" class="text-g-500 dark:text-g-300">
+        {{ $t("info.notFoundTasks") }}
+      </div>
       <div
         v-for="task in tasksCompleted"
         class="p-2 flex flex-row hover:bg-black/5 dark:hover:bg-black/10"

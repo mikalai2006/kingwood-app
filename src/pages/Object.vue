@@ -65,14 +65,14 @@ const defaultData: IObjectInput = {};
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
 const onEditItem = (item: IObject) => {
   console.log("Edit object item: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 </script>

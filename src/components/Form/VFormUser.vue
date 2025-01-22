@@ -108,7 +108,11 @@ const rules: Record<string, Rule[]> = {
 
 const { onGetValidateError } = useError();
 
+const loading = ref(false);
+
 const onSubmit = async () => {
+  loading.value = true;
+
   await formRef.value
     .validate()
     .then(async () => {
@@ -120,6 +124,7 @@ const onSubmit = async () => {
         dataForm.append("phone", data.phone);
         dataForm.append("roleId", data.roleId);
         dataForm.append("postId", data.postId);
+        dataForm.append("hidden", data.hidden.toString() || "0");
         dataForm.append("typePay", data.typePay.toString());
         dataForm.append("archive", data.archive.toString());
         if (data.typePay === 1) {
@@ -161,6 +166,9 @@ const onSubmit = async () => {
       } else {
         throw new Error(JSON.stringify(error));
       }
+    })
+    .finally(() => {
+      loading.value = false;
     });
 };
 const resetForm = () => {
@@ -261,7 +269,7 @@ const previewVisible = ref(false);
 const previewImage = ref("");
 const previewTitle = ref("");
 
-const handlePreview = async (file: UploadProps["fileList"][number]) => {
+const handlePreview = async (file: any) => {
   // console.log(file);
 
   if (file?.originFileObj) {
@@ -377,7 +385,7 @@ onMounted(() => {
           <a-form-item
             v-if="
               authStore.roles.includes('user-change-role') ||
-              authStore.code === 'superadmin'
+              authStore.code === 'systemrole'
             "
             :label="$t('form.user.roleId')"
             name="roleId"
@@ -393,7 +401,7 @@ onMounted(() => {
           <template
             v-if="
               authStore.roles.includes('user-change-typePay') ||
-              authStore.code === 'superadmin'
+              authStore.code === 'systemrole'
             "
           >
             <a-form-item name="typePay" :label="$t('form.user.typePay')">
@@ -421,7 +429,7 @@ onMounted(() => {
           <a-form-item
             v-if="
               authStore.roles.includes('user-change-post') ||
-              authStore.code === 'superadmin'
+              authStore.code === 'systemrole'
             "
             :label="$t('form.user.postId')"
             name="postId"
@@ -437,7 +445,7 @@ onMounted(() => {
           <a-form-item
             v-if="
               authStore.roles.includes('user-change-typeWork') ||
-              authStore.code === 'superadmin'
+              authStore.code === 'systemrole'
             "
             :label="$t('form.user.typeWork')"
             name="typeWork"
@@ -452,9 +460,21 @@ onMounted(() => {
           </a-form-item>
 
           <a-form-item
+            v-if="authStore.code === 'systemrole'"
+            :label="$t('form.user.hidden')"
+            name="hidden"
+          >
+            <a-switch
+              v-model:checked="formState.hidden"
+              :checkedValue="1"
+              :unCheckedValue="0"
+            />
+          </a-form-item>
+
+          <a-form-item
             v-if="
               authStore.roles.includes('user-archiv') ||
-              authStore.code === 'superadmin'
+              authStore.code === 'systemrole'
             "
             :label="$t('form.user.archive')"
             name="archive"
@@ -467,11 +487,17 @@ onMounted(() => {
           </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-            <a-button type="primary" @click="onSubmit">
+            <a-button
+              type="primary"
+              :loading="loading"
+              :diasabled="loading"
+              @click="onSubmit"
+            >
               {{ formState.id ? $t("form.save") : $t("form.create") }}
             </a-button>
             <a-button
               v-if="!formState.id"
+              :diasabled="loading"
               style="margin-left: 10px"
               @click="resetForm"
             >
@@ -484,7 +510,7 @@ onMounted(() => {
         v-if="
           formState.userId &&
           (authStore.roles.includes('auth-resetpass') ||
-            authStore.code === 'superadmin')
+            authStore.code === 'systemrole')
         "
         key="password"
         :tab="$t('tabs.user.password')"

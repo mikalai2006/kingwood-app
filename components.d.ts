@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AAlert: typeof import('ant-design-vue/es')['Alert']
     AApp: typeof import('ant-design-vue/es')['App']
     AAutoComplete: typeof import('ant-design-vue/es')['AutoComplete']
     AAvatar: typeof import('ant-design-vue/es')['Avatar']
@@ -57,6 +58,7 @@ declare module 'vue' {
     FinancyPaneTableTotal: typeof import('./src/components/Financy/FinancyPaneTableTotal.vue')['default']
     FinancyTotal: typeof import('./src/components/Financy/FinancyTotal.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    Install: typeof import('./src/components/Cms/Install.vue')['default']
     MontajListItem: typeof import('./src/components/Montaj/MontajListItem.vue')['default']
     MontajObjectOrders: typeof import('./src/components/Montaj/MontajObjectOrders.vue')['default']
     MontajWorkerList: typeof import('./src/components/Montaj/MontajWorkerList.vue')['default']

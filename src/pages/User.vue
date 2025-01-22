@@ -5,7 +5,12 @@ import { useUserStore } from "@/store/modules/user";
 import { computed, ref, onMounted, h } from "vue";
 import dayjs from "@/utils/dayjs";
 import { DownOutlined } from "@ant-design/icons-vue";
-import { usePostStore, useTaskStore, useTaskWorkerStore } from "@/store";
+import {
+  useAuthStore,
+  usePostStore,
+  useTaskStore,
+  useTaskWorkerStore,
+} from "@/store";
 import UserTask from "@/components/User/UserTask.vue";
 import { invertColor, replaceSubstringByArray } from "@/utils/utils";
 import { useI18n } from "vue-i18n";
@@ -22,6 +27,7 @@ const postStore = usePostStore();
 const { t } = useI18n();
 
 const taskStore = useTaskStore();
+const authStore = useAuthStore();
 const taskWorkerStore = useTaskWorkerStore();
 
 const postsFilter = computed(() => {
@@ -108,7 +114,7 @@ const defaultData: IUserInput = {
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
@@ -274,6 +280,21 @@ onMounted(() => {
           :params="{
             archive: 1,
             hidden: 0,
+          }"
+          @on-edit-item="onEditItem"
+          @on-remove-item="onRemoveItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane
+        v-if="authStore.code === 'systemrole'"
+        key="hiddden"
+        :tab="$t('tabs.user.hidden')"
+      >
+        <UserList
+          :columns="columns"
+          key-list="hiddden"
+          :params="{
+            hidden: 1,
           }"
           @on-edit-item="onEditItem"
           @on-remove-item="onRemoveItem"

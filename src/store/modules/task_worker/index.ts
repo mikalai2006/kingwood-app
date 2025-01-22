@@ -79,8 +79,9 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
         return;
       }
 
-      const data = await remove(id, {}).then(() => {
+      const data = await remove(id, {}).then((r) => {
         this.onRemoveItemFromStore(id);
+        return r;
       });
 
       return data;

@@ -83,7 +83,11 @@ const rules: Record<string, Rule[]> = {
 
 const { onGetValidateError, onShowError } = useError();
 
+const loading = ref(false);
+
 const onSubmit = async () => {
+  loading.value = true;
+
   await formRef.value
     .validate()
     .then(async () => {
@@ -109,6 +113,9 @@ const onSubmit = async () => {
       } else {
         throw new Error(JSON.stringify(error));
       }
+    })
+    .finally(() => {
+      loading.value = false;
     });
 };
 const resetForm = () => {
@@ -366,10 +373,16 @@ onBeforeUnmount(() => {
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-        <a-button v-if="!formState?.id" @click="resetForm">
+        <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>
-        <a-button type="primary" style="margin-left: 10px" @click="onSubmit">
+        <a-button
+          type="primary"
+          :disabled="loading"
+          :loading="loading"
+          style="margin-left: 10px"
+          @click="onSubmit"
+        >
           {{ !formState?.id ? $t("form.create") : $t("form.save") }}
         </a-button>
       </a-form-item>

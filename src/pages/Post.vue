@@ -54,14 +54,14 @@ const defaultData: IPostInput = {
 const dataForm = ref(defaultData);
 
 const onAddNewItem = () => {
-  dataForm.value = defaultData;
+  dataForm.value = Object.assign({}, defaultData);
   showModal();
 };
 
 const onEditItem = (item: IPost) => {
   console.log("item: ", item);
 
-  dataForm.value = item;
+  dataForm.value = Object.assign({}, item);
   showModal();
 };
 </script>
@@ -113,7 +113,7 @@ const onEditItem = (item: IPost) => {
 
   <a-modal
     v-model:open="open"
-    :destroyOnClose="false"
+    :destroyOnClose="true"
     :key="dataForm.id"
     :title="dataForm.id ? $t('form.post.edit') : $t('form.post.new')"
     :ok-button-props="{ hidden: true }"

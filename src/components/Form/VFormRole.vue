@@ -48,7 +48,11 @@ const rules: Record<string, Rule[]> = {
 
 const { onGetValidateError } = useError();
 
+const loading = ref(false);
+
 const onSubmit = async () => {
+  loading.value = true;
+
   await formRef.value
     .validate()
     .then(async () => {
@@ -70,6 +74,9 @@ const onSubmit = async () => {
       } else {
         throw new Error(JSON.stringify(error));
       }
+    })
+    .finally(() => {
+      loading.value = false;
     });
 };
 const resetForm = () => {
@@ -92,7 +99,7 @@ const rolesList = roles.map((x) => {
       :model="formState"
       :rules="rules"
     >
-      <a-form-item ref="name" :label="$t('form.role.name')" name="name">
+      <a-form-item :label="$t('form.role.name')" name="name">
         <a-input v-model:value="formState.name" />
       </a-form-item>
 
@@ -115,20 +122,16 @@ const rolesList = roles.map((x) => {
         ></a-select>
       </a-form-item>
 
-      <a-form-item
-        ref="sortOrder"
-        :label="$t('form.role.sortOrder')"
-        name="sortOrder"
-      >
+      <a-form-item :label="$t('form.role.sortOrder')" name="sortOrder">
         <a-input-number v-model:value="formState.sortOrder" />
       </a-form-item>
 
-      <a-form-item ref="code" :label="$t('form.role.code')" name="code">
+      <a-form-item :label="$t('form.role.code')" name="code">
         <a-input v-model:value="formState.code" />
       </a-form-item>
 
       <a-form-item
-        v-if="authStore.code === 'superadmin'"
+        v-if="authStore.code === 'systemrole'"
         :label="$t('form.role.hidden')"
         name="hidden"
       >
@@ -141,17 +144,22 @@ const rolesList = roles.map((x) => {
 
       <a-form-item
         v-if="
-          (formState?.id
+          formState?.id
             ? authStore.roles.includes('role-patch')
-            : authStore.roles.includes('role-create')) ||
-          authStore.code === 'admin'
+            : authStore.roles.includes('role-create')
         "
         :wrapper-col="{ span: 14, offset: 4 }"
       >
-        <a-button v-if="!formState?.id" @click="resetForm">
+        <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">
           {{ $t("form.reset") }}
         </a-button>
-        <a-button type="primary" style="margin-left: 10px" @click="onSubmit">
+        <a-button
+          type="primary"
+          :disabled="loading"
+          :loading="loading"
+          style="margin-left: 10px"
+          @click="onSubmit"
+        >
           {{ !formState?.id ? $t("form.create") : $t("form.save") }}
         </a-button>
       </a-form-item>
