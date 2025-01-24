@@ -16,17 +16,18 @@ import {
   iTrashFill,
   iWraningTriangle,
 } from "@/utils/icons";
-import { dateFormat, dateTimeFormat } from "@/utils/date";
+import { dateFormat } from "@/utils/date";
 import { getShortFIO, replaceSubstringByArray } from "@/utils/utils";
 import colors from "tailwindcss/colors";
 import sift from "sift";
 import OrderGroupBadge from "./OrderGroupBadge.vue";
-import { message, Modal, TableProps } from "ant-design-vue";
+import { message, Modal } from "ant-design-vue";
 import VIcon from "../UI/VIcon.vue";
 import { useI18n } from "vue-i18n";
+import useOrder from "@/composable/useOrder";
 
 export interface IConfigTable {
-  sort: { field: string; order: number }[];
+  sort: { field: string; order: number; key: string }[];
   pagination: {
     total: number;
     current: number;
@@ -37,28 +38,57 @@ export interface IConfigTable {
 const props = defineProps<{
   keyList: string;
   params: IOrderFilter;
-  columns: {
-    key: string;
-    title: string;
-    dataIndex: string;
-    customFilterDropdown?: boolean;
-    onFilter?: (value: string, record: IOrder) => boolean;
-    sorter?: (a: IOrder, b: IOrder) => number;
-  }[];
+  // columns: {
+  //   key: string;
+  //   title: string;
+  //   dataIndex: string;
+  //   customFilterDropdown?: boolean;
+  //   onFilter?: (value: string, record: IOrder) => boolean;
+  //   sorter?: (a: IOrder, b: IOrder) => number;
+  // }[];
+  keyColumns: string;
 }>();
 
 const emit = defineEmits([
-  "showOrderInfo",
+  // "showOrderInfo",
   "onEditItem",
-  "onOtgruzka",
-  "onDateStart",
+  // "onOtgruzka",
+  // "onDateStart",
 ]);
+
+const { t } = useI18n();
 
 const nameKeyLocalStorage = computed(
   () => `tableConfig.order.${props.keyList}`
 );
 
-const { t } = useI18n();
+const {
+  columnKeys,
+  sort,
+  columns,
+
+  openTaskModal,
+  dataTaskForm,
+  defaultDataTask,
+  // open,
+  // dataForm,
+  // defaultData,
+  openOtgruzka,
+  dataFormOtgruzka,
+  defaultDataOtgruzka,
+  openOrderInfo,
+  currentOrderInModal,
+  onAddNewTask,
+  onEditTask,
+  dateFormStart,
+  openDateStart,
+  defaultDateStart,
+
+  showOrderInfo,
+  onOtgruzka,
+  // onEditItem,
+  onDateStart,
+} = useOrder();
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
@@ -105,19 +135,18 @@ const state = reactive({
 
 const searchInput = ref();
 
-const handleSearch = (selectedKeys, confirm, dataIndex) => {
+const handleSearch = (selectedKeys: any, confirm: any, dataIndex: string) => {
   confirm();
   state.searchText = selectedKeys[0];
   state.searchedColumn = dataIndex;
 };
 
-const handleReset = (clearFilters) => {
+const handleReset = (clearFilters: any) => {
   clearFilters({ confirm: true });
   state.searchText = "";
 };
 
 const loading = ref(true);
-const sort = ref([{ field: "number", order: 1 }]);
 const pagination = ref({
   total: 10,
   current: 1,
@@ -141,12 +170,14 @@ const onQueryData = async () => {
         pagination.value.pageSize * (pagination.value.current - 1) - 1,
         0
       ),
-      $sort: sort.value.map((x) => {
-        return {
-          key: x.field,
-          value: x.order,
-        };
-      }),
+      $sort: sort.value?.length
+        ? sort.value.map((x) => {
+            return {
+              key: x.field,
+              value: x.order,
+            };
+          })
+        : undefined,
     })
     .then((result) => {
       pagination.value.total = result.total;
@@ -162,20 +193,26 @@ const onQueryData = async () => {
     });
 };
 
-const handleTableChange: TableProps["onChange"] = (
+const handleTableChange: any = (
+  //TableProps["onChange"]
   pag: { pageSize: number; current: number },
   filters: any,
   sorter: any
 ) => {
-  console.log("sorter", sorter);
+  // console.log("sorter", sorter);
 
   if (Object.values(sorter).length > 0) {
-    sort.value = [
-      {
-        field: sorter.field === "objectId" ? "object.name" : sorter.field,
-        order: sorter.order == "ascend" ? 1 : -1,
-      },
-    ];
+    sort.value = sorter.order
+      ? [
+          {
+            field: sorter.field === "objectId" ? "object.name" : sorter.field,
+            order: sorter.order == "ascend" ? 1 : -1,
+            key: sorter.field,
+          },
+        ]
+      : [];
+  } else {
+    sort.value = [];
   }
   onQueryData();
   // console.log({
@@ -261,6 +298,12 @@ const onDeleteAlert = (record: IOrder) => {
 };
 
 onMounted(async () => {
+  // sync columnKeys from localStorage.
+  const _columns = localStorage.getItem(props.keyColumns);
+  if (_columns) {
+    columnKeys.value = JSON.parse(_columns);
+  }
+
   // sync columns from localStorage.
   const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
   if (_configTable) {
@@ -302,7 +345,7 @@ onMounted(async () => {
               return {
                 // xxx, // props
                 onClick: () => {
-                  emit('showOrderInfo', record)
+                  showOrderInfo(record)
                 }, // click row
                 // onDblclick: (event) => {}, // double click row
                 // onContextmenu: (event) => {}  // right button click row
@@ -315,6 +358,7 @@ onMounted(async () => {
       ...pagination,
       disabled: loading,
       onChange: onChangePagintaion,
+      showSizeChanger: true,
     }"
   >
     <template #bodyCell="{ column, record }">
@@ -327,7 +371,7 @@ onMounted(async () => {
             </template>
             <a-button
               type="link"
-              @click="(e: Event) => {emit('onEditItem', record); e.preventDefault(); e.stopPropagation()}"
+              @click="(e: Event) => {emit('onEditItem',record); e.preventDefault(); e.stopPropagation()}"
             >
               <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
             </a-button>
@@ -398,6 +442,14 @@ onMounted(async () => {
         />
       </template>
 
+      <template v-if="column.key === 'shlifComplete'">
+        <OrderGroupBadge
+          :orderId="record.id"
+          group="6"
+          :status="!!record.shlifComplete"
+        />
+      </template>
+
       <template v-if="column.key === 'goComplete'">
         <div
           v-if="record.goComplete"
@@ -416,7 +468,7 @@ onMounted(async () => {
                 size="small"
                 @click="
                   (e: Event) => {
-                    emit('onOtgruzka', record);
+                    onOtgruzka(record);
                     e.preventDefault();
                     e.stopPropagation();
                   }
@@ -436,7 +488,13 @@ onMounted(async () => {
                   /> -->
           </div>
         </div>
-        <div v-else></div>
+        <div v-else>
+          <OrderGroupBadge
+            :orderId="record.id"
+            group="4"
+            :status="!!record.goComplete"
+          />
+        </div>
       </template>
 
       <template v-if="column.key === 'constructorId'">
@@ -509,7 +567,7 @@ onMounted(async () => {
             size="small"
             @click="
                   (e: Event) => {
-                    emit('onDateStart', record);
+                    onDateStart(record);
                     e.preventDefault();
                     e.stopPropagation();
                   }
@@ -597,4 +655,106 @@ onMounted(async () => {
             <span style="color: red">More</span>
           </template> -->
   </a-table>
+
+  <a-modal
+    v-model:open="openTaskModal"
+    :destroyOnClose="true"
+    :key="dataTaskForm.id"
+    :maskClosable="false"
+    :title="dataTaskForm.id ? $t('form.task.edit') : $t('form.task.new')"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormTask
+      :data="dataTaskForm"
+      :default-data="defaultDataTask"
+      @callback="
+        () => {
+          openTaskModal = false;
+        }
+      "
+    />
+  </a-modal>
+
+  <a-modal
+    v-model:open="openOtgruzka"
+    :destroyOnClose="true"
+    :title="$t('button.otgruzka')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormOrderOtgruzka
+      :data="dataFormOtgruzka"
+      :default-data="defaultDataOtgruzka"
+      @callback="
+        () => {
+          openOtgruzka = false;
+        }
+      "
+    />
+  </a-modal>
+
+  <a-modal
+    v-model:open="openDateStart"
+    :destroyOnClose="true"
+    :title="$t('button.dateStart')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormOrderDateStart
+      :data="dateFormStart"
+      :default-data="defaultDateStart"
+      @callback="
+        () => {
+          openDateStart = false;
+        }
+      "
+    />
+  </a-modal>
+
+  <a-modal
+    v-model:open="openOrderInfo"
+    width="1000px"
+    :key="currentOrderInModal?.id"
+    wrapClassName="b-scroll"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-text="$t('button.close')"
+    @cancel="
+      () => {
+        openOrderInfo = false;
+      }
+    "
+  >
+    <template #title>
+      <p class="text-xl">
+        {{ currentOrderInModal?.object?.name }}, №{{
+          currentOrderInModal?.number
+        }}
+        -
+        {{ currentOrderInModal?.name }}
+      </p>
+    </template>
+    <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
+      <template v-if="authStore.roles.includes('task-list')">
+        <OrderTaskList
+          :order-id="currentOrderInModal.id"
+          @on-edit-task="onEditTask"
+        />
+      </template>
+      <template v-else>
+        <a-alert :message="$t('info.notPermission')" banner />
+      </template>
+      <a-button
+        v-if="authStore.roles.includes('task-create')"
+        type="primary"
+        @click="onAddNewTask(currentOrderInModal)"
+        class="mt-4"
+      >
+        {{ $t("form.task.add") }}
+      </a-button>
+    </div>
+  </a-modal>
 </template>

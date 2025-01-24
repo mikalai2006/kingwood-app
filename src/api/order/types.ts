@@ -1,4 +1,5 @@
 import { IObject } from "../object/types";
+import { ITask } from "../task/types";
 import { IPaginationParams } from "../types";
 
 export interface IOrder {
@@ -15,7 +16,9 @@ export interface IOrder {
   priority: number;
   group: string[];
   status: number;
+
   object?: IObject;
+  tasks?: ITask[];
 
   stolyarComplete: number;
   malyarComplete: number;

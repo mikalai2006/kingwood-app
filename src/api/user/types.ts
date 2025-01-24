@@ -2,6 +2,7 @@ import { IAuthPublicData } from "../auth/types";
 import { IImage } from "../image/types";
 import { IPost } from "../post/types";
 import { IRole } from "../role/types";
+import { ITaskWorker } from "../task_worker/types";
 import { IPaginationParams } from "../types";
 
 export interface IUser {
@@ -25,6 +26,7 @@ export interface IUser {
   lastTime: Date;
 
   auth: IAuthPublicData;
+  taskWorkers: ITaskWorker[];
 
   createdAt: Date;
   updatedAt: Date;

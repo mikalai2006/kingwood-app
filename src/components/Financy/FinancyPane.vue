@@ -55,7 +55,7 @@ const daysList = computed(() =>
 
 const workers = computed(() => {
   return userStore.items
-    .filter((x) => x.hidden)
+    .filter((x) => !x.hidden)
     .map((x) => {
       const post = postStore.items.find((y) => y.id === x.postId);
       return {

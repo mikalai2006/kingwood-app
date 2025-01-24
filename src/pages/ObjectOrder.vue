@@ -42,33 +42,14 @@ const object = computed(() =>
 );
 
 const {
-  onAddNewItem,
-  showOrderInfo,
-  onOtgruzka,
   onEditItem,
-  openTaskModal,
-  dataTaskForm,
-  defaultDataTask,
   open,
   dataForm,
   defaultData,
-  openOtgruzka,
-  dataFormOtgruzka,
-  defaultDataOtgruzka,
-  openOrderInfo,
-  currentOrderInModal,
-  onAddNewTask,
-  onEditTask,
-
   columnKeys,
-  columns,
   optionsForSelect,
   onSetColumns,
-
-  dateFormStart,
-  openDateStart,
-  onDateStart,
-  defaultDateStart,
+  onAddNewItem,
 } = useOrder();
 
 const dateFormat = "DD.MM.YYYY";
@@ -198,44 +179,32 @@ onMounted(async () => {
         <OrderList
           key-list="all"
           :params="{ objectId: objectIds }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
         <OrderList
           keyList="notWork"
           :params="{ status: 0, objectId: objectIds }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
         <OrderList
           key-list="stolyarComplete"
           :params="{ stolyarComplete: 1, objectId: objectIds }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
         <OrderList
           key-list="malyarComplete"
           :params="{ malyarComplete: 1, objectId: objectIds }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
@@ -246,28 +215,41 @@ onMounted(async () => {
             montajComplete: 0,
             objectId: objectIds,
           }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
           key-list="completed"
           :params="{ status: 100, objectId: objectIds }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
+          :keyColumns="nameKeyLocalStorageColumns"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
     </a-tabs>
   </div>
 
   <a-modal
+    v-model:open="open"
+    :destroyOnClose="true"
+    :maskClosable="false"
+    :title="dataForm.id ? $t('form.order.edit') : $t('form.order.new')"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormOrder
+      :data="dataForm"
+      :default-data="defaultData"
+      @callback="
+        () => {
+          open = false;
+        }
+      "
+    />
+  </a-modal>
+
+  <!-- <a-modal
     v-model:open="openTaskModal"
     :destroyOnClose="true"
     :key="dataTaskForm.id"
@@ -386,5 +368,5 @@ onMounted(async () => {
         }
       "
     />
-  </a-modal>
+  </a-modal> -->
 </template>

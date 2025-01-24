@@ -9,7 +9,6 @@ import {
   useUserStore,
 } from "@/store";
 import VIcon from "../UI/VIcon.vue";
-import { iArrowClockWise, iSpinThree } from "@/utils/icons";
 import { getShortFIO, invertColor } from "@/utils/utils";
 
 const props = defineProps<{

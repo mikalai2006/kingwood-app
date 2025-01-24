@@ -103,7 +103,7 @@ export default defineConfig(({ command }) => {
     server: {
       proxy: {
         "/api/v1": {
-          target: "https://kingwood-apps.ru/", //https://kingwood-apps.ru/ - http://localhost:8000/
+          target: "http://localhost:8000/", //https://kingwood-apps.ru/ - http://localhost:8000/
           changeOrigin: true,
           secure: false,
           ws: true,

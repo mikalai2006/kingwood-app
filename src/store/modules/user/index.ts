@@ -5,6 +5,10 @@ import { IRequestParams } from "@/api/types";
 // import sift from 'sift'
 import { useAuthStore } from "../auth";
 import { getObjectId } from "@/utils/utils";
+import { useTaskWorkerStore } from "../task_worker";
+import { useObjectStore } from "../object";
+import { useTaskStore } from "../task";
+import { useOrderStore } from "../order";
 
 export const useUserStore = defineStore("user", {
   state() {
@@ -39,8 +43,31 @@ export const useUserStore = defineStore("user", {
       // const existsItem = this.onExists(params)
       // if (existsItem.index == -1) {
       const data = await find(params || {});
-      data.data?.forEach((el) => this.onAddItemToStore(el));
+      data.data?.forEach((item) => {
+        if (item.taskWorkers) {
+          const taskWorkerStore = useTaskWorkerStore();
+          item.taskWorkers.forEach((el) => {
+            taskWorkerStore.onAddItemToStore(el);
+
+            if (el.object) {
+              const objectStore = useObjectStore();
+              objectStore.onAddItemToStore(el.object);
+            }
+            if (el.task) {
+              const taskStore = useTaskStore();
+              taskStore.onAddItemToStore(el.task);
+            }
+            if (el.order) {
+              const orderStore = useOrderStore();
+              orderStore.onAddItemToStore(el.order);
+            }
+          });
+        }
+
+        this.onAddItemToStore(item);
+      });
       // }
+
       return data;
     },
     /**

@@ -30,6 +30,8 @@ const useOrder = () => {
     showModalOtgruzka();
   };
 
+  const sort = ref([{ field: "number", order: 1, key: "number" }]);
+
   // dateStart
   const openDateStart = ref<boolean>(false);
 
@@ -91,7 +93,7 @@ const useOrder = () => {
   const onAddNewTask = (order: IOrder) => {
     // console.log("orderId: ", orderId);
 
-    const status = taskStatusStore.items.find((x) => x.start);
+    const status = taskStatusStore.items.find((x) => x.status === "wait");
 
     dataTaskForm.value = {
       ...defaultDataTask,
@@ -155,6 +157,7 @@ const useOrder = () => {
     { key: "dateStart" },
     { key: "activeOperation" },
     { key: "stolyarComplete" },
+    { key: "shlifComplete" },
     { key: "malyarComplete" },
     { key: "goComplete" },
     { key: "montajComplete" },
@@ -177,7 +180,7 @@ const useOrder = () => {
     "name",
     "term",
     "group",
-    "activeOperation",
+    // "activeOperation",
     "action",
   ]);
 
@@ -186,13 +189,20 @@ const useOrder = () => {
       allColumns.value
         .filter((x) => columnKeys.value.includes(x.key))
         .map((x) => {
+          const isExistSort = sort.value.find((y) => y.key === x.key);
+          // isExistSort && console.log("isExistSort: ", x.key, isExistSort, sort);
+
           return {
             title: t(`table.order.${x.key}`),
             dataIndex: x.key,
             key: x.key,
             sorter: x.sorter,
             onFilter: x?.onFilter,
-            sortOrder: x.key === "number" ? "ascend" : "",
+            sortOrder: isExistSort
+              ? isExistSort.order === -1
+                ? "descend"
+                : "ascend"
+              : null,
             // customFilterDropdown: x?.customFilterDropdown,
             // fixed: true
           };
@@ -290,6 +300,8 @@ const useOrder = () => {
   }, 300);
 
   return {
+    sort,
+
     openOtgruzka,
     dataFormOtgruzka,
     defaultDataOtgruzka,

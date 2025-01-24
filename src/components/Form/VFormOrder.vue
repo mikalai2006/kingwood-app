@@ -133,14 +133,14 @@ const constructors = computed(() => {
     });
 });
 
-const orderGroups = computed(() => {
-  return ["0", "1", "2", "3", "4", "5", "10"].map((x) => {
-    return {
-      value: x,
-      label: t(`groupOperation.${x}`),
-    };
-  });
-});
+// const orderGroups = computed(() => {
+//   return ["0", "1", "2", "3", "4", "5", "6", "10"].map((x) => {
+//     return {
+//       value: x,
+//       label: t(`groupOperation.${x}`),
+//     };
+//   });
+// });
 
 const orderStatuses = computed(() => {
   return [0, 1, 100].map((x) => {

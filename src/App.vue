@@ -73,23 +73,23 @@ const onInitData = async () => {
       socket.close();
     }
 
-    await payTemplateStore.find({ $limit: 100 });
     loadingText.value = t("page.payTemplate.title");
-    await roleStore.find({ $limit: 100 });
+    await payTemplateStore.find({ $limit: 100 });
     loadingText.value = t("page.role.title");
-    await postStore.find({ $limit: 100 });
+    await roleStore.find({ $limit: 100 });
     loadingText.value = t("page.post.title");
-    await userStore.find({ $limit: 100 });
+    await postStore.find({ $limit: 100 });
     loadingText.value = t("page.user.title");
-    await operationStore.find({ $limit: 100 });
+    await userStore.find({ $limit: 100 });
     loadingText.value = t("page.operation.title");
-    await taskStore.find({ $limit: 300 });
-    loadingText.value = t("page.task.title");
+    await operationStore.find({ $limit: 100 });
+    // await taskStore.find({ $limit: 300 });
+    // loadingText.value = t("page.task.title");
     // await orderStore.find({ $limit: 100 });
-    await taskWorkerStore.find({ $limit: 100 });
-    loadingText.value = t("page.taskWorker.title");
-    await taskStatus.find();
+    // await taskWorkerStore.find({ $limit: 100 });
+    // loadingText.value = t("page.taskWorker.title");
     loadingText.value = t("page.taskStatus.title");
+    await taskStatus.find();
 
     // setTimeout(() => {
     const { socket: _socket } = useSocket({ router, t, noty });

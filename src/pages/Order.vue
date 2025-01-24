@@ -1,13 +1,7 @@
 <script setup lang="ts" async>
-import { useUserStore } from "@/store/modules/user";
 import { computed, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import {
-  useAuthStore,
-  useObjectStore,
-  useOrderStore,
-  useTaskStatusStore,
-} from "@/store";
+import { useAuthStore } from "@/store";
 import { IOrder } from "@/api/order/types";
 import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
@@ -20,42 +14,51 @@ import OrderList from "@/components/Order/OrderList.vue";
 import useOrder from "@/composable/useOrder";
 
 dayjs.locale("ru");
-const userStore = useUserStore();
-const orderStore = useOrderStore();
-const taskStatusStore = useTaskStatusStore();
-const objectStore = useObjectStore();
 const authStore = useAuthStore();
 
 const { t } = useI18n();
 
 const {
-  onAddNewItem,
-  showOrderInfo,
-  onOtgruzka,
+  // onAddNewItem,
+  // showOrderInfo,
+  // onOtgruzka,
+  // openTaskModal,
+  // dataTaskForm,
+  // defaultDataTask,
   onEditItem,
-  openTaskModal,
-  dataTaskForm,
-  defaultDataTask,
   open,
   dataForm,
   defaultData,
-  openOtgruzka,
-  dataFormOtgruzka,
-  defaultDataOtgruzka,
-  openOrderInfo,
-  currentOrderInModal,
-  onAddNewTask,
-  onEditTask,
-
   columnKeys,
-  columns,
   optionsForSelect,
   onSetColumns,
+  // columns,
+  // openOtgruzka,
+  // dataFormOtgruzka,
+  // defaultDataOtgruzka,
+  // openOrderInfo,
+  // currentOrderInModal,
+  // onAddNewTask,
+  // onEditTask,
 
-  dateFormStart,
-  openDateStart,
-  onDateStart,
-  defaultDateStart,
+  // openTaskModal,
+  // dataTaskForm,
+  // defaultDataTask,
+  // open,
+  // dataForm,
+  // defaultData,
+  // openOtgruzka,
+  // dataFormOtgruzka,
+  // defaultDataOtgruzka,
+  // openOrderInfo,
+  // currentOrderInModal,
+  // onAddNewTask,
+  // onEditTask,
+  // dateFormStart,
+  // openDateStart,
+  // defaultDateStart,
+  // onDateStart,
+  onAddNewItem,
 } = useOrder();
 
 // const onDeleteTask = (item: ITask) => {
@@ -111,6 +114,7 @@ onMounted(() => {
   if (_columns) {
     columnKeys.value = JSON.parse(_columns);
   }
+
   // sync range from localStorage.
   const _range = localStorage.getItem(nameKeyLocalStorageRange.value);
   if (_range) {
@@ -182,7 +186,11 @@ onMounted(() => {
       </div>
     </div>
 
-    <a-tabs v-model:activeKey="activeKey">
+    <a-tabs
+      v-model:activeKey="activeKey"
+      :key="columnKeys.length"
+      destroyInactiveTabPane
+    >
       <a-tab-pane key="all" :tab="$t('tabs.order.all')">
         <div class="flex flex-row items-center">
           <div class="flex-auto">
@@ -206,59 +214,44 @@ onMounted(() => {
         <OrderList
           :key="rangeSearch.map((x) => x.toString()).join('-')"
           keyList="all"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{
             from: rangeSearch[0].format(),
             to: rangeSearch[1].format(),
           }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
         <OrderList
           keyList="notWork"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{ status: 0 }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
         <OrderList
           keyList="stolyarComplete"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{ stolyarComplete: 1 }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
         <OrderList
           keyList="malyarComplete"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{ malyarComplete: 1 }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
         <OrderList
           keyList="goComplete"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{ goComplete: 1, montajComplete: 0 }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
       <!-- <a-tab-pane key="montajComplete" :tab="$t('tabs.order.montajComplete')">
@@ -274,41 +267,17 @@ onMounted(() => {
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
           keyList="completed"
+          :keyColumns="nameKeyLocalStorageColumns"
           :params="{ status: 100 }"
-          :columns="columns"
-          @show-order-info="showOrderInfo"
-          @on-otgruzka="onOtgruzka"
           @on-edit-item="onEditItem"
-          @on-date-start="onDateStart"
         />
       </a-tab-pane>
     </a-tabs>
   </div>
 
   <a-modal
-    v-model:open="openTaskModal"
-    :destroyOnClose="true"
-    :key="dataTaskForm.id"
-    :maskClosable="false"
-    :title="dataTaskForm.id ? $t('form.task.edit') : $t('form.task.new')"
-    :ok-button-props="{ hidden: true }"
-    :cancel-button-props="{ hidden: true }"
-  >
-    <VFormTask
-      :data="dataTaskForm"
-      :default-data="defaultDataTask"
-      @callback="
-        () => {
-          openTaskModal = false;
-        }
-      "
-    />
-  </a-modal>
-
-  <a-modal
     v-model:open="open"
     :destroyOnClose="true"
-    :key="new Date().getMilliseconds()"
     :maskClosable="false"
     :title="dataForm.id ? $t('form.order.edit') : $t('form.order.new')"
     :ok-button-props="{ hidden: true }"
@@ -324,88 +293,4 @@ onMounted(() => {
       "
     />
   </a-modal>
-
-  <a-modal
-    v-model:open="openOtgruzka"
-    :destroyOnClose="true"
-    :title="$t('button.otgruzka')"
-    :maskClosable="false"
-    :ok-button-props="{ hidden: true }"
-    :cancel-button-props="{ hidden: true }"
-  >
-    <VFormOrderOtgruzka
-      :data="dataFormOtgruzka"
-      :default-data="defaultDataOtgruzka"
-      @callback="
-        () => {
-          openOtgruzka = false;
-        }
-      "
-    />
-  </a-modal>
-
-  <a-modal
-    v-model:open="openDateStart"
-    :destroyOnClose="true"
-    :title="$t('button.dateStart')"
-    :maskClosable="false"
-    :ok-button-props="{ hidden: true }"
-    :cancel-button-props="{ hidden: true }"
-  >
-    <VFormOrderDateStart
-      :data="dateFormStart"
-      :default-data="defaultDateStart"
-      @callback="
-        () => {
-          openDateStart = false;
-        }
-      "
-    />
-  </a-modal>
-
-  <a-modal
-    v-model:open="openOrderInfo"
-    width="1000px"
-    :key="currentOrderInModal?.id"
-    wrapClassName="b-scroll"
-    :maskClosable="false"
-    :ok-button-props="{ hidden: true }"
-    :cancel-text="$t('button.close')"
-    @cancel="
-      () => {
-        openOrderInfo = false;
-      }
-    "
-  >
-    <template #title>
-      <p class="text-xl">
-        {{ currentOrderInModal?.object?.name }}, №{{
-          currentOrderInModal?.number
-        }}
-        -
-        {{ currentOrderInModal?.name }}
-      </p>
-    </template>
-    <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
-      <template v-if="authStore.roles.includes('task-list')">
-        <OrderTaskList
-          :order-id="currentOrderInModal.id"
-          @on-edit-task="onEditTask"
-        />
-      </template>
-      <template v-else>
-        <a-alert :message="$t('info.notPermission')" banner />
-      </template>
-      <a-button
-        v-if="authStore.roles.includes('task-create')"
-        type="primary"
-        @click="onAddNewTask(currentOrderInModal)"
-        class="mt-4"
-      >
-        {{ $t("form.task.add") }}
-      </a-button>
-    </div>
-  </a-modal>
 </template>
-
-<style scoped></style>

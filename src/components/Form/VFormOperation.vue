@@ -76,7 +76,7 @@ const resetForm = () => {
 };
 
 const groupsOperation = computed(() =>
-  ["0", "1", "2", "3", "4", "5"].map((x) => {
+  ["0", "1", "2", "3", "4", "5", "6"].map((x) => {
     return {
       label: t(`groupOperation.${x}`),
       value: x,

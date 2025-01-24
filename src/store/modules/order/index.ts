@@ -3,6 +3,8 @@ import { find, get, remove } from "@/api/order";
 import { IRequestParams } from "@/api/types";
 import { IOrder, IOrderFilter, IOrderInput } from "@/api/order/types";
 import { useObjectStore } from "../object";
+import { useTaskStore } from "../task";
+import { useTaskWorkerStore } from "../task_worker";
 // import sift from 'sift'
 
 export const useOrderStore = defineStore("order", {
@@ -66,6 +68,19 @@ export const useOrderStore = defineStore("order", {
       if (item.object) {
         const objectStore = useObjectStore();
         objectStore.onAddItemToStore(item.object);
+      }
+      if (item.tasks) {
+        const taskStore = useTaskStore();
+        item.tasks.forEach((el) => {
+          taskStore.onAddItemToStore(el);
+
+          if (el.workers?.length) {
+            const taskWorkerStore = useTaskWorkerStore();
+            el.workers.forEach((worker) =>
+              taskWorkerStore.onAddItemToStore(worker)
+            );
+          }
+        });
       }
     },
     /**
