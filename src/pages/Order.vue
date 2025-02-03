@@ -1,7 +1,7 @@
 <script setup lang="ts" async>
 import { computed, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useAuthStore } from "@/store";
+import { useAuthStore, useGeneralStore } from "@/store";
 import { IOrder } from "@/api/order/types";
 import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
@@ -12,9 +12,11 @@ import { Dayjs } from "dayjs";
 import VHeader from "@/components/V/VHeader.vue";
 import OrderList from "@/components/Order/OrderList.vue";
 import useOrder from "@/composable/useOrder";
+import { Colors } from "@/utils/colors";
 
 dayjs.locale("ru");
 const authStore = useAuthStore();
+const generalStore = useGeneralStore();
 
 const { t } = useI18n();
 
@@ -59,6 +61,7 @@ const {
   // defaultDateStart,
   // onDateStart,
   onAddNewItem,
+  counter,
 } = useOrder();
 
 // const onDeleteTask = (item: ITask) => {
@@ -91,7 +94,7 @@ const rangeSearch = ref<Dayjs[]>([
   dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
 ]);
 
-const activeKey = ref("all");
+const activeKey = ref("inWork");
 
 const nameKeyLocalStorageColumns = ref("order.column");
 const nameKeyLocalStorageRange = computed(() => "range.all");
@@ -191,38 +194,43 @@ onMounted(() => {
       :key="columnKeys.length"
       destroyInactiveTabPane
     >
-      <a-tab-pane key="all" :tab="$t('tabs.order.all')">
-        <div class="flex flex-row items-center">
-          <div class="flex-auto">
-            <!-- <a-input
-              placeholder="Текст для поиска"
-              v-model:value="querySearch"
-            /> -->
-          </div>
-          <div>
-            {{ $t("form.order.rangeSearch") }}
-            <a-range-picker
-              v-model:value="rangeSearch"
-              :format="dateFormat"
-              @change="onChangeRange"
-            />
-          </div>
-        </div>
-        <!-- :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'custom cursor-pointer bg-red-500/50' : 'cursor-pointer')"
-        :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'cursor-pointer font-medium text-red-500 dark:text-red-300' : 'cursor-pointer')" 
-        -->
+      <a-tab-pane key="inWork">
+        <template #tab>
+          {{ $t("tabs.order.inWork") }}
+          <a-badge
+            v-if="counter.inWork.length"
+            :count="counter.inWork.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
-          :key="rangeSearch.map((x) => x.toString()).join('-')"
-          keyList="all"
+          keyList="inWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{
-            from: rangeSearch[0].format(),
-            to: rangeSearch[1].format(),
-          }"
+          :params="{ status: 1 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
-      <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
+      <a-tab-pane key="notWork">
+        <template #tab>
+          {{ $t("tabs.order.notWork") }}
+          <a-badge
+            v-if="counter.notWork.length"
+            :count="counter.notWork.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
@@ -230,27 +238,123 @@ onMounted(() => {
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
-      <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
+      <a-tab-pane key="stolyarComplete">
+        <template #tab>
+          {{ $t("tabs.order.stolyarComplete") }}
+          <a-badge
+            v-if="counter.stolyarComplete.length"
+            :count="counter.stolyarComplete.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="stolyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ stolyarComplete: 1 }"
+          :params="{
+            status: 1,
+            stolyarComplete: 1,
+            dateOtgruzka: '1',
+            // shlifComplete: 0,
+            // malyarComplete: 0,
+            // goComplete: 0,
+            // montajComplete: 0,
+          }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
-      <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
+      <a-tab-pane key="shlifComplete">
+        <template #tab>
+          {{ $t("tabs.order.shlifComplete") }}
+          <a-badge
+            v-if="counter.shlifComplete.length"
+            :count="counter.shlifComplete.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
+        <OrderList
+          keyList="shlifComplete"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{
+            status: 1,
+            // stolyarComplete: 1,
+            shlifComplete: 1,
+            dateOtgruzka: '1',
+            // malyarComplete: 0,
+            // goComplete: 0,
+            // montajComplete: 0,
+          }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="malyarComplete">
+        <template #tab>
+          {{ $t("tabs.order.malyarComplete") }}
+          <a-badge
+            v-if="counter.malyarComplete.length"
+            :count="counter.malyarComplete.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="malyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ malyarComplete: 1 }"
+          :params="{
+            status: 1,
+            // stolyarComplete: 1,
+            malyarComplete: 1,
+            dateOtgruzka: '1',
+            // shlifComplete: 1,
+            // goComplete: 0,
+            // montajComplete: 0,
+          }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
-      <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
+      <a-tab-pane key="goComplete">
+        <template #tab>
+          {{ $t("tabs.order.goComplete") }}
+          <a-badge
+            v-if="counter.goComplete.length"
+            :count="counter.goComplete.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="goComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ goComplete: 1, montajComplete: 0 }"
+          :params="{
+            status: 1,
+            // stolyarComplete: 1,
+            // shlifComplete: 1,
+            // malyarComplete: 1,
+            goComplete: 1,
+            dateOtgruzka: '1',
+            // montajComplete: 0,
+          }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -269,6 +373,34 @@ onMounted(() => {
           keyList="completed"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{ status: 100 }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="all" :tab="$t('tabs.order.all')">
+        <div class="flex flex-row items-center">
+          <div class="flex-auto">
+            <!-- <a-input
+              placeholder="Текст для поиска"
+              v-model:value="querySearch"
+            /> -->
+          </div>
+          <div>
+            {{ $t("form.order.rangeSearch") }}
+            <a-range-picker
+              v-model:value="rangeSearch"
+              :format="dateFormat"
+              @change="onChangeRange"
+            />
+          </div>
+        </div>
+        <OrderList
+          :key="rangeSearch.map((x) => x.toString()).join('-')"
+          keyList="all"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{
+            from: rangeSearch[0].format(),
+            to: rangeSearch[1].format(),
+          }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>

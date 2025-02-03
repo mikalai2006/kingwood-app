@@ -25,6 +25,7 @@ import { message, Modal } from "ant-design-vue";
 import VIcon from "../UI/VIcon.vue";
 import { useI18n } from "vue-i18n";
 import useOrder from "@/composable/useOrder";
+import OrderObject from "./OrderObject.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -102,11 +103,12 @@ const siftParams = computed(() => {
       .map(([key, value]) => {
         if (typeof value === "object" && value?.length) {
           return [key, { $in: value }];
-        }
-        // else if (["$sort"].includes(key)) {
-        //   return [];
-        // }
-        else if (["from"].includes(key)) {
+        } else if (["dateOtgruzka"].includes(key)) {
+          return [
+            "dateOtgruzka",
+            { $lte: dayjs(0).add(value, "year").utc().format() },
+          ];
+        } else if (["from"].includes(key)) {
           return ["createdAt", { $gte: value, $lte: props.params.to }];
         } else {
           return [key, value];
@@ -115,6 +117,7 @@ const siftParams = computed(() => {
   );
   return _result;
 });
+// console.log("siftParams: ", siftParams.value);
 
 const columnsData = computed(() => {
   return orderStore.items.filter(sift(siftParams.value)).map((x) => {
@@ -365,6 +368,7 @@ onMounted(async () => {
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
         <div class="flex gap-0">
+          {{ dayjs(record.dateOtgruzka).year() }}
           <a-tooltip v-if="authStore.roles.includes('order-patch')">
             <template #title>
               {{ $t("button.edit") }}
@@ -453,12 +457,12 @@ onMounted(async () => {
       <template v-if="column.key === 'goComplete'">
         <div
           v-if="record.goComplete"
-          class="relative min-w-32 min-h-16 rounded-md bg-green-600 dark:bg-green-700 flex items-center justify-center"
+          class="relative min-w-32 min-h-16 rounded-md bg-green-500 dark:bg-green-700 flex items-center justify-center"
         >
           <div
             class="absolute w-2 h-2 top-1 left-1/2 bg-white dark:bg-g-900 rounded-full z-10"
           ></div>
-          <div class="p-2 pt-4 text-white text-center">
+          <div class="p-2 pt-4 text-black dark:text-white text-center">
             <template v-if="dayjs(record.dateOtgruzka).year() == 1">
               <div>
                 {{ $t("groupOperation.4") }}
@@ -535,7 +539,8 @@ onMounted(async () => {
           }"
           class="flex items-center gap-2"
         >
-          {{ record?.object?.name }}
+          <!-- {{ record?.object?.name }} -->
+          <OrderObject :object-id="record.objectId" />
           <VIcon :path="iChevronRight" />
         </RouterLink>
       </template>

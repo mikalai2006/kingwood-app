@@ -89,7 +89,7 @@ const allWorkers = computed(() =>
     class="relative min-w-32 min-h-16 rounded-md"
     :class="[
       { 'bg-s-200 dark:bg-g-700': !status },
-      { 'bg-green-600 dark:bg-green-700': status },
+      { 'bg-green-500 dark:bg-green-700': status },
     ]"
   >
     <div
@@ -171,7 +171,7 @@ const allWorkers = computed(() =>
             class="text-sm text-nowrap"
             :class="status ? 'text-white' : 'text-black dark:text-g-100'"
           >
-            {{ getShortFIO(worker.user?.name) }}
+            {{ getShortFIO(worker.worker?.name) }}
           </div>
           <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"

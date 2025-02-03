@@ -14,6 +14,7 @@ import { useWorkTimeStore } from "./modules/workTime";
 import { usePayStore } from "./modules/pay";
 import { usePayTemplateStore } from "./modules/pay_template";
 import { useAppErrorStore } from "./modules/appError";
+import { useWorkHistoryStore } from "./modules/workHistory";
 
 export {
   useAuthStore,
@@ -32,4 +33,5 @@ export {
   usePayStore,
   usePayTemplateStore,
   useAppErrorStore,
+  useWorkHistoryStore,
 };

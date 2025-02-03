@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { find, get } from "@/api/object";
 import { IRequestParams } from "@/api/types";
 import { IObject } from "@/api/object/types";
+import { getObjectId } from "@/utils/utils";
 // import sift from 'sift'
 
 export const useObjectStore = defineStore("object", {
@@ -43,6 +44,10 @@ export const useObjectStore = defineStore("object", {
     // },
     onAddItemToStore(item: IObject) {
       const existsItem = this.onExists(item.id);
+      if (getObjectId(item.id) === "0") {
+        return;
+      }
+
       if (existsItem.index == -1) {
         this._items.push(item);
       } else {

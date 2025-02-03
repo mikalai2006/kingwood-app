@@ -1,17 +1,15 @@
 import { defineStore } from "pinia";
+import { find, patch, remove } from "@/api/work_history";
 import {
-  IWorkTimeInput,
-  IWorkTime,
-  IWorkTimeFilter,
-} from "@/api/work_time/types";
-import { find, patch, remove } from "@/api/work_time";
-import { useWorkHistoryStore } from "./workHistory";
-// import sift from 'sift'
+  IWorkHistory,
+  IWorkHistoryFilter,
+  IWorkHistoryInput,
+} from "@/api/work_history/types";
 
-export const useWorkTimeStore = defineStore("workTime", {
+export const useWorkHistoryStore = defineStore("workHistory", {
   state() {
     return {
-      _items: [] as IWorkTime[],
+      _items: [] as IWorkHistory[],
     };
   },
   getters: {
@@ -20,23 +18,15 @@ export const useWorkTimeStore = defineStore("workTime", {
     },
   },
   actions: {
-    async find(params?: IWorkTimeFilter) {
+    async find(params?: IWorkHistoryFilter) {
       const data = await find(params || {});
       data.data?.forEach((el) => {
         this.onAddItemToStore(el);
-
-        if (el.workHistory?.length) {
-          const workHistoryStore = useWorkHistoryStore();
-
-          el.workHistory.forEach((wh) => {
-            workHistoryStore.onAddItemToStore(wh);
-          });
-        }
       });
 
       return data;
     },
-    async patch(id: string, data?: IWorkTimeInput) {
+    async patch(id: string, data?: IWorkHistoryInput) {
       const _item = await patch(id, data || {});
       if (_item) {
         this.onAddItemToStore(_item);
@@ -50,13 +40,13 @@ export const useWorkTimeStore = defineStore("workTime", {
      * @returns
      */
     onExists(id: string): {
-      item: IWorkTime | null;
+      item: IWorkHistory | null;
       index: number;
     } {
       const pageIndex = this._items.findIndex((x) => x.id === id);
       return { item: this._items[pageIndex], index: pageIndex };
     },
-    onAddItemToStore(item: IWorkTime) {
+    onAddItemToStore(item: IWorkHistory) {
       const existsItem = this.onExists(item.id);
       if (existsItem.index == -1) {
         this._items.push(item);
@@ -68,25 +58,28 @@ export const useWorkTimeStore = defineStore("workTime", {
         );
       }
     },
-    onGetInStore(id: string | number, params?: IWorkTime): IWorkTime | null {
+    onGetInStore(
+      id: string | number,
+      params?: IWorkHistory
+    ): IWorkHistory | null {
       let item = null;
       if (params) {
         // search by params
       } else {
-        item = this._items.find((el: IWorkTime) => el.id == id);
+        item = this._items.find((el: IWorkHistory) => el.id == id);
       }
       return item || null;
     },
 
     onRemoveItemFromStore(
       id: string | number,
-      params?: IWorkTimeInput
+      params?: IWorkHistoryInput
     ): number {
       let itemIndex = -1;
       if (params) {
         // search by params
       } else {
-        itemIndex = this._items.findIndex((el: IWorkTime) => el.id == id);
+        itemIndex = this._items.findIndex((el: IWorkHistory) => el.id == id);
       }
 
       if (itemIndex !== -1) {

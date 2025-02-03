@@ -7,10 +7,12 @@ export interface IWorkHistory {
   orderId: string;
   taskId: string;
   workerId: string;
+  workTimeId: string;
   operationId: string;
   status: number;
   from: string;
   to: string;
+  workHistory: IWorkHistory[];
 
   createdAt: Date;
   updatedAt: Date;

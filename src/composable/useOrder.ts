@@ -15,6 +15,57 @@ const useOrder = () => {
   const userStore = useUserStore();
   const orderStore = useOrderStore();
 
+  const counter = computed(() => {
+    return {
+      inWork: orderStore.items.filter((x) => x.status === 1),
+      notWork: orderStore.items.filter((x) => x.status === 0),
+      stolyarComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          x.stolyarComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1
+        //  &&
+        // x.shlifComplete === 0 &&
+        // x.malyarComplete === 0 &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      shlifComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          x.shlifComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1
+        // &&
+        // x.malyarComplete === 0 &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      malyarComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          x.malyarComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1
+        // &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      goComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          // x.malyarComplete === 1 &&
+          x.goComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1
+        //  &&
+        // x.montajComplete === 0
+      ),
+    };
+  });
+
   const openOtgruzka = ref<boolean>(false);
 
   const showModalOtgruzka = () => {
@@ -337,6 +388,8 @@ const useOrder = () => {
 
     state,
     onFetchOrders,
+
+    counter,
   };
 };
 

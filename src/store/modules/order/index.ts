@@ -5,6 +5,7 @@ import { IOrder, IOrderFilter, IOrderInput } from "@/api/order/types";
 import { useObjectStore } from "../object";
 import { useTaskStore } from "../task";
 import { useTaskWorkerStore } from "../task_worker";
+import { getObjectId } from "@/utils/utils";
 // import sift from 'sift'
 
 export const useOrderStore = defineStore("order", {
@@ -55,6 +56,10 @@ export const useOrderStore = defineStore("order", {
     // },
     onAddItemToStore(item: IOrder) {
       const existsItem = this.onExists(item.id);
+      if (getObjectId(item.id) === "0") {
+        return;
+      }
+
       if (existsItem.index == -1) {
         this._items.push(item);
       } else {
@@ -69,6 +74,7 @@ export const useOrderStore = defineStore("order", {
         const objectStore = useObjectStore();
         objectStore.onAddItemToStore(item.object);
       }
+
       if (item.tasks) {
         const taskStore = useTaskStore();
         item.tasks.forEach((el) => {

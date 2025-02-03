@@ -95,11 +95,11 @@
     "removeTask": "Вы действительно хотите удалить задание: %s, заказ №%s %s-%s?",
     "removeTaskWorker": "Вы действительно хотите удалить исполнителя: %s, заказ №%s - %s?",
     "taskComplete": "Успешно завершены все задания для изделия: %s (объект %s)!",
-    "taskWorkerComplete": "Исполнитель %s завершил задание %s для изделия %s (объект %s)!",
+    "taskWorkerComplete": "%s завершил задание %s для изделия %s (объект %s)!",
     "userRemove": "Вы действительно хотите удалить пользователя: %s?",
     "userRemoveOk": "Пользователь успешно удален из системы!",
     "deleteTaskOk": "Задание %s успешно удалено!",
-    "deleteTaskWorkerOk": "Исполнитель %s успешно удален!"
+    "deleteTaskWorkerOk": "%s успешно удален!"
   },
   "info": {
     "notFoundTasks": "Не найдено заданий!",
@@ -111,7 +111,8 @@
     "logoutQuestionTitle": "Выход из аккаунта",
     "logoutQuestionDescription": "Вы действительно хотите покинуть ваш аккаунт?",
     "loading": "Загрузка данных",
-    "notPermission": "У вас нет прав для просмотра!"
+    "notPermission": "У вас нет прав для просмотра!",
+    "notFoundWorkHistory": "Не найдено записей!"
   },
   "page": {
     "notify": {
@@ -170,12 +171,14 @@
     },
     "order": {
       "all": "Все изделия",
-      "montajComplete": "Завершенные по монтажу",
-      "malyarComplete": "Завершенные по малярке",
-      "stolyarComplete": "Завершенные по столярке",
-      "goComplete": "Готовы к отгрузке",
-      "completed": "Завершенные полностью",
-      "notWork": "Не в работе"
+      "montajComplete": "Монтаж окончен",
+      "shlifComplete": "Шлифовка окончена",
+      "malyarComplete": "Отделка окончена",
+      "stolyarComplete": "Изготовление окончено",
+      "goComplete": "Готово к отгрузке",
+      "completed": "Выполненные",
+      "notWork": "Не в работе",
+      "inWork": "В работе"
     },
     "user": {
       "current": "Действующие",
@@ -289,7 +292,11 @@
       "paySize": "Размер",
       "payDolg": "К выдаче",
       "totalByMonth": "Итого за месяц",
-      "totalZpMonth": "Заработано"
+      "totalZpMonth": "Заработано",
+      "object": "Объект",
+      "order": "Заказ",
+      "operation": "Задание",
+      "time": "Затраченное время"
     },
     "payTemplate": {
       "name": "Название шаблона",

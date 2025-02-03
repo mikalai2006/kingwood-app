@@ -2,6 +2,7 @@
 import { IPaneOptionFinancy } from "@/api/types";
 import { usePayStore, useUserStore, useWorkTimeStore } from "@/store";
 import dayjs from "@/utils/dayjs";
+import { getObjectTime } from "@/utils/time";
 import { computed, onMounted } from "vue";
 
 const props = defineProps<{
@@ -34,10 +35,12 @@ const listData = computed(() => {
           )
     )
     .map((x) => {
-      const _totalMinutes = x.workHistory.reduce(
-        (a, b) => a + dayjs(b.to).diff(b.from, "minutes"),
-        0
-      );
+      const _totalMinutes = x.workHistory.reduce((a, b) => {
+        const dayTo = dayjs(b.to);
+        console.log(dayTo.year(), dayTo.diff(b.from));
+
+        return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
+      }, 0);
       return {
         ...x,
         totalMinutes: _totalMinutes,
@@ -48,6 +51,9 @@ const listData = computed(() => {
 
 const totalMoney = computed(() =>
   listData.value.reduce((a, b) => a + b.total, 0)
+);
+const totalMinutesHistory = computed(() =>
+  listData.value.reduce((a, b) => a + b.totalMinutes, 0)
 );
 
 const listPay = computed(() =>
@@ -147,6 +153,9 @@ onMounted(() => {
       <b class="text-s-500 dark:text-p-400">
         {{ (totalMoney + totalPayed).toLocaleString("ru-RU") }} ₽
       </b>
+      <!-- <div>
+        <TimePretty :time="getObjectTime(totalMinutesHistory)" />
+      </div> -->
     </div>
   </div>
 </template>

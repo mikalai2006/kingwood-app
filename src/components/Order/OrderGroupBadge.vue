@@ -127,7 +127,7 @@ const allWorkers = computed(() =>
     class="relative min-w-32 min-h-16 rounded-md"
     :class="[
       { 'bg-s-100 dark:bg-g-700': !status },
-      { 'bg-green-600 dark:bg-green-700': status },
+      { 'bg-green-500 dark:bg-green-700': status },
     ]"
   >
     <div
@@ -207,7 +207,11 @@ const allWorkers = computed(() =>
           <TaskWorkerStatusTagDot :task-worker-id="worker.id" />
           <div
             class="text-sm text-nowrap"
-            :class="status ? 'text-white' : 'text-black dark:text-g-100'"
+            :class="
+              status
+                ? 'text-black dark:text-white'
+                : 'text-black dark:text-g-200'
+            "
           >
             {{ getShortFIO(worker.user?.name) }}
           </div>

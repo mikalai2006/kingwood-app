@@ -160,10 +160,27 @@ onMounted(async () => {
       </div>
     </div>
 
-    <a-tabs v-model:activeKey="activeKey">
+    <a-tabs
+      v-model:activeKey="activeKey"
+      :key="columnKeys.length"
+      destroyInactiveTabPane
+    >
+      <a-tab-pane key="inWork" :tab="$t('tabs.order.inWork')">
+        <OrderList
+          keyList="inWork"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ status: 1 }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
       <a-tab-pane key="all" :tab="$t('tabs.order.all')">
         <div class="flex flex-row items-center">
-          <div class="flex-auto"></div>
+          <div class="flex-auto">
+            <!-- <a-input
+              placeholder="Текст для поиска"
+              v-model:value="querySearch"
+            /> -->
+          </div>
           <div>
             {{ $t("form.order.rangeSearch") }}
             <a-range-picker
@@ -177,53 +194,71 @@ onMounted(async () => {
         :row-class-name="(_record: IOrder, index: number) => (_record.priority ? 'cursor-pointer font-medium text-red-500 dark:text-red-300' : 'cursor-pointer')" 
         -->
         <OrderList
-          key-list="all"
-          :params="{ objectId: objectIds }"
+          :key="rangeSearch.map((x) => x.toString()).join('-')"
+          keyList="all"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{
+            from: rangeSearch[0].format(),
+            to: rangeSearch[1].format(),
+          }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
       <a-tab-pane key="notWork" :tab="$t('tabs.order.notWork')">
         <OrderList
           keyList="notWork"
-          :params="{ status: 0, objectId: objectIds }"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ status: 0 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
       <a-tab-pane key="stolyarComplete" :tab="$t('tabs.order.stolyarComplete')">
         <OrderList
-          key-list="stolyarComplete"
-          :params="{ stolyarComplete: 1, objectId: objectIds }"
+          keyList="stolyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ stolyarComplete: 1 }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="shlifComplete" :tab="$t('tabs.order.shlifComplete')">
+        <OrderList
+          keyList="shlifComplete"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ shlifComplete: 1 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
       <a-tab-pane key="malyarComplete" :tab="$t('tabs.order.malyarComplete')">
         <OrderList
-          key-list="malyarComplete"
-          :params="{ malyarComplete: 1, objectId: objectIds }"
+          keyList="malyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ malyarComplete: 1 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
       <a-tab-pane key="goComplete" :tab="$t('tabs.order.goComplete')">
         <OrderList
-          key-list="goComplete"
-          :params="{
-            goComplete: 1,
-            montajComplete: 0,
-            objectId: objectIds,
-          }"
+          keyList="goComplete"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ goComplete: 1, montajComplete: 0 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
+      <!-- <a-tab-pane key="montajComplete" :tab="$t('tabs.order.montajComplete')">
+        <OrderList
+          :params="{ montajComplete: 1 }"
+          :columns="columns"
+          @show-order-info="showOrderInfo"
+          @on-otgruzka="onOtgruzka"
+          @on-edit-item="onEditItem"
+          @on-date-start="onDateStart"
+        />
+      </a-tab-pane> -->
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
-          key-list="completed"
-          :params="{ status: 100, objectId: objectIds }"
+          keyList="completed"
           :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ status: 100 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>

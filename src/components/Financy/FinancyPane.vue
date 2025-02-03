@@ -14,6 +14,7 @@ import FinancyDay from "./FinancyDay.vue";
 import FinancyPaneTable from "./FinancyPaneTable.vue";
 import { IPay, IPayInput } from "@/api/pay/types";
 import VFormPay from "../Form/VFormPay.vue";
+import { getShortFIO } from "@/utils/utils";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -46,6 +47,7 @@ const daysList = computed(() =>
       "D-M-YYYY"
     );
     return {
+      key: x.toString(),
       day: x + 1,
       dayWeek: _date.day(),
       dayName: _date.format("dddd"),
@@ -81,7 +83,9 @@ const onQuery = (isSaveOption: boolean) => {
     orderId: orderId.value,
     workerId: workerId.value,
     title: worker.value
-      ? `${worker.value.name} (${currentDate.value.format("YYYY-MM")})`
+      ? `${getShortFIO(worker.value.name)} - ${currentDate.value.format(
+          "YYYY-MM"
+        )}`
       : props.pane.title,
   };
   if (isSaveOption) {

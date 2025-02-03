@@ -6,6 +6,8 @@ import {
   ITaskWorkerFilter,
   ITaskWorkerInput,
 } from "@/api/task_worker/types";
+import { getObjectId } from "@/utils/utils";
+import { useUserStore } from "../user";
 // import sift from 'sift'
 
 export const useTaskWorkerStore = defineStore("taskWorker", {
@@ -55,6 +57,11 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
           this._items[existsItem.index],
           item
         );
+      }
+
+      if (item.worker && getObjectId(item.worker.id) != "0") {
+        const userStore = useUserStore();
+        userStore.onAddItemToStore(item.worker);
       }
     },
     onRemoveItemFromStore(

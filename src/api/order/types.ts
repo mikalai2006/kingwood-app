@@ -25,6 +25,7 @@ export interface IOrder {
   goComplete: number;
   dateOtgruzka: string;
   montajComplete: number;
+  shlifComplete: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -41,9 +42,11 @@ export interface IOrderFilter extends IPaginationParams<IOrderInput> {
   status?: number;
   objectId?: string[];
   stolyarComplete?: number;
+  shlifComplete?: number;
   malyarComplete?: number;
   goComplete?: number;
   montajComplete?: number;
+  dateOtgruzka?: string;
 
   from?: string;
   to?: string;

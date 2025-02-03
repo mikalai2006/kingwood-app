@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store";
-import { computed, ref } from "vue";
+import { computed, h, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
+import VIcon from "./UI/VIcon.vue";
+import { iWraningTriangle } from "@/utils/icons";
 
 const route = useRoute();
 
@@ -22,6 +24,77 @@ const menuItems = computed(() =>
     // "task_status",
   ].filter((x) => authStore.roles.includes(`${x}-list`))
 );
+
+// const state = reactive({
+//   collapsed: false,
+//   selectedKeys: ["1"],
+//   openKeys: ["sub1"],
+//   preOpenKeys: ["sub1"],
+// });
+// const items = reactive([
+//   {
+//     key: "1",
+//     icon: () =>
+//       h(VIcon, {
+//         path: iWraningTriangle,
+//         class: "flex-none text-2xl text-s-500 dark:text-g-400",
+//       }),
+//     label: "Option 1",
+//     title: "Option 1",
+//   },
+//   {
+//     key: "2",
+//     icon: () =>
+//       h(VIcon, {
+//         path: iWraningTriangle,
+//         class: "flex-none text-xl text-s-500 dark:text-g-400",
+//       }),
+//     label: "Option 2",
+//     title: "Option 2",
+//   },
+//   {
+//     key: "3",
+//     icon: () =>
+//       h(VIcon, {
+//         path: iWraningTriangle,
+//         class: "flex-none text-xl text-s-500 dark:text-g-400",
+//       }),
+//     label: "Option 3",
+//     title: "Option 3",
+//   },
+//   {
+//     key: "sub1",
+//     icon: () =>
+//       h(VIcon, {
+//         path: iWraningTriangle,
+//         class: "flex-none text-xl text-s-500 dark:text-g-400",
+//       }),
+//     label: "Navigation One",
+//     title: "Navigation One",
+//     children: [
+//       {
+//         key: "5",
+//         label: "Option 5",
+//         title: "Option 5",
+//       },
+//       {
+//         key: "6",
+//         label: "Option 6",
+//         title: "Option 6",
+//       },
+//       {
+//         key: "7",
+//         label: "Option 7",
+//         title: "Option 7",
+//       },
+//       {
+//         key: "8",
+//         label: "Option 8",
+//         title: "Option 8",
+//       },
+//     ],
+//   },
+// ]);
 </script>
 <template>
   <nav class="p-4 space-y-1">
@@ -48,4 +121,12 @@ const menuItems = computed(() =>
       </RouterLink>
     </template>
   </nav>
+  <!-- <a-menu
+    v-model:openKeys="state.openKeys"
+    v-model:selectedKeys="state.selectedKeys"
+    mode="inline"
+    theme="dark"
+    :inline-collapsed="state.collapsed"
+    :items="items"
+  ></a-menu> -->
 </template>

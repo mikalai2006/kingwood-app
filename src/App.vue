@@ -433,7 +433,9 @@ onErrorCaptured((error: any, vm, info) => {
                   v-if="authStore.iam?.id"
                   class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2"
                 >
-                  <UserInfoAside />
+                  <div class="flex-auto">
+                    <UserInfoAside />
+                  </div>
                   <UserExitButton />
                 </div>
               </aside>

@@ -7,6 +7,9 @@ import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
 import { useI18n } from "vue-i18n";
 import FinancyPaneTableTotal from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
+import FinancyDetails from "./FinancyDetails.vue";
+import VIcon from "../UI/VIcon.vue";
+import { iChevronDown, iMinus, iPlusLg } from "@/utils/icons";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -60,8 +63,8 @@ const columns = ref([
   <a-table
     :columns="columns"
     :data-source="data"
-    expandRowByClick
     bordered
+    expandRowByClick
     sticky
     size="small"
     :pagination="{
@@ -69,23 +72,7 @@ const columns = ref([
     }"
     :row-class-name="(_record: any, index: number) => ([0,6].includes(_record.dayWeek)  ? 'custom priority cursor-pointer bg-p-500/30 dark:bg-p-500/15 hover:!bg-p-500/40 dark:hover:!bg-p-500/30' : 'cursor-pointer')"
   >
-    <!-- 
-    :customRow="
-            (record: IOrder) => {
-              return {
-                // xxx, // props
-                onClick: () => {
-                  emit('showOrderInfo', record)
-                }, // click row
-                // onDblclick: (event) => {}, // double click row
-                // onContextmenu: (event) => {}  // right button click row
-                // onMouseenter: (event) => {}   // mouse enter row
-                // onMouseleave: (event) => {}   // mouse leave row
-              };
-            }
-          " -->
     <template #bodyCell="{ column, record }">
-      <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'day'">
         <div class="text-xl text-g-800 dark:text-g-200">
           {{ record.day }}
@@ -105,14 +92,10 @@ const columns = ref([
       </template>
 
       <template v-if="column.key === 'totalTime'">
-        <!-- <div>
-      <TimePretty :time="getObjectTime(workTimeTotal - workHistoryTotal)" />
-    </div> -->
         <div
           v-if="workTimes[record.day]"
           class="text-base text-g-500 dark:text-g-400"
         >
-          <!-- {{ $t("form.financy.totalTimeWork") }}: -->
           <TimePretty
             :time="
               getObjectTime(
@@ -125,6 +108,33 @@ const columns = ref([
           />
         </div>
       </template>
+    </template>
+
+    <template #expandedRowRender="{ record }">
+      <template v-if="workTimes[record.day]?.length">
+        <!-- record {{ workTimes[record.day][0]?.id }} -->
+        <FinancyDetails :work-times="workTimes[record.day]" />
+      </template>
+      <template v-else>
+        <p>{{ $t("info.notFoundWorkHistory") }}</p>
+      </template>
+    </template>
+    <!-- <template #expandColumnTitle>
+      <span style="color: red">More</span>
+    </template> -->
+    <template #expandIcon="{ expanded, onExpand, record }">
+      <VIcon
+        v-if="!expanded"
+        :path="iChevronDown"
+        class="transition-all rotate-0"
+        @click="(e) => onExpand(record, e)"
+      />
+      <VIcon
+        v-else
+        :path="iChevronDown"
+        class="transition-all rotate-180"
+        @click="(e) => onExpand(record, e)"
+      />
     </template>
   </a-table>
 </template>
