@@ -169,7 +169,7 @@ onMounted(async () => {
         <OrderList
           keyList="inWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 1 }"
+          :params="{ status: 1, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -200,6 +200,7 @@ onMounted(async () => {
           :params="{
             from: rangeSearch[0].format(),
             to: rangeSearch[1].format(),
+            objectId: objectIds,
           }"
           @on-edit-item="onEditItem"
         />
@@ -208,7 +209,7 @@ onMounted(async () => {
         <OrderList
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 0 }"
+          :params="{ status: 0, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -216,7 +217,7 @@ onMounted(async () => {
         <OrderList
           keyList="stolyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ stolyarComplete: 1 }"
+          :params="{ stolyarComplete: 1, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -224,7 +225,7 @@ onMounted(async () => {
         <OrderList
           keyList="shlifComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ shlifComplete: 1 }"
+          :params="{ shlifComplete: 1, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -232,7 +233,7 @@ onMounted(async () => {
         <OrderList
           keyList="malyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ malyarComplete: 1 }"
+          :params="{ malyarComplete: 1, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -240,7 +241,7 @@ onMounted(async () => {
         <OrderList
           keyList="goComplete"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ goComplete: 1, montajComplete: 0 }"
+          :params="{ goComplete: 1, montajComplete: 0, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -258,7 +259,7 @@ onMounted(async () => {
         <OrderList
           keyList="completed"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 100 }"
+          :params="{ status: 100, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
