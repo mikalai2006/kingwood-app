@@ -179,3 +179,13 @@ autoUpdater.on("download-progress", (progressObj) => {
 autoUpdater.on("update-downloaded", (info) => {
   sendStatusToWindow("Update downloaded");
 });
+
+//-------------------------------------------------------------------
+// Auto updates - Option 1 - Simplest version
+//
+// This will immediately download an update, then install when the
+// app quits.
+//-------------------------------------------------------------------
+app.on("ready", function () {
+  autoUpdater.checkForUpdatesAndNotify();
+});

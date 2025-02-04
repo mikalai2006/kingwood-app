@@ -28,6 +28,12 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
       body,
     }).show();
   },
+  message: (title, body) => {
+    new Notification({
+      title,
+      body,
+    }).show();
+  },
   // You can expose other APTs you need here.
   // ...
 });
