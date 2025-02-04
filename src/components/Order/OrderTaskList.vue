@@ -63,8 +63,8 @@ const onSaveSortOrder = async () => {
   });
 
   await sort(data)
-    .then((r: ITask[]) => {
-      r.forEach((element) => {
+    .then((r: any) => {
+      r.forEach((element: ITask) => {
         taskStore.onAddItemToStore(element);
       });
       message.success("Порядок задач успешно изменен!");

@@ -16,7 +16,7 @@ enum URLS {
 }
 
 const login = async (data: ILoginData): Promise<IResResultLogin> =>
-  await fetch("/api/v1" + URLS.auth_login, {
+  await fetch(import.meta.env.VITE_HOST_API + "/api/v1" + URLS.auth_login, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -43,7 +43,7 @@ const register = async (data: IUser): Promise<IUser> =>
 const refresh_token = async (
   data: ILoginRefreshToken
 ): Promise<IResResultLogin> =>
-  await fetch("/api/v1" + URLS.refresh_token, {
+  await fetch(import.meta.env.VITE_HOST_API + "/api/v1" + URLS.refresh_token, {
     method: "POST",
     headers: {
       Accept: "application/json",

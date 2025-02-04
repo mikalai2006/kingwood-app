@@ -213,7 +213,7 @@ const allWorkers = computed(() =>
                 : 'text-black dark:text-g-200'
             "
           >
-            {{ getShortFIO(worker.user?.name) }}
+            {{ getShortFIO(worker.worker?.name) }}
           </div>
           <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"

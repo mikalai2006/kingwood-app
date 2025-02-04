@@ -96,7 +96,7 @@ export const getObjectId = (id: string) => {
 
 export const replaceSubstringByArray = function (
   text: string,
-  replacements: (string | number | undefined)[]
+  replacements: any[]
 ) {
   const regex = /(\%s)/g;
   const _text = text.replace(regex, () => replacements.shift());

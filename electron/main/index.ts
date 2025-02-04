@@ -58,7 +58,7 @@ async function createWindow() {
     width: 1600,
     height: 900,
     autoHideMenuBar: true,
-    // frame: false,
+    frame: false,
     titleBarStyle: "hidden",
     titleBarOverlay: {
       color: "#2f324100",
@@ -75,6 +75,7 @@ async function createWindow() {
     win.webContents.session.clearCache();
   } else {
     win.loadFile(indexHtml);
+    win.webContents.openDevTools();
   }
 
   // Test actively push message to the Electron-Renderer

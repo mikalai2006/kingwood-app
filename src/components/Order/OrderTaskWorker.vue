@@ -59,7 +59,7 @@ const statuses = computed(() => [
 //   })
 // );
 
-const onDeleteTask = (item: ITask) => {
+const onDeleteTask = (item: any) => {
   console.log("Delete task: ", item);
   //   await emit("onDeleteTask", item);
   return new Promise((resolve) => {

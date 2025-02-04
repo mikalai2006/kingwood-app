@@ -27,7 +27,10 @@ const formState = reactive<FormState>({
 
 const { onGetValidateError } = useError();
 
+const loading = ref(false);
+
 const onFinish = async (values: any) => {
+  loading.value = true;
   try {
     await authStore
       .login(formState)
@@ -46,6 +49,8 @@ const onFinish = async (values: any) => {
       });
   } catch (e: any) {
     message.error(t(e?.message));
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -91,7 +96,9 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
       </a-form-item> -->
 
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-          <a-button type="primary" html-type="submit">Войти</a-button>
+          <a-button type="primary" :loading="loading" html-type="submit">
+            Войти
+          </a-button>
         </a-form-item>
       </a-form>
     </div>

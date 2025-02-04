@@ -105,12 +105,12 @@ const routes = [
     component: MontajList,
     meta: { requiresAuth: true },
   },
-  {
-    path: "/montajList/:day",
-    name: "montajListDay",
-    component: MontajListDay,
-    meta: { requiresAuth: true },
-  },
+  // {
+  //   path: "/montajList/:day",
+  //   name: "montajListDay",
+  //   component: MontajListDay,
+  //   meta: { requiresAuth: true },
+  // },
 
   {
     path: "/dashboard",

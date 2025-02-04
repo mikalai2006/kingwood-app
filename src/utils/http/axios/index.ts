@@ -18,7 +18,7 @@ axios.defaults.headers.post["Access-Control-Allow-Origin-Type"] = "*";
 // axios.defaults.maxBodyLength = Infinity
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "/api/v1", // import.meta.env.VITE_HOST_API +
+  baseURL: import.meta.env.VITE_HOST_API + "/api/v1", // import.meta.env.VITE_HOST_API +
 });
 
 // axios instance intercepts the response

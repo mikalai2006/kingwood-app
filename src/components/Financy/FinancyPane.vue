@@ -158,7 +158,7 @@ const defaultData = computed<IPayInput>(() => {
   };
 });
 
-const dataForm = ref({});
+const dataForm = ref<IPayInput>({});
 
 const onAddPay = () => {
   dataForm.value = { ...defaultData.value };

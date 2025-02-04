@@ -368,7 +368,6 @@ onMounted(async () => {
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
         <div class="flex gap-0">
-          {{ dayjs(record.dateOtgruzka).year() }}
           <a-tooltip v-if="authStore.roles.includes('order-patch')">
             <template #title>
               {{ $t("button.edit") }}

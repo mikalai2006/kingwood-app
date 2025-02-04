@@ -232,6 +232,7 @@ onErrorCaptured((error: any, vm, info) => {
 </script>
 
 <template>
+  <div class="absolute top-0 h-8 w-full title-drag"></div>
   <a-config-provider
     :locale="ruRU"
     :theme="{

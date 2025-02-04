@@ -19,6 +19,10 @@
     -ms-overflow-style: none;
   }
 
+  .title-drag {
+    app-region: drag;
+  }
+
   .b-scroll::-webkit-scrollbar-track,
   .ant-modal-wrap::-webkit-scrollbar-track {
     @apply bg-s-100 dark:bg-g-800;
