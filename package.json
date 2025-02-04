@@ -24,6 +24,13 @@
     "mac": {
       "category": "kingwood.app.category.type"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "mikalai2006",
+        "repo": "kingwood-app"
+      }
+    ],
     "directories": {
       "output": "release",
       "buildResources": "dist"
