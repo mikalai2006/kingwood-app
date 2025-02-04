@@ -62,7 +62,7 @@
     "vue-tsc": "^2.0.6"
   },
   "dependencies": {
-    "@vueuse/integrations": "^11.2.0",
+    "@vueuse/integrations": "^12.5.0",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.7.7",
     "dayjs": "^1.11.13",
