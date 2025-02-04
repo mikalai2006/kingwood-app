@@ -1,6 +1,6 @@
 {
   "name": "kingwood-app",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "main": "dist-electron/main/index.js",
   "description": "Kingwood app",
   "homepage": ".",
@@ -50,7 +50,7 @@
     "dev": "vite --force",
     "build": "vue-tsc --noEmit && vite build && electron-builder",
     "preview": "vite preview",
-    "publish": "electron-builder --win -p always"
+    "publish": "electron-builder -p always"
   },
   "devDependencies": {
     "@types/lodash-es": "^4.17.12",
