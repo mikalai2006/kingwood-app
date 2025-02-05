@@ -25,7 +25,7 @@
       "category": "kingwood.app.category.type"
     },
     "win": {
-      "icon": "public/icon.ico"
+      "icon": "public/icon.png"
     },
     "publish": [
       {
