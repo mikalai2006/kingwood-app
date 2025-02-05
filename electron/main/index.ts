@@ -56,7 +56,7 @@ let win: BrowserWindow | null = null;
 const preload = path.join(__dirname, "../preload/index.mjs");
 const indexHtml = path.join(RENDERER_DIST, "index.html");
 
-const appIcon = nativeImage.createFromPath("../public/icon.png");
+const appIcon = nativeImage.createFromPath("../public/icon.ico");
 
 async function createWindow() {
   win = new BrowserWindow({

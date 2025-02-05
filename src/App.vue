@@ -126,7 +126,8 @@ watch(
 
 onMounted(async () => {
   window?.ipcRenderer.on("message", function (event, text) {
-    alert(text);
+    // alert(text);
+    noty.onShowNotify(text);
   });
 
   try {
