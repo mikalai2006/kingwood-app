@@ -229,6 +229,10 @@ onErrorCaptured((error: any, vm, info) => {
   onShowError(error);
   return false; // Prevents the error from propagating further
 });
+
+window?.ipcRenderer.on("message", function (event, text) {
+  alert(text);
+});
 </script>
 
 <template>

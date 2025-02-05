@@ -24,6 +24,9 @@
     "mac": {
       "category": "kingwood.app.category.type"
     },
+    "win": {
+      "icon": "public/icon.png"
+    },
     "publish": [
       {
         "provider": "github",

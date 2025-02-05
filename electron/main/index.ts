@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from "electron";
+import { app, BrowserWindow, shell, ipcMain, nativeImage } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -56,10 +56,12 @@ let win: BrowserWindow | null = null;
 const preload = path.join(__dirname, "../preload/index.mjs");
 const indexHtml = path.join(RENDERER_DIST, "index.html");
 
+const appIcon = nativeImage.createFromPath("../public/icon.png");
+
 async function createWindow() {
   win = new BrowserWindow({
     title: "App",
-    icon: path.join(process.env.VITE_PUBLIC, "favicon.ico"),
+    icon: appIcon, // path.join(process.env.VITE_PUBLIC, "icon.png"),
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -89,7 +91,7 @@ async function createWindow() {
     win.webContents.session.clearCache();
   } else {
     win.loadFile(indexHtml);
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
   }
 
   // Test actively push message to the Electron-Renderer
@@ -164,29 +166,31 @@ function sendStatusToWindow(text) {
 }
 
 autoUpdater.on("checking-for-update", () => {
-  sendStatusToWindow("Checking for update...");
+  sendStatusToWindow("Проверка обновлений...");
 });
 autoUpdater.on("update-available", (info) => {
-  sendStatusToWindow("Update available.");
+  sendStatusToWindow("Доступно обновление для программы!");
 });
-autoUpdater.on("update-not-available", (info) => {
-  sendStatusToWindow("Update not available.");
-});
+// autoUpdater.on("update-not-available", (info) => {
+//   sendStatusToWindow("Update not available.");
+// });
 autoUpdater.on("error", (err) => {
-  sendStatusToWindow("Error in auto-updater. " + err);
+  sendStatusToWindow("Ошибка в автообновлении: " + err);
 });
-autoUpdater.on("download-progress", (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + " - Downloaded " + progressObj.percent + "%";
-  log_message =
-    log_message +
-    " (" +
-    progressObj.transferred +
-    "/" +
-    progressObj.total +
-    ")";
-  sendStatusToWindow(log_message);
-});
+// autoUpdater.on("download-progress", (progressObj) => {
+//   let log_message = ""; // "Download speed: " + progressObj.bytesPerSecond;
+//   log_message = log_message + "Скачано " + progressObj.percent + "%";
+//   log_message =
+//     log_message +
+//     " (" +
+//     progressObj.transferred +
+//     "/" +
+//     progressObj.total +
+//     ")";
+//   sendStatusToWindow(log_message);
+// });
 autoUpdater.on("update-downloaded", (info) => {
-  sendStatusToWindow("Update downloaded");
+  sendStatusToWindow(
+    "Обновления успешно загружены! Перезапустите программу для установки обновлений!"
+  );
 });
