@@ -56,12 +56,12 @@ let win: BrowserWindow | null = null;
 const preload = path.join(__dirname, "../preload/index.mjs");
 const indexHtml = path.join(RENDERER_DIST, "index.html");
 
-const appIcon = nativeImage.createFromPath("../public/icon.png");
+const appIcon = nativeImage.createFromPath("../public/icon.ico");
 
 async function createWindow() {
   win = new BrowserWindow({
     title: "App",
-    icon: appIcon, // path.join(process.env.VITE_PUBLIC, "icon.png"),
+    icon: appIcon, // path.join(process.env.VITE_PUBLIC, "icon.ico"),
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -91,7 +91,7 @@ async function createWindow() {
     win.webContents.session.clearCache();
   } else {
     win.loadFile(indexHtml);
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
   }
 
   // Test actively push message to the Electron-Renderer

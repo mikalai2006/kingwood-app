@@ -125,6 +125,10 @@ watch(
 );
 
 onMounted(async () => {
+  window?.ipcRenderer.on("message", function (event, text) {
+    alert(text);
+  });
+
   try {
     generalStore.onGetMode();
     await authStore.initToken();
@@ -228,10 +232,6 @@ onErrorCaptured((error: any, vm, info) => {
 
   onShowError(error);
   return false; // Prevents the error from propagating further
-});
-
-window?.ipcRenderer.on("message", function (event, text) {
-  alert(text);
 });
 </script>
 
