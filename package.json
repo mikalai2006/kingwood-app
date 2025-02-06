@@ -1,6 +1,6 @@
 {
   "name": "kingwood-app",
-  "version": "1.0.11",
+  "version": "0.1.1",
   "main": "dist-electron/main/index.js",
   "description": "Kingwood app",
   "homepage": ".",
@@ -26,7 +26,7 @@
       "category": "kingwood.app.category.type"
     },
     "win": {
-      "icon": "public/icon.png"
+      "icon": "public/icon.icns"
     },
     "publish": [
       {
