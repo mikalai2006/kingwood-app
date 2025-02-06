@@ -56,12 +56,12 @@ let win: BrowserWindow | null = null;
 const preload = path.join(__dirname, "../preload/index.mjs");
 const indexHtml = path.join(RENDERER_DIST, "index.html");
 
-const appIcon = nativeImage.createFromPath("../public/icon.ico");
+// const appIcon = nativeImage.createFromPath("../public/icon_black.ico");
 
 async function createWindow() {
   win = new BrowserWindow({
     title: "App",
-    icon: appIcon, // path.join(process.env.VITE_PUBLIC, "icon.ico"),
+    icon: path.join(process.env.VITE_PUBLIC, "icon_black.ico"),
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -168,9 +168,9 @@ function sendStatusToWindow(text) {
 autoUpdater.on("checking-for-update", () => {
   sendStatusToWindow("Проверка обновлений...");
 });
-autoUpdater.on("update-available", (info) => {
-  sendStatusToWindow("Доступно обновление для программы!");
-});
+// autoUpdater.on("update-available", (info) => {
+//   sendStatusToWindow("Доступно обновление для программы!");
+// });
 // autoUpdater.on("update-not-available", (info) => {
 //   sendStatusToWindow("Update not available.");
 // });
@@ -191,6 +191,6 @@ autoUpdater.on("error", (err) => {
 // });
 autoUpdater.on("update-downloaded", (info) => {
   sendStatusToWindow(
-    "Обновления успешно загружены! Перезапустите программу для установки обновлений!"
+    "Обновления для программы успешно загружены! Перезапустите программу для применения обновлений!"
   );
 });

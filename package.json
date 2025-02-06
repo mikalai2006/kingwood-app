@@ -1,6 +1,6 @@
 {
   "name": "kingwood-app",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "main": "dist-electron/main/index.js",
   "description": "Kingwood app",
   "homepage": ".",
@@ -20,6 +20,7 @@
     }
   },
   "build": {
+    "productName": "KWApp",
     "appId": "kingwood-app",
     "mac": {
       "category": "kingwood.app.category.type"

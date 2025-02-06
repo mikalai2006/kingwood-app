@@ -21,6 +21,7 @@ const login = async (data: ILoginData): Promise<IResResultLogin> =>
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
     },
     body: JSON.stringify({ ...data }),
   })

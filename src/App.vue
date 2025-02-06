@@ -125,10 +125,10 @@ watch(
 );
 
 onMounted(async () => {
-  window?.ipcRenderer.on("message", function (event, text) {
-    // alert(text);
-    noty.onShowNotify(text);
-  });
+  // window?.ipcRenderer.on("message", function (event, text) {
+  //   // alert(text);
+  //   noty.onShowNotify(text);
+  // });
 
   try {
     generalStore.onGetMode();
