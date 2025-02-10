@@ -5,6 +5,7 @@ import dayjs from "@/utils/dayjs";
 import { IOrder, IOrderFilter } from "@/api/order/types";
 import {
   useAuthStore,
+  useGeneralStore,
   useObjectStore,
   useOrderStore,
   useUserStore,
@@ -26,6 +27,9 @@ import VIcon from "../UI/VIcon.vue";
 import { useI18n } from "vue-i18n";
 import useOrder from "@/composable/useOrder";
 import OrderObject from "./OrderObject.vue";
+import { Colors } from "@/utils/colors";
+import OrderMessages from "./OrderMessages.vue";
+import OrderTaskList from "./OrderTaskList.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -59,6 +63,8 @@ const emit = defineEmits([
 
 const { t } = useI18n();
 
+const generalStore = useGeneralStore();
+
 const nameKeyLocalStorage = computed(
   () => `tableConfig.order.${props.keyList}`
 );
@@ -79,6 +85,7 @@ const {
   defaultDataOtgruzka,
   openOrderInfo,
   currentOrderInModal,
+  currentOrderObjectInModal,
   onAddNewTask,
   onEditTask,
   dateFormStart,
@@ -108,6 +115,8 @@ const siftParams = computed(() => {
             "dateOtgruzka",
             { $lte: dayjs(0).add(value, "year").utc().format() },
           ];
+        } else if (["name"].includes(key)) {
+          return ["name", { $regex: value, $options: "i" }];
         } else if (["from"].includes(key)) {
           return ["createdAt", { $gte: value, $lte: props.params.to }];
         } else {
@@ -332,6 +341,8 @@ onMounted(async () => {
 //     immediate: false,
 //   }
 // );
+
+const activeKey = ref("list");
 </script>
 
 <template>
@@ -364,6 +375,9 @@ onMounted(async () => {
       showSizeChanger: true,
     }"
   >
+    <template #title>
+      <slot name="header"></slot>
+    </template>
     <template #bodyCell="{ column, record }">
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
@@ -533,7 +547,7 @@ onMounted(async () => {
           :to="{
             name: 'objectOrderId',
             params: {
-              objectId: record?.object.id,
+              objectId: record.objectId,
             },
           }"
           class="flex items-center gap-2"
@@ -720,45 +734,100 @@ onMounted(async () => {
 
   <a-modal
     v-model:open="openOrderInfo"
-    width="1000px"
+    width="70%"
+    style="margin: 0 auto"
     :key="currentOrderInModal?.id"
-    wrapClassName="b-scroll"
+    wrapClassName="b-scroll full-modal"
+    :bodyStyle="{ margin: 0, padding: 0 }"
+    :destroyOnClose="true"
     :maskClosable="false"
     :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
     :cancel-text="$t('button.close')"
     @cancel="
       () => {
+        activeKey = 'list';
         openOrderInfo = false;
       }
     "
   >
     <template #title>
-      <p class="text-xl">
-        {{ currentOrderInModal?.object?.name }}, №{{
+      <p class="text-xl leading-6">
+        {{ currentOrderObjectInModal?.name }}, №{{
           currentOrderInModal?.number
         }}
         -
         {{ currentOrderInModal?.name }}
       </p>
     </template>
-    <div v-if="currentOrderInModal" class="-mt-4 -ml-4 pl-4 py-4">
-      <template v-if="authStore.roles.includes('task-list')">
-        <OrderTaskList
-          :order-id="currentOrderInModal.id"
-          @on-edit-task="onEditTask"
-        />
-      </template>
-      <template v-else>
-        <a-alert :message="$t('info.notPermission')" banner />
-      </template>
-      <a-button
-        v-if="authStore.roles.includes('task-create')"
-        type="primary"
-        @click="onAddNewTask(currentOrderInModal)"
-        class="mt-4"
+    <div v-if="currentOrderInModal" class="">
+      <a-tabs
+        v-model:activeKey="activeKey"
+        destroyInactiveTabPane
+        :tabBarStyle="{
+          position: 'sticky',
+          top: 0,
+          'padding-left': '15px',
+          margin: '2px',
+          'z-index': 50,
+          background:
+            generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.white,
+        }"
       >
-        {{ $t("form.task.add") }}
-      </a-button>
+        <a-tab-pane key="list" :tab="$t('tabs.task.list')">
+          <template v-if="authStore.roles.includes('task-list')">
+            <div class="px-4">
+              <OrderTaskList
+                :order-id="currentOrderInModal.id"
+                @on-edit-task="onEditTask"
+              />
+              <a-button
+                v-if="authStore.roles.includes('task-create')"
+                type="primary"
+                @click="onAddNewTask(currentOrderInModal)"
+                class="mt-4"
+              >
+                {{ $t("form.task.add") }}
+              </a-button>
+            </div>
+          </template>
+          <template v-else>
+            <a-alert :message="$t('info.notPermission')" banner />
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="message" :tab="$t('tabs.task.message')">
+          <OrderMessages :orderId="currentOrderInModal.id" />
+        </a-tab-pane>
+      </a-tabs>
     </div>
   </a-modal>
 </template>
+
+<style>
+.full-modal {
+  .ant-modal {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh);
+  }
+  .ant-modal-body {
+    flex: 1;
+    padding: 15px;
+  }
+  .ant-modal-content {
+    padding: 0;
+    border-radius: 0 !important;
+  }
+  .ant-modal-header {
+    margin: 0;
+    padding: 15px;
+    padding-bottom: 0;
+  }
+}
+</style>

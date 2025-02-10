@@ -7,6 +7,7 @@ import dayjs from "@/utils/dayjs";
 import { DownOutlined } from "@ant-design/icons-vue";
 import {
   useAuthStore,
+  useGeneralStore,
   usePostStore,
   useTaskStore,
   useTaskWorkerStore,
@@ -18,11 +19,13 @@ import VImg from "@/components/UI/VImg.vue";
 import UserList from "@/components/User/UserList.vue";
 import { message, Modal } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iWraningTriangle } from "@/utils/icons";
+import { iCog, iWraningTriangle } from "@/utils/icons";
+import { Colors } from "@/utils/colors";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
 const postStore = usePostStore();
+const generalStore = useGeneralStore();
 
 const { t } = useI18n();
 
@@ -221,34 +224,42 @@ onMounted(() => {
   <div class="flex-auto p-4">
     <VHeader :title="$t('page.user.title')" class="mb-4">
       <template #back>&nbsp;</template>
-    </VHeader>
-    <div class="flex flex-row items-center">
-      <div class="flex-auto">
-        <a-button type="primary" @click="onAddNewItem">
-          {{ $t("form.add") }}
-        </a-button>
-      </div>
-      <div class="flex gap-2">
-        <span class="whitespace-nowrap">
-          {{ $t("table.order.fields") }}
-        </span>
-        <a-select
-          v-model:value="columnKeys"
-          mode="multiple"
-          style="width: 100%; min-width: 200px"
-          :placeholder="$t('table.order.fields')"
-          :max-tag-count="3"
-          :removeIcon="null"
-          :options="optionsForSelect"
-          @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
-        >
-          <template #maxTagPlaceholder="omittedValues">
-            <span style="color: red">+ {{ omittedValues.length }} ...</span>
-          </template>
-          <!-- <template #option="{ value, label }">
+      <template #header>
+        <div class="flex flex-row items-center">
+          <div class="flex-auto">
+            <a-button type="primary" @click="onAddNewItem">
+              {{ $t("form.add") }}
+            </a-button>
+          </div>
+          <div class="flex gap-2">
+            <a-popover
+              :title="$t('table.order.fields')"
+              trigger="click"
+              placement="topRight"
+            >
+              <template #content>
+                <!-- <span class="whitespace-nowrap">
+                  {{ $t("table.order.fields") }}
+                </span> -->
+                <a-select
+                  v-model:value="columnKeys"
+                  mode="multiple"
+                  style="width: 100%; min-width: 200px"
+                  :placeholder="$t('table.order.fields')"
+                  :max-tag-count="3"
+                  :removeIcon="null"
+                  :options="optionsForSelect"
+                  @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
+                >
+                  <template #maxTagPlaceholder="omittedValues">
+                    <span style="color: red"
+                      >+ {{ omittedValues.length }} ...</span
+                    >
+                  </template>
+                  <!-- <template #option="{ value, label }">
             {{ label }}
           </template> -->
-          <!-- <a-select-option
+                  <!-- <a-select-option
             v-for="col in columns"
             :value="col.key"
             :label="$t(`tabs.order.${col.key}`)"
@@ -256,11 +267,32 @@ onMounted(() => {
             <span role="img" aria-label="Japan">🇯🇵</span>
             {{ $t(`tabs.order.${col.key}`) }}
           </a-select-option> -->
-        </a-select>
-      </div>
-    </div>
+                </a-select>
+              </template>
+              <a-button type="text">
+                <VIcon :path="iCog" class="text-lg" />
+              </a-button>
+            </a-popover>
+          </div>
+        </div>
+      </template>
+    </VHeader>
 
-    <a-tabs v-model:activeKey="activeKey" destroyInactiveTabPane>
+    <a-tabs
+      v-model:activeKey="activeKey"
+      destroyInactiveTabPane
+      type="card"
+      class="mt-4"
+      :tabBarStyle="{
+        position: 'sticky',
+        top: 0,
+        'padding-left': '15px',
+        margin: '0px',
+        'z-index': 50,
+        background:
+          generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
+      }"
+    >
       <a-tab-pane key="current" :tab="$t('tabs.user.current')">
         <UserList
           :columns="columns"
@@ -310,6 +342,9 @@ onMounted(() => {
     :title="dataForm.id ? $t('form.user.edit') : $t('form.user.new')"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
+    style="margin: 0 auto"
+    wrapClassName="b-scroll modal-user"
+    :bodyStyle="{ margin: 0, padding: 0 }"
   >
     <VFormUser
       :data="dataForm"
@@ -323,4 +358,18 @@ onMounted(() => {
   </a-modal>
 </template>
 
-<style scoped></style>
+<style>
+.modal-user {
+  .ant-modal-content {
+    padding: 0;
+  }
+  .ant-modal-header {
+    padding: 15px;
+    margin: 0;
+    background-color: #00000010 !important;
+  }
+  .ant-tabs-nav {
+    background-color: #00000010 !important;
+  }
+}
+</style>

@@ -4,6 +4,7 @@ import { patch } from "@/api/user";
 import { IUser, IUserInput } from "@/api/user/types";
 import {
   useAuthStore,
+  useGeneralStore,
   useOperationStore,
   usePostStore,
   useUserStore,
@@ -31,6 +32,7 @@ import { IValidateError, useError } from "@/composable/useError";
 import { dateFormat } from "@/utils/date";
 import { remove } from "@/api/image";
 import { IImageUpload } from "@/api/image/types";
+import { Colors } from "@/utils/colors";
 
 // export interface IFormStateRole {
 //   name: string;
@@ -48,6 +50,7 @@ const userStore = useUserStore();
 const authStore = useAuthStore();
 const postStore = usePostStore();
 const operationStore = useOperationStore();
+const generalStore = useGeneralStore();
 
 const formState: UnwrapRef<IUserInput> = reactive({
   ...props.data,
@@ -308,13 +311,30 @@ onMounted(() => {
 
 <template>
   <div>
-    <a-tabs v-model:activeKey="activeKey">
-      <a-tab-pane key="user" :tab="$t('tabs.user.user')">
+    <a-tabs
+      v-model:activeKey="activeKey"
+      destroyInactiveTabPane
+      type="card"
+      :tabBarStyle="{
+        position: 'sticky',
+        top: 0,
+        'padding-left': '15px',
+        margin: '0px',
+        'z-index': 50,
+        background:
+          generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
+      }"
+    >
+      <a-tab-pane
+        key="user"
+        :tab="$t('tabs.user.user')"
+        class="bg-white dark:bg-g-900/60 p-4"
+      >
         <!-- {{ JSON.stringify(formState) }} -->
         <a-form
           ref="formRef"
           layout="horizontal"
-          style="max-width: 600px"
+          style="max-width: 100%"
           :model="formState"
           :rules="rules"
         >
@@ -514,6 +534,7 @@ onMounted(() => {
         "
         key="password"
         :tab="$t('tabs.user.password')"
+        class="bg-white dark:bg-g-900/60 p-4"
       >
         <div class="mb-4">
           {{ $t("form.user.login") }}: {{ formState.auth?.login }}

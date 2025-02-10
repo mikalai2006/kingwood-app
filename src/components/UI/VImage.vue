@@ -37,18 +37,12 @@ const visible = ref(false);
 
 <template>
   <!-- <img class="h-8 w-8 rounded-full" :src="srcAttr" /> -->
-  <a-image class="object-cover" :src="srcAttr" :preview="{ src: srcPreview }" />
+  <a-image class="" :src="srcAttr" :preview="{ src: srcPreview }" />
   <!-- <div style="display: none">
-    <a-image-preview-group :preview="{ visible, onVisibleChange: (vis: any) => (visible = vis) }">
-      <a-image
-        src="https://gw.alipayobjects.com/zos/antfincdn/LlvErxo8H9/photo-1503185912284-5271ff81b9a8.webp"
-      />
-      <a-image
-        src="https://gw.alipayobjects.com/zos/antfincdn/cV16ZqzMjW/photo-1473091540282-9b846e7965e3.webp"
-      />
-      <a-image
-        src="https://gw.alipayobjects.com/zos/antfincdn/x43I27A55%26/photo-1438109491414-7198515b166b.webp"
-      />
+    <a-image-preview-group
+      :preview="{ visible, onVisibleChange: (vis: any) => (visible = vis) }"
+    >
+      <a-image :src="srcPreview" />
     </a-image-preview-group>
   </div> -->
 </template>

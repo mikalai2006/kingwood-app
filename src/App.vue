@@ -172,7 +172,7 @@ const tokenTheme = computed(() => {
     fontSize: 14,
   };
   if (generalStore.themeMode === "dark") {
-    result.colorBgBase = Colors.g[951];
+    result.colorBgBase = Colors.g[950];
     result.colorTextBase = Colors.white;
     result.colorPrimary = Colors.p[400];
     result.colorError = Colors.r[400];
@@ -446,7 +446,7 @@ onErrorCaptured((error: any, vm, info) => {
                 </div>
               </aside>
               <div
-                class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
+                class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-951"
               >
                 <div class="flex-auto flex">
                   <RouterView v-slot="{ Component }">

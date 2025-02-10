@@ -6,9 +6,8 @@ defineProps<{ title: string }>();
 </script>
 
 <template>
-  <div
-    class="h-12 flex flex-row gap-0 items-center pb-1 border-b border-s-100 dark:border-g-700"
-  >
+  <div class="flex flex-row gap-4 items-center pb-1 mt-4">
+    <!-- border-b border-black/5 dark:border-white/5 -->
     <slot name="back">
       <a-tooltip>
         <template #title>
@@ -27,10 +26,13 @@ defineProps<{ title: string }>();
         </a-button>
       </a-tooltip>
     </slot>
-    <div>
+    <div class="flex-auto">
       <h2 class="text-lg font-medium">
         {{ title }}
       </h2>
+    </div>
+    <div>
+      <slot name="header"></slot>
     </div>
   </div>
 </template>

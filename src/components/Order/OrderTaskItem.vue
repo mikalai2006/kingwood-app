@@ -81,6 +81,14 @@ const { t } = useI18n();
 // const trashTaskLodal = ref(false);
 
 const onDeleteTask = (item: ITask | undefined) => {
+  if (taskWorkers.value?.length) {
+    Modal.warning({
+      title: t("notify.warning"),
+      content: t("error.noRemoveTaskWithWrokers"),
+    });
+    return;
+  }
+
   Modal.confirm({
     // transitionName: "",
     icon: null,
@@ -374,7 +382,12 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       class="flex flex-row items-center gap-4 py-1 px-4"
     >
       <div class="flex flex-row items-center gap-1">
-        <VImg :image="item.worker?.images?.[0]" />
+        <div>
+          <VImg
+            :image="item.worker?.images?.[0]"
+            class="w-8 h-8 rounded-full"
+          />
+        </div>
         <!-- <img
           src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
           class="w-8 h-8 rounded-full border-2 border-s-200"
@@ -396,7 +409,12 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           </a-button>
         </a-tooltip>
 
-        <a-tooltip v-if="authStore.roles?.includes('taskWorker-delete')">
+        <a-tooltip
+          v-if="
+            authStore.roles?.includes('taskWorker-delete') &&
+            item.status === 'wait'
+          "
+        >
           <template #title>
             {{ $t("button.deleteTaskWorker") }}
           </template>

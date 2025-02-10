@@ -16,6 +16,7 @@ export interface IOrder {
   priority: number;
   group: string[];
   status: number;
+  year: number;
 
   object?: IObject;
   tasks?: ITask[];
@@ -38,6 +39,8 @@ export type IOrderInput = {
 export interface IOrderFilter extends IPaginationParams<IOrderInput> {
   id?: string[];
   name?: string;
+  number?: number;
+  year?: number;
   group?: string[];
   status?: number;
   objectId?: string[];

@@ -1,8 +1,8 @@
 <script setup lang="ts" async>
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import dayjs from "@/utils/dayjs";
 import { useAuthStore, useGeneralStore } from "@/store";
-import { IOrder } from "@/api/order/types";
+import { IOrder, IOrderFilter, IOrderInput } from "@/api/order/types";
 import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
 import { useI18n } from "vue-i18n";
@@ -83,28 +83,62 @@ const {
 //         return <SomeOtherCustomIcon onClick={e=>{onExpand(record, e)}}
 //     }
 //   }
-const querySearch = ref("");
 
-const dateFormat = "DD.MM.YYYY";
-const rangeSearch = ref<Dayjs[]>([
-  // dayjs("01.01.2015", dateFormat),
-  // dayjs("01.01.2015", dateFormat),
+// const dateFormat = "DD.MM.YYYY";
+// const rangeSearch = ref<Dayjs[]>([
+//   // dayjs("01.01.2015", dateFormat),
+//   // dayjs("01.01.2015", dateFormat),
 
-  dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
-  dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
-]);
+//   dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
+//   dayjs(`31.12.${new Date().getFullYear()}`, dateFormat),
+// ]);
+
+const year = ref<Dayjs | null>();
+
+const filter = ref<IOrderFilter>({
+  year: year.value?.year(),
+});
+const onRemoveFilterKey = (key: keyof IOrderFilter) => {
+  if (filter.value[key]) {
+    delete filter.value[key];
+  }
+  if (key === "year") {
+    year.value = null;
+  }
+  onSetFilter();
+};
+
+const filterParams = ref<IOrderFilter>({});
+const onSetFilter = () => {
+  filterParams.value = Object.fromEntries(
+    Object.entries(filter.value).filter(([k, v]) => v)
+  );
+
+  localStorage.setItem(
+    nameKeyLocalFilterAll.value,
+    JSON.stringify(filterParams.value)
+  );
+};
+// watch(
+//   () => year.value,
+//   (o, n) => {
+//     console.log("year: ", year);
+
+//     filter.year = n.year();
+//   }
+// );
 
 const activeKey = ref("inWork");
 
 const nameKeyLocalStorageColumns = ref("order.column");
-const nameKeyLocalStorageRange = computed(() => "range.all");
+const nameKeyLocalFilterAll = computed(() => "filter.all");
 
-const onChangeRange = (value: Dayjs[]) => {
-  const _range = value.map((x) => x.format());
-  // console.log("_range: ", _range);
+// const onChangeRange = (value: Dayjs[]) => {
+//   const _range = value.map((x) => x.format());
+//   // console.log("_range: ", _range);
 
-  localStorage.setItem(nameKeyLocalStorageRange.value, JSON.stringify(_range));
-};
+//   localStorage.setItem(nameKeyLocalFilterAll.value, JSON.stringify(_range));
+// };
 
 onMounted(() => {
   // rangeSearch.value = [
@@ -119,59 +153,61 @@ onMounted(() => {
   }
 
   // sync range from localStorage.
-  const _range = localStorage.getItem(nameKeyLocalStorageRange.value);
-  if (_range) {
-    const _data: string[] = JSON.parse(_range);
-    rangeSearch.value = _data.map((x) => dayjs(x));
+  const _filter = localStorage.getItem(nameKeyLocalFilterAll.value);
+  if (_filter) {
+    const _data = JSON.parse(_filter);
+    filter.value = { ..._data };
+    onSetFilter();
   }
 });
+
+const showFilter = ref(false);
 </script>
 <template>
   <div class="p-4 flex-auto">
     <!-- <VTitle :text="$t('page.order.title')" /> -->
     <VHeader :title="$t('page.order.title')" class="mb-4">
       <template #back>&nbsp;</template>
-    </VHeader>
+      <template #header>
+        <div class="flex flex-row items-center">
+          <div class="flex-auto">
+            <a-tooltip v-if="authStore.roles.includes('order-create')">
+              <template #title>
+                {{ $t("form.order.new") }}
+              </template>
 
-    <div class="flex flex-row items-center">
-      <div class="flex-auto">
-        <a-tooltip v-if="authStore.roles.includes('order-create')">
-          <template #title>
-            {{ $t("form.order.new") }}
-          </template>
-
-          <a-button type="primary" @click="onAddNewItem">
-            {{ $t("form.add") }}
-          </a-button>
-        </a-tooltip>
-      </div>
-      <div class="flex gap-2 items-center">
-        <a-popover
-          :title="$t('table.order.fields')"
-          trigger="click"
-          placement="topRight"
-        >
-          <template #content>
-            <div class="flex gap-2 items-center">
-              <a-select
-                v-model:value="columnKeys"
-                mode="multiple"
-                style="width: 100%; min-width: 200px"
-                :placeholder="$t('table.order.fields')"
-                :max-tag-count="3"
-                :removeIcon="null"
-                :options="optionsForSelect"
-                @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
-              >
-                <template #maxTagPlaceholder="omittedValues">
-                  <span style="color: red">
-                    + {{ omittedValues.length }} ...
-                  </span>
-                </template>
-                <!-- <template #option="{ value, label }">
+              <a-button type="primary" @click="onAddNewItem">
+                {{ $t("form.add") }}
+              </a-button>
+            </a-tooltip>
+          </div>
+          <div class="flex gap-2 items-center">
+            <a-popover
+              :title="$t('table.order.fields')"
+              trigger="click"
+              placement="topRight"
+            >
+              <template #content>
+                <div class="flex gap-2 items-center">
+                  <a-select
+                    v-model:value="columnKeys"
+                    mode="multiple"
+                    style="width: 100%; min-width: 200px"
+                    :placeholder="$t('table.order.fields')"
+                    :max-tag-count="3"
+                    :removeIcon="null"
+                    :options="optionsForSelect"
+                    @change="(value: string) => onSetColumns(value,nameKeyLocalStorageColumns,columnKeys)"
+                  >
+                    <template #maxTagPlaceholder="omittedValues">
+                      <span style="color: red">
+                        + {{ omittedValues.length }} ...
+                      </span>
+                    </template>
+                    <!-- <template #option="{ value, label }">
             {{ label }}
           </template> -->
-                <!-- <a-select-option
+                    <!-- <a-select-option
             v-for="col in columns"
             :value="col.key"
             :label="$t(`tabs.order.${col.key}`)"
@@ -179,20 +215,32 @@ onMounted(() => {
             <span role="img" aria-label="Japan">🇯🇵</span>
             {{ $t(`tabs.order.${col.key}`) }}
           </a-select-option> -->
-              </a-select>
-            </div>
-          </template>
-          <a-button type="text">
-            <VIcon :path="iCog" class="text-lg" />
-          </a-button>
-        </a-popover>
-      </div>
-    </div>
+                  </a-select>
+                </div>
+              </template>
+              <a-button type="text">
+                <VIcon :path="iCog" class="text-lg" />
+              </a-button>
+            </a-popover>
+          </div>
+        </div>
+      </template>
+    </VHeader>
 
     <a-tabs
       v-model:activeKey="activeKey"
       :key="columnKeys.length"
       destroyInactiveTabPane
+      type="card"
+      :tabBarStyle="{
+        position: 'sticky',
+        top: 0,
+        'padding-left': '15px',
+        margin: '0px',
+        'z-index': 50,
+        background:
+          generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
+      }"
     >
       <a-tab-pane key="inWork">
         <template #tab>
@@ -377,32 +425,94 @@ onMounted(() => {
         />
       </a-tab-pane>
       <a-tab-pane key="all" :tab="$t('tabs.order.all')">
-        <div class="flex flex-row items-center">
-          <div class="flex-auto">
-            <!-- <a-input
-              placeholder="Текст для поиска"
-              v-model:value="querySearch"
-            /> -->
-          </div>
-          <div>
-            {{ $t("form.order.rangeSearch") }}
-            <a-range-picker
-              v-model:value="rangeSearch"
-              :format="dateFormat"
-              @change="onChangeRange"
-            />
-          </div>
-        </div>
         <OrderList
-          :key="rangeSearch.map((x) => x.toString()).join('-')"
+          :key="Object.keys(filterParams).join('-')"
           keyList="all"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{
-            from: rangeSearch[0].format(),
-            to: rangeSearch[1].format(),
-          }"
+          :params="{ ...filterParams }"
           @on-edit-item="onEditItem"
-        />
+        >
+          <template #header>
+            <div class="p-4 bg-s-100 dark:bg-g-950/10 border-l-4 border-p-500">
+              <!-- <a-collapse v-model:showFilter="showFilter" ghost>
+                <a-collapse-panel key="1"> -->
+              <!-- <template #header>
+                  </template> -->
+              <template v-if="Object.keys(filterParams).length">
+                <div
+                  class="flex items-center gap-1 border-b border-black/10 pb-1.5 mb-1.5"
+                >
+                  <div class="">
+                    {{ t("button.filter") }}
+                  </div>
+                  <a-tag
+                    color="success"
+                    closable
+                    class="text-md"
+                    v-for="[k, v] in Object.entries(filterParams)"
+                    @close="() => onRemoveFilterKey(k as keyof IOrderFilter)"
+                  >
+                    {{ $t(`form.order.${k}`) }} - {{ v }}
+                  </a-tag>
+                  <!-- <template v-else>
+                    <a-alert
+                    class="m-0 leading-5"
+                    :message="$t('info.filterOrder')"
+                    banner
+                    />
+                  </template> -->
+                </div>
+              </template>
+              <a-form layout="inline" :model="filter">
+                <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
+                  <a-input v-model:value="formState.object" />
+                </a-form-item> -->
+
+                <a-form-item :label="$t('form.order.number')" name="number">
+                  <a-input-number v-model:value="filter.number" />
+                </a-form-item>
+                <a-form-item :label="$t('form.order.name')" name="name">
+                  <a-input v-model:value="filter.name" />
+                </a-form-item>
+
+                <a-form-item :label="$t('form.order.year')" name="year">
+                  <a-date-picker
+                    v-model:value="year"
+                    picker="year"
+                    @change="(v:any) => {
+                        filter.year = v?.year()
+                        // console.log(v);
+                        
+                      }"
+                  />
+                </a-form-item>
+
+                <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+                  <!-- <a-button @click="resetForm">
+                    {{ $t("form.reset") }}
+                  </a-button> -->
+                  <a-button
+                    type="primary"
+                    style="margin-left: 10px"
+                    @click="onSetFilter"
+                  >
+                    {{ $t("form.search") }}
+                  </a-button>
+                </a-form-item>
+                <!-- <div>
+                {{ $t("form.order.rangeSearch") }}
+                <a-range-picker
+                  v-model:value="rangeSearch"
+                  :format="dateFormat"
+                  @change="onChangeRange"
+                />
+              </div> -->
+              </a-form>
+              <!-- </a-collapse-panel>
+              </a-collapse> -->
+            </div>
+          </template>
+        </OrderList>
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -426,3 +536,9 @@ onMounted(() => {
     />
   </a-modal>
 </template>
+
+<style>
+.ant-table-title {
+  padding: 0 !important;
+}
+</style>

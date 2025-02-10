@@ -23,36 +23,44 @@ const activeKey = ref("new");
     <VHeader :title="$t('page.notify.title')" class="mb-4">
       <template #back>&nbsp;</template>
     </VHeader>
-    <div class="max-w-screen-md">
+    <div class="max-w-screen-md mx-auto">
       <a-tabs
         v-model:activeKey="activeKey"
+        destroyInactiveTabPane
+        type="card"
         :tabBarStyle="{
           position: 'sticky',
           top: 0,
+          'padding-left': '15px',
+          margin: '0px',
           'z-index': 50,
           background:
-            generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.white,
+            generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
         }"
       >
         <a-tab-pane key="new" :tab="$t('tabs.notify.new')">
-          <NotifyList
-            :params="{
-              status: 0,
-              userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,
-            }"
-            key-list="new"
-            @onPatchNotify="onPatchNotify"
-          />
+          <div class="bg-white dark:bg-g-900">
+            <NotifyList
+              :params="{
+                status: 0,
+                userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,
+              }"
+              key-list="new"
+              @onPatchNotify="onPatchNotify"
+            />
+          </div>
         </a-tab-pane>
         <a-tab-pane key="old" :tab="$t('tabs.notify.old')">
-          <NotifyList
-            :params="{
-              status: 1,
-              userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,
-            }"
-            key-list="old"
-            @onPatchNotify="onPatchNotify"
-          />
+          <div class="bg-white dark:bg-g-900">
+            <NotifyList
+              :params="{
+                status: 1,
+                userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,
+              }"
+              key-list="old"
+              @onPatchNotify="onPatchNotify"
+            />
+          </div>
         </a-tab-pane>
       </a-tabs>
       <!-- <ul role="list" class="divide-y divide-s-100 dark:divide-g-700">

@@ -70,7 +70,9 @@ const resetForm = () => {
 </script>
 <template>
   <div>
-    <div class="mb-4">{{ $t("form.user.password") }}: {{ password }}</div>
+    <div v-if="password" class="mb-4">
+      {{ $t("form.user.password") }}: {{ password }}
+    </div>
     <a-form
       ref="formRef"
       layout="horizontal"

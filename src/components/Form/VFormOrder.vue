@@ -17,6 +17,8 @@ import { dateFormat } from "@/utils/date";
 import useObject from "@/composable/useObject";
 import { message } from "ant-design-vue";
 import { IValidateError, useError } from "@/composable/useError";
+import { Dayjs } from "dayjs";
+import dayjs from "@/utils/dayjs";
 
 const props = defineProps<{ data: IOrder; defaultData: IOrder }>();
 const emit = defineEmits(["callback"]);
@@ -100,6 +102,11 @@ const onSubmit = async () => {
         const result = await patch(data.id, data);
         orderStore.onAddItemToStore(result);
       } else {
+        // add year.
+        if (year.value) {
+          data.year = year.value.year();
+        }
+
         const result = await create(data);
         orderStore.onAddItemToStore(result);
       }
@@ -172,9 +179,15 @@ const orderStatuses = computed(() => {
 
 const { onCreateObject, onFetchObjects, state } = useObject();
 
+const year = ref<Dayjs>(dayjs(new Date()));
+
 onMounted(() => {
   const object = objectStore.items.find((x) => x.id === formState.objectId);
   object?.name && onFetchObjects(object?.name);
+
+  if (formState.year) {
+    year.value = dayjs().year(formState.year);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -199,6 +212,7 @@ onBeforeUnmount(() => {
 //     return this.vnodes;
 //   },
 // });
+const showMore = ref(0);
 </script>
 <template>
   <div>
@@ -212,6 +226,7 @@ onBeforeUnmount(() => {
       <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
         <a-input v-model:value="formState.object" />
       </a-form-item> -->
+
       <a-form-item
         v-if="formState.number"
         ref="number"
@@ -371,6 +386,18 @@ onBeforeUnmount(() => {
           :unCheckedValue="0"
         />
       </a-form-item>
+
+      <a-collapse v-model:activeKey="showMore" ghost>
+        <a-collapse-panel key="1" :header="t('button.moreFields')">
+          <a-form-item :label="$t('form.order.year')" name="year">
+            <template #help>
+              <a-alert :message="$t('info.helpMoreOrderYear')" banner />
+            </template>
+            <a-date-picker v-model:value="year" picker="year" />
+            <!-- <a-input v-model:value="formState.number" :disabled="true" /> -->
+          </a-form-item>
+        </a-collapse-panel>
+      </a-collapse>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">

@@ -4,9 +4,15 @@ import { message } from "ant-design-vue";
 import { debounce } from "lodash-es";
 import { IOrder, IOrderInput } from "@/api/order/types";
 import { ITask, ITaskInput } from "@/api/task/types";
-import { useOrderStore, useTaskStatusStore, useUserStore } from "@/store";
+import {
+  useObjectStore,
+  useOrderStore,
+  useTaskStatusStore,
+  useUserStore,
+} from "@/store";
 import dayjs from "@/utils/dayjs";
 import { useI18n } from "vue-i18n";
+import { IObject } from "@/api/object/types";
 
 const useOrder = () => {
   const { t } = useI18n();
@@ -112,12 +118,17 @@ const useOrder = () => {
 
   const openOrderInfo = ref(false);
 
+  const objectStore = useObjectStore();
+
   const showOrderInfo = (order: IOrder) => {
     openOrderInfo.value = true;
     currentOrderInModal.value = order;
   };
 
   const currentOrderInModal = ref<IOrder | null>(null);
+  const currentOrderObjectInModal = computed<IObject | undefined>(() =>
+    objectStore.items.find((x) => x.id === currentOrderInModal.value?.objectId)
+  );
 
   const onAddNewItem = () => {
     dataForm.value = Object.assign({}, defaultData);
@@ -203,10 +214,10 @@ const useOrder = () => {
         return user?.name.indexOf(value) === 0;
       },
     },
-    { key: "group" },
-    { key: "image" },
+    // { key: "group" },
+    // { key: "image" },
     { key: "dateStart" },
-    { key: "activeOperation" },
+    // { key: "activeOperation" },
     { key: "stolyarComplete" },
     { key: "shlifComplete" },
     { key: "malyarComplete" },
@@ -365,6 +376,7 @@ const useOrder = () => {
     openOrderInfo,
     showOrderInfo,
     currentOrderInModal,
+    currentOrderObjectInModal,
     onAddNewItem,
     onEditItem,
 

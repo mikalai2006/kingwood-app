@@ -109,10 +109,10 @@ onMounted(async () => {
                 class="bg-s-500 dark:bg-s-800"
                 src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
               /> -->
-        <div class="relative w-12 h-12">
+        <div class="relative w-16 h-16">
           <VImg
             :image="record.images?.[0]"
-            class="w-full h-full"
+            class="w-16 h-16 rounded-full"
             :class="[{ 'border-4 border-green-500': record.online }]"
           />
           <!-- <div

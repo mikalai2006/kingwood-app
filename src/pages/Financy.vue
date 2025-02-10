@@ -6,8 +6,12 @@ import { useI18n } from "vue-i18n";
 
 import FinancyPane from "@/components/Financy/FinancyPane.vue";
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
+import { Colors } from "@/utils/colors";
+import { useGeneralStore } from "@/store";
 
 dayjs.locale("ru");
+
+const generalStore = useGeneralStore();
 
 const { t } = useI18n();
 
@@ -80,7 +84,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex-auto overflow-hidden max-h-screen">
-    <VHeader :title="$t('page.financy.title')" class="px-4">
+    <VHeader :title="$t('page.financy.title')" class="p-4">
       <template #back>&nbsp;</template>
     </VHeader>
     <div class="flex-auto p-4">
@@ -88,9 +92,17 @@ onMounted(async () => {
         v-model:activeKey="activeKey"
         type="editable-card"
         hide-add
-        :tabBarStyle="{ padding: 0, 'margin-bottom': '5px' }"
         :tabBarGutter="2"
         destroyInactiveTabPane
+        :tabBarStyle="{
+          position: 'sticky',
+          top: 0,
+          'padding-left': '15px',
+          margin: '0px',
+          'z-index': 50,
+          background:
+            generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
+        }"
         @edit="onEdit"
       >
         <template #leftExtra>

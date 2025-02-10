@@ -49,8 +49,8 @@ const handleMenuClick: MenuProps["onClick"] = (e) => {
       src="https://xsgames.co/randomusers/avatar.php?g=pixel&key=1"
       class="w-8 h-8 rounded-full border-2 border-s-200"
     /> -->
-      <div class="relative w-8 h-8 shrink-0 grow-0">
-        <VImg :image="user?.images?.[0]" class="w-full h-full" />
+      <div class="relative shrink-0 grow-0">
+        <VImg :image="user?.images?.[0]" class="w-8 h-8 rounded-full" />
         <!-- <div
           v-if="user?.online"
           class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-[3px] border-s-50 dark:border-g-800"

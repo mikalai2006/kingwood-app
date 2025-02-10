@@ -2,6 +2,7 @@ import type { IWsMessage } from "@/api/types";
 import VIcon from "@/components/UI/VIcon.vue";
 import {
   useAuthStore,
+  useMessageStore,
   useNotifyStore,
   useOrderStore,
   usePayStore,
@@ -30,6 +31,7 @@ export const useSocket = (props: IUseSocketProps) => {
   const payStore = usePayStore();
   const taskStatusStore = useTaskStatusStore();
   const taskWorkerStore = useTaskWorkerStore();
+  const messageStore = useMessageStore();
   const orderStore = useOrderStore();
   const notifyStore = useNotifyStore();
 
@@ -162,6 +164,14 @@ export const useSocket = (props: IUseSocketProps) => {
                   )
                 );
               }
+            }
+            break;
+
+          case "message":
+            if (method === "DELETE") {
+              messageStore.onRemoveItemFromStore(content.id);
+            } else {
+              messageStore.onAddItemToStore(content);
             }
             break;
 

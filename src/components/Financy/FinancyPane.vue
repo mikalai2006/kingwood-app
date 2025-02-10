@@ -178,9 +178,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex-auto flex flex-row items-stretc">
+  <div class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50">
     <div class="flex flex-row items-stretch w-96">
-      <div class="py-4 overflow-hidden">
+      <div class="py-4 pl-4 overflow-hidden">
         <!-- {{ JSON.stringify(daysList) }} -->
         <div class="p-4 bg-s-100 dark:bg-g-800 rounded-lg">
           <a-form layout="vertical" class="w-80">

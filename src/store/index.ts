@@ -15,6 +15,7 @@ import { usePayStore } from "./modules/pay";
 import { usePayTemplateStore } from "./modules/pay_template";
 import { useAppErrorStore } from "./modules/appError";
 import { useWorkHistoryStore } from "./modules/workHistory";
+import { useMessageStore } from "./modules/message";
 
 export {
   useAuthStore,
@@ -34,4 +35,5 @@ export {
   usePayTemplateStore,
   useAppErrorStore,
   useWorkHistoryStore,
+  useMessageStore,
 };
