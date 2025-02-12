@@ -30,6 +30,7 @@ import OrderObject from "./OrderObject.vue";
 import { Colors } from "@/utils/colors";
 import OrderMessages from "./OrderMessages.vue";
 import OrderTaskList from "./OrderTaskList.vue";
+import FinancyOrder from "../Financy/FinancyOrder.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -798,6 +799,9 @@ const activeKey = ref("list");
         <a-tab-pane key="message" :tab="$t('tabs.task.message')">
           <OrderMessages :orderId="currentOrderInModal.id" />
         </a-tab-pane>
+        <!-- <a-tab-pane key="financy" :tab="$t('tabs.order.financy')">
+          <FinancyOrder :order-id="currentOrderInModal.id" />
+        </a-tab-pane> -->
       </a-tabs>
     </div>
   </a-modal>
@@ -828,6 +832,10 @@ const activeKey = ref("list");
     margin: 0;
     padding: 15px;
     padding-bottom: 0;
+  }
+
+  .ant-modal-close {
+    top: 30px !important;
   }
 }
 </style>

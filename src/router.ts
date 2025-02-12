@@ -19,6 +19,7 @@ import ObjectOrder from "./pages/ObjectOrder.vue";
 import Notify from "./pages/Notify.vue";
 import Financy from "./pages/Financy.vue";
 import PayTemplate from "./pages/PayTemplate.vue";
+import FinancyOrder from "./pages/FinancyOrder.vue";
 
 const routes = [
   {
@@ -121,6 +122,12 @@ const routes = [
     path: "/object/:objectId",
     name: "objectOrderId",
     component: ObjectOrder,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/financy/:orderId",
+    name: "financyOrder",
+    component: FinancyOrder,
     meta: { requiresAuth: true },
   },
 ];

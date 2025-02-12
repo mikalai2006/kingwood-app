@@ -152,3 +152,8 @@ code {
     background-color: #f9f9f9;
   }
 }
+
+.ant-image-preview-operations-wrapper {
+  top: auto !important;
+  bottom: 0 !important;
+}

@@ -42,10 +42,11 @@ const countDays = computed(() =>
 
 const daysList = computed(() =>
   Array.from(Array(countDays.value).keys()).map((x) => {
-    const _date = dayjs(
-      `${x + 1}-${month.value.month()}-${month.value.year()}`,
-      "D-M-YYYY"
-    );
+    const _date = month.value.startOf("month").add(x, "day");
+    // dayjs(
+    //   `${x + 1}-${month.value.month()}-${month.value.year()}`,
+    //   "D-M-YYYY"
+    // );
     return {
       key: x.toString(),
       day: x + 1,

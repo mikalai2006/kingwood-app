@@ -1,14 +1,25 @@
 import { $delete, $patch, $post } from "@/utils/http/axios";
 import { IResponseData } from "@/api/types";
-import { IWorkHistory, IWorkHistoryFilter, IWorkHistoryInput } from "./types";
+import {
+  IWorkHistory,
+  IWorkHistoryFilter,
+  IWorkHistoryInput,
+  IWorkHistoryStatByOrder,
+} from "./types";
 
 enum URLS {
-  path = "/work_time",
+  path = "/work_history",
 }
 
 const find = async (data: IWorkHistoryFilter) =>
   $post<IResponseData<IWorkHistory>>({
     url: `${URLS.path}/populate`,
+    data,
+  });
+
+const getStatByOrder = async (data: IWorkHistoryFilter) =>
+  $post<IWorkHistoryStatByOrder[]>({
+    url: `${URLS.path}/statByOrder`,
     data,
   });
 
@@ -29,4 +40,4 @@ const remove = async (id: string | number) =>
     url: `${URLS.path}/${id}`,
   });
 
-export { find, create, patch, remove };
+export { find, create, patch, remove, getStatByOrder };

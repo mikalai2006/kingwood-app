@@ -137,6 +137,9 @@
     "financy": {
       "title": "Финансы"
     },
+    "financyOrder": {
+      "title": "Отчет по заказу"
+    },
     "user": {
       "title": "Cотрудники"
     },
@@ -185,7 +188,8 @@
       "goComplete": "Готово к отгрузке",
       "completed": "Выполненные",
       "notWork": "Не в работе",
-      "inWork": "В работе"
+      "inWork": "В работе",
+      "financy": "Финансовый отчет"
     },
     "user": {
       "current": "Действующие",
@@ -305,6 +309,12 @@
       "order": "Заказ",
       "operation": "Задание",
       "time": "Затраченное время"
+    },
+    "financyOrder": {
+      "worker": "Работник",
+      "total": "Итого",
+      "operation": "Задание",
+      "totalAll": "Итого"
     },
     "payTemplate": {
       "name": "Название шаблона",

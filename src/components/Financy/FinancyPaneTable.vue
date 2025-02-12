@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
-import { usePostStore, useUserStore, useWorkTimeStore } from "@/store";
+import {
+  useAuthStore,
+  usePostStore,
+  useUserStore,
+  useWorkTimeStore,
+} from "@/store";
 import dayjs from "@/utils/dayjs";
 import { ref } from "vue";
 import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
@@ -9,7 +14,7 @@ import FinancyPaneTableTotal from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
 import FinancyDetails from "./FinancyDetails.vue";
 import VIcon from "../UI/VIcon.vue";
-import { iChevronDown, iMinus, iPlusLg } from "@/utils/icons";
+import { iChevronDown, iMinus, iPen, iPlusLg, iTrashFill } from "@/utils/icons";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -29,6 +34,7 @@ const { t } = useI18n();
 
 const userStore = useUserStore();
 const postStore = usePostStore();
+const authStore = useAuthStore();
 const workTimeStore = useWorkTimeStore();
 
 const columns = ref([
@@ -50,12 +56,12 @@ const columns = ref([
     key: "totalTime",
     fixed: false,
   },
-  // {
-  //   title: t("table.object.action"),
-  //   dataIndex: "action",
-  //   key: "action",
-  //   fixed: false,
-  // },
+  {
+    title: t("table.object.action"),
+    dataIndex: "action",
+    key: "action",
+    fixed: false,
+  },
 ]);
 </script>
 
@@ -92,6 +98,7 @@ const columns = ref([
       </template>
 
       <template v-if="column.key === 'totalTime'">
+        {{ workTimes[record.day]?.length }}
         <div
           v-if="workTimes[record.day]"
           class="text-base text-g-500 dark:text-g-400"
@@ -107,6 +114,32 @@ const columns = ref([
             "
           />
         </div>
+      </template>
+      <template v-if="column.key === 'action'">
+        <a-tooltip v-if="authStore.roles.includes('workTime-patch')">
+          <template #title>
+            {{ $t("button.edit") }}
+          </template>
+          <a-button
+            type="link"
+            @click="(e: Event) => {e.preventDefault(); e.stopPropagation()}"
+          >
+            <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+          </a-button>
+        </a-tooltip>
+
+        <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
+          <template #title>
+            {{ $t("button.delete") }}
+          </template>
+          <a-button
+            danger
+            type="link"
+            @click="(e: Event) => { e.preventDefault(); e.stopPropagation()}"
+          >
+            <VIcon :path="iTrashFill" />
+          </a-button>
+        </a-tooltip>
       </template>
     </template>
 

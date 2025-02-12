@@ -333,6 +333,10 @@ onErrorCaptured((error: any, vm, info) => {
             </nav>
           </div> -->
           <div class="flex-auto flex flex-col h-screen overflow-y-hidden">
+            <!-- <div class="flex items-stretch h-8">
+              <div class="bg-s-800 md:w-64 w-3/4"></div>
+              <div class="flex-auto bg-s-100">App</div>
+            </div> -->
             <!-- <header
               class="shrink-0 h-16 bg-s-50 dark:bg-g-800 z-50 shadow-md flex items-center"
             >

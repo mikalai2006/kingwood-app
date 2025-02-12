@@ -8,10 +8,14 @@ import {
   useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
 import { useI18n } from "vue-i18n";
+import { RouterLink } from "vue-router";
+import { IWorkHistoryStatByOrder } from "@/api/work_history/types";
+import { IOrder } from "@/api/order/types";
+import FinancyOrder from "./FinancyOrder.vue";
 
 const props = defineProps<{
   workTimes: IWorTimeExtends[];
@@ -61,6 +65,19 @@ const workHistory = computed(() => {
   return _list;
 });
 
+const openFinancyOrder = ref(false);
+
+const activeFinancyOrder = ref<IOrder | null>();
+
+const onViewFinancyOrder = (orderId: string) => {
+  const _order = orderStore.items.find((x) => x.id === orderId);
+
+  if (_order) {
+    activeFinancyOrder.value = _order;
+    openFinancyOrder.value = true;
+  }
+};
+
 const innerColumns = [
   { title: t("table.financy.object"), dataIndex: "object", key: "object" },
   { title: t("table.financy.order"), dataIndex: "order", key: "order" },
@@ -108,9 +125,21 @@ onMounted(() => {});
         </p>
       </template>
       <template v-if="column.key === 'order'">
-        <a-button type="link">
+        <!-- <RouterLink
+          :to="{
+            name: 'financyOrder',
+            params: {
+              orderId: record.order.id,
+            },
+          }"
+        >
           <span class="underline">
-            {{ record.order?.name }}
+            №{{ record.order?.number }} - {{ record.order?.name }}
+          </span>
+        </RouterLink> -->
+        <a-button type="link" @click="onViewFinancyOrder(record.order.id)">
+          <span class="underline">
+            №{{ record.order?.number }} - {{ record.order?.name }}
           </span>
         </a-button>
       </template>
@@ -128,4 +157,34 @@ onMounted(() => {});
       </template>
     </template>
   </a-table>
+
+  <a-modal
+    v-model:open="openFinancyOrder"
+    width="70%"
+    style="margin: 0 auto"
+    :key="activeFinancyOrder?.id"
+    wrapClassName="b-scroll full-modal"
+    :bodyStyle="{ margin: 0, padding: 0 }"
+    :destroyOnClose="true"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+    :cancel-text="$t('button.close')"
+    @cancel="
+      () => {
+        activeFinancyOrder = null;
+      }
+    "
+  >
+    <template #title>
+      <p class="text-xl leading-6">
+        {{ $t("page.financyOrder.title") }} №{{ activeFinancyOrder?.number }}
+        -
+        {{ activeFinancyOrder?.name }}
+      </p>
+    </template>
+    <div v-if="activeFinancyOrder" class="">
+      <FinancyOrder :order-id="activeFinancyOrder.id" />
+    </div>
+  </a-modal>
 </template>
