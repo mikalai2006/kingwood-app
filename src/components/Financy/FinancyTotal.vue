@@ -37,7 +37,7 @@ const listData = computed(() => {
     .map((x) => {
       const _totalMinutes = x.workHistory.reduce((a, b) => {
         const dayTo = dayjs(b.to);
-        console.log(dayTo.year(), dayTo.diff(b.from));
+        // console.log(dayTo.year(), dayTo.diff(b.from));
 
         return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
       }, 0);

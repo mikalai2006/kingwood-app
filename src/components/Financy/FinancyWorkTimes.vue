@@ -7,7 +7,7 @@ import {
   useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
 import { useI18n } from "vue-i18n";
 import FinancyPaneTableTotal from "./FinancyPaneTableTotal.vue";
@@ -15,20 +15,14 @@ import { getObjectTime } from "@/utils/time";
 import FinancyDetails from "./FinancyDetails.vue";
 import VIcon from "../UI/VIcon.vue";
 import { iChevronDown, iMinus, iPen, iPlusLg, iTrashFill } from "@/utils/icons";
-import FinancyWorkTimes from "./FinancyWorkTimes.vue";
-import { Dayjs } from "dayjs";
-import { dateFormat } from "@/utils/date";
+import { dateTimeFormat } from "@/utils/date";
+import VFormWorkTime from "../Form/VFormWorkTime.vue";
+import { IWorkTime, IWorkTimeInput } from "@/api/work_time/types";
 import TimePretty from "../Time/TimePretty.vue";
 
 const props = defineProps<{
+  date: string;
   pane: IPaneOptionFinancy;
-  data: {
-    day: number;
-    dayWeek: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-    dayName: string;
-    date: string;
-  }[];
-  workTimes: { [key: string]: IWorTimeExtends[] };
 }>();
 
 const emit = defineEmits({
@@ -44,9 +38,15 @@ const workTimeStore = useWorkTimeStore();
 
 const columns = ref([
   {
-    title: t("table.financy.day"),
-    dataIndex: "day",
-    key: "day",
+    title: t("table.financy.from"),
+    dataIndex: "from",
+    key: "from",
+    fixed: false,
+  },
+  {
+    title: t("table.financy.to"),
+    dataIndex: "to",
+    key: "to",
     fixed: false,
   },
   {
@@ -69,14 +69,50 @@ const columns = ref([
   },
 ]);
 
-const openModalWorkTime = ref(false);
-const workTimeDate = ref<string>("");
+const currentDate = computed(() => dayjs(props.date));
+
+const listData = computed(() => {
+  const _list = workTimeStore.items
+    .filter(
+      (x) =>
+        props.pane.workerId == x.workerId &&
+        dayjs(x.to).year() > 1 &&
+        dayjs(x.date).isSame(dayjs(props.date), "day")
+    )
+    .map((x) => {
+      const _totalMs = dayjs(x.to).diff(x.from);
+      return {
+        ...x,
+        totalMs: _totalMs,
+      };
+    });
+  return _list;
+});
+console.log("listData", listData.value);
+
+const showFormWorkTime = ref(false);
+
+const defaultDataForm: IWorkTimeInput = {};
+
+const dataForm = ref(defaultDataForm);
+
+// const onAddNewItem = () => {
+//   dataForm.value = Object.assign({}, defaultData);
+//   showModal();
+// };
+
+const onEditItem = (item: IWorkTime) => {
+  console.log("edit WorkTime: ", item);
+
+  dataForm.value = Object.assign({}, item);
+  showFormWorkTime.value = true;
+};
 </script>
 
 <template>
   <a-table
     :columns="columns"
-    :data-source="data"
+    :data-source="listData"
     bordered
     expandRowByClick
     sticky
@@ -96,48 +132,40 @@ const workTimeDate = ref<string>("");
         </div>
       </template>
 
+      <template v-if="column.key === 'from'">
+        {{ dayjs(record.from).format(dateTimeFormat) }}
+      </template>
+
+      <template v-if="column.key === 'to'">
+        {{ dayjs(record.to).format(dateTimeFormat) }}
+      </template>
+
       <template v-if="column.key === 'total'">
-        <FinancyPaneTableTotal
-          v-if="workTimes[record.day]"
-          :data="workTimes[record.day]"
-          :pane="pane"
-          :day="record.day"
-        />
+        {{ record.total.toLocaleString("ru-RU") }} ₽
       </template>
 
       <template v-if="column.key === 'totalTime'">
-        <!-- {{ workTimes[record.day]?.length }} -->
         <div
-          v-if="workTimes[record.day]"
+          v-if="record.totalMs != undefined"
           class="text-base text-g-500 dark:text-g-400"
         >
-          <TimePretty
-            :time="
-              getObjectTime(
-                workTimes[record.day]?.reduce(
-                  (a, b) => a + dayjs(b.to).diff(b.from),
-                  0
-                )
-              )
-            "
-            hide-seconds
-          />
+          <TimePretty :time="getObjectTime(record.totalMs)" hide-seconds />
         </div>
       </template>
       <template v-if="column.key === 'action'">
-        <a-tooltip v-if="authStore.roles.includes('workTime-list')">
+        <a-tooltip v-if="authStore.roles.includes('workTime-patch')">
           <template #title>
             {{ $t("button.edit") }}
           </template>
           <a-button
             type="link"
-            @click="(e: Event) => {workTimeDate=record.date; openModalWorkTime=true; e.preventDefault(); e.stopPropagation()}"
+            @click="(e: Event) => {onEditItem(record); e.preventDefault(); e.stopPropagation()}"
           >
             <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
           </a-button>
         </a-tooltip>
 
-        <!-- <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
+        <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
           <template #title>
             {{ $t("button.delete") }}
           </template>
@@ -148,22 +176,18 @@ const workTimeDate = ref<string>("");
           >
             <VIcon :path="iTrashFill" />
           </a-button>
-        </a-tooltip> -->
+        </a-tooltip>
       </template>
     </template>
 
-    <template #expandedRowRender="{ record }">
+    <!-- <template #expandedRowRender="{ record }">
       <template v-if="workTimes[record.day]?.length">
-        <!-- record {{ workTimes[record.day][0]?.id }} -->
-        <FinancyDetailsList :work-times="workTimes[record.day]" />
+        <FinancyDetails :work-times="workTimes[record.day]" />
       </template>
       <template v-else>
         <p>{{ $t("info.notFoundWorkHistory") }}</p>
       </template>
     </template>
-    <!-- <template #expandColumnTitle>
-      <span style="color: red">More</span>
-    </template> -->
     <template #expandIcon="{ expanded, onExpand, record }">
       <VIcon
         v-if="!expanded"
@@ -177,20 +201,25 @@ const workTimeDate = ref<string>("");
         class="transition-all rotate-180"
         @click="(e) => onExpand(record, e)"
       />
-    </template>
+    </template> -->
   </a-table>
 
   <a-modal
-    v-model:open="openModalWorkTime"
+    v-model:open="showFormWorkTime"
     :destroyOnClose="true"
-    style="width: 70%"
-    :title="
-      $t('page.workTimes.title') + ' ' + dayjs(workTimeDate).format(dateFormat)
-    "
+    :title="$t('form.workTime.modalTitle')"
     :maskClosable="false"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >
-    <FinancyWorkTimes :date="workTimeDate" :pane="pane" />
+    <VFormWorkTime
+      :data="dataForm"
+      :default-data="defaultDataForm"
+      @callback="
+        () => {
+          showFormWorkTime = false;
+        }
+      "
+    />
   </a-modal>
 </template>

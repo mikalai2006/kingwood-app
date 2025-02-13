@@ -51,4 +51,8 @@ export const roles = [
   "payTemplate-patch",
   "payTemplate-delete",
   "payTemplate-list",
+  "workTime-create",
+  "workTime-patch",
+  "workTime-delete",
+  "workTime-list",
 ];

@@ -50,6 +50,7 @@ const daysList = computed(() =>
     return {
       key: x.toString(),
       day: x + 1,
+      date: _date.format(),
       dayWeek: _date.day(),
       dayName: _date.format("dddd"),
     };
@@ -120,10 +121,11 @@ const listData = computed(() => {
           )
     )
     .map((x) => {
-      const _totalMs = x.workHistory.reduce(
-        (a, b) => a + dayjs(b.to).diff(b.from),
-        0
-      );
+      const _totalMs = dayjs(x.to).diff(x.from);
+      // x.workHistory.reduce(
+      //   (a, b) => a + dayjs(b.to).diff(b.from),
+      //   0
+      // );
       return {
         ...x,
         totalMs: _totalMs,
