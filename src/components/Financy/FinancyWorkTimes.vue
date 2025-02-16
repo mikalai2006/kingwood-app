@@ -107,6 +107,29 @@ const onEditItem = (item: IWorkTime) => {
   dataForm.value = Object.assign({}, item);
   showFormWorkTime.value = true;
 };
+
+const onAddItem = () => {
+  const userForPayload = userStore.items.find(
+    (x) => x.id === props.pane.workerId
+  );
+  if (!userForPayload) {
+    return;
+  }
+
+  const timeFrom = dayjs(props.date);
+  const timeTo = dayjs(props.date);
+  dataForm.value = Object.assign(
+    {},
+    {
+      workerId: userForPayload.id,
+      from: timeFrom.format(),
+      date: timeFrom.set("hour", 12).format(),
+      to: timeTo.endOf("day").set("seconds", 0).format(),
+      oklad: userForPayload.oklad,
+    }
+  );
+  showFormWorkTime.value = true;
+};
 </script>
 
 <template>
@@ -165,7 +188,7 @@ const onEditItem = (item: IWorkTime) => {
           </a-button>
         </a-tooltip>
 
-        <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
+        <!-- <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
           <template #title>
             {{ $t("button.delete") }}
           </template>
@@ -176,7 +199,7 @@ const onEditItem = (item: IWorkTime) => {
           >
             <VIcon :path="iTrashFill" />
           </a-button>
-        </a-tooltip>
+        </a-tooltip> -->
       </template>
     </template>
 
@@ -202,6 +225,23 @@ const onEditItem = (item: IWorkTime) => {
         @click="(e) => onExpand(record, e)"
       />
     </template> -->
+    <template #footer>
+      <a-tooltip v-if="authStore.roles.includes('workTime-create')">
+        <template #title>
+          {{ $t("button.addWorkTime") }}
+        </template>
+        <a-button
+          @click="(e: Event) => {onAddItem(); e.preventDefault(); e.stopPropagation()}"
+        >
+          <div class="flex gap-2 items-center">
+            <VIcon :path="iPlusLg" class="text-s-400 dark:text-g-300" />
+            <div>
+              {{ $t("form.add") }}
+            </div>
+          </div>
+        </a-button>
+      </a-tooltip>
+    </template>
   </a-table>
 
   <a-modal

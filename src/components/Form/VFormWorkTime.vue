@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { patch } from "@/api/work_time";
+import { create, patch } from "@/api/work_time";
 import { Rule } from "ant-design-vue/es/form";
 import {
-  computed,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -12,11 +11,9 @@ import {
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { useWorkTimeStore } from "@/store";
-import { iX } from "@/utils/icons";
 import { useError } from "@/composable/useError";
 import { message } from "ant-design-vue";
 import { IWorkTimeInput } from "@/api/work_time/types";
-import { dateTimeFormat } from "@/utils/date";
 import dayjs, { Dayjs } from "dayjs";
 
 const props = defineProps<{
@@ -62,8 +59,10 @@ const onSubmit = async () => {
         const result = await patch(data.id, data);
         workTimeStore.onAddItemToStore(result);
       } else {
-        // const result = await create(data);
-        // payStore.onAddItemToStore(result);
+        data.status = 1;
+        // data.date = data.from;
+        const result = await create(data);
+        workTimeStore.onAddItemToStore(result);
       }
       message.success(t("form.message.successSave"));
       emit("callback");
@@ -119,8 +118,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    {{ formState.from }}/
-    {{ formState.to }}
+    {{ formState }}
     <a-form
       ref="formRef"
       layout="horizontal"

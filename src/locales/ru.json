@@ -98,7 +98,8 @@
     "submit": "Отправить",
     "loadPrevMessages": "Показать предыдущие сообщения",
     "moreFields": "Дополнительно",
-    "filter": "Фильтр"
+    "filter": "Фильтр",
+    "addWorkTime": "Добавить рабочую сессию"
   },
   "message": {
     "notDataForSendMessage": "Нет данных для отправки!",
