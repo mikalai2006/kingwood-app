@@ -108,6 +108,7 @@ const onRemoveFilterKey = (key: keyof IOrderFilter) => {
   onSetFilter();
 };
 
+const nameKeyLocalFilterAll = computed(() => "filter.all");
 const filterParams = ref<IOrderFilter>({});
 const onSetFilter = () => {
   filterParams.value = Object.fromEntries(
@@ -131,7 +132,6 @@ const onSetFilter = () => {
 const activeKey = ref("inWork");
 
 const nameKeyLocalStorageColumns = ref("order.column");
-const nameKeyLocalFilterAll = computed(() => "filter.all");
 
 // const onChangeRange = (value: Dayjs[]) => {
 //   const _range = value.map((x) => x.format());
@@ -158,6 +158,9 @@ onMounted(() => {
     const _data = JSON.parse(_filter);
     filter.value = { ..._data };
     onSetFilter();
+    if (filter.value.year) {
+      year.value = dayjs().set("year", filter.value.year);
+    }
   }
 });
 

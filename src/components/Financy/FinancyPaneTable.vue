@@ -120,7 +120,6 @@ const workTimeDate = ref<string>("");
                 )
               )
             "
-            hide-seconds
           />
         </div>
       </template>
