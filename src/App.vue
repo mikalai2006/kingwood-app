@@ -202,6 +202,7 @@ onErrorCaptured((error: any, vm, info) => {
   if (error?.code == 500) {
     errorApp.value = error;
   }
+
   //  else {
 
   //   modal.confirm({

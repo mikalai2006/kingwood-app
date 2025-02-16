@@ -38,18 +38,23 @@ axiosInstance.interceptors.response.use(
   },
   // Request failed
   (error: any) => {
-    // console.log("Request failed: ", error);
+    // console.log("Request failed: ", error.response);
 
-    const { response } = error;
-    if (response) {
+    // const { response } = error;
+    if (error?.response) {
       // The request has been made, but is not in the scope of 2xx
-      const err: any = new Error(
-        response?.data?.message
-          ? response.data.message
-          : showMessage(response.status)
+      const errData = error?.response?.data;
+
+      // console.log("errData:", errData, typeof errData);
+      // const err: any = new Error(
+      //   errData.message || showMessage(error?.response.status)
+      // );
+      // err.code = error?.response.status;
+      return Promise.reject(
+        errData.message || showMessage(error?.response.status)
       );
-      err.code = response.status;
-      return Promise.reject(err);
+    } else {
+      console.log("not response!");
     }
     // showMessage("The network connection is abnormal, please try again later!");
   }

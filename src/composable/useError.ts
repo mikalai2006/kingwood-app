@@ -53,7 +53,7 @@ export const useError = () => {
 
   const onShowError = (err: any) => {
     // code: string = "", stack: string = ""
-    // console.log("onShowError: ", err);
+    console.log("onShowError: ", err);
 
     if (authStore.iam?.id) {
       appErrorStore.create({

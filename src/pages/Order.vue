@@ -521,6 +521,7 @@ const showFilter = ref(false);
     v-model:open="open"
     :destroyOnClose="true"
     :maskClosable="false"
+    style="top: 40px"
     :title="dataForm.id ? $t('form.order.edit') : $t('form.order.new')"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"

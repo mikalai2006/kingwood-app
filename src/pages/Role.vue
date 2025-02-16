@@ -16,7 +16,7 @@ await roleStore.find();
 
 const columns = ref([
   { title: t("table.role.name"), dataIndex: "name", key: "name", fixed: true },
-  { title: t("table.role.code"), dataIndex: "code", key: "code", fixed: false },
+  // { title: t("table.role.code"), dataIndex: "code", key: "code", fixed: false },
   {
     title: t("table.role.value"),
     dataIndex: "value",

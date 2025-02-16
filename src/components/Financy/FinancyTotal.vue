@@ -1,9 +1,19 @@
 <script setup lang="ts">
+import { IOrder } from "@/api/order/types";
 import { IPaneOptionFinancy } from "@/api/types";
-import { usePayStore, useUserStore, useWorkTimeStore } from "@/store";
+import {
+  useOrderStore,
+  usePayStore,
+  useUserStore,
+  useWorkHistoryStore,
+  useWorkTimeStore,
+} from "@/store";
 import dayjs from "@/utils/dayjs";
 import { getObjectTime } from "@/utils/time";
-import { computed, onMounted } from "vue";
+import { groupBy } from "lodash-es";
+import { computed, onMounted, ref } from "vue";
+import VIcon from "../UI/VIcon.vue";
+import { iChevronDown } from "@/utils/icons";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -11,6 +21,8 @@ const props = defineProps<{
 
 const userStore = useUserStore();
 const workTimeStore = useWorkTimeStore();
+const workHistory = useWorkHistoryStore();
+const orderStore = useOrderStore();
 const payStore = usePayStore();
 
 const worker = computed(() =>
@@ -52,6 +64,50 @@ const listData = computed(() => {
 const totalMoney = computed(() =>
   listData.value.reduce((a, b) => a + b.total, 0)
 );
+
+const totalMoneyGroupOrder = computed(() => {
+  const _list = workHistory.items
+    .filter(
+      (x) =>
+        props.pane.workerId?.includes(x.workerId) &&
+        dayjs(x.to).year() > 1 &&
+        dayjs(x.to)
+          .utc(true)
+          .isBetween(
+            dayjs(props.pane.month).utc(true).startOf("month"),
+            dayjs(props.pane.month).utc(true).endOf("month"),
+            "day",
+            "[]"
+          )
+    )
+    .map((x) => {
+      return {
+        ...x,
+      };
+    });
+
+  const _group = groupBy(_list, "orderId");
+  const _result: {
+    [key: string]: { total: number; order: IOrder | undefined };
+  } = {};
+
+  for (const key in _group) {
+    _result[key] = {
+      total: _group[key].reduce((a, e) => a + e.total, 0),
+      order: orderStore.items.find((x) => x.id === key),
+    };
+  }
+
+  return _result;
+});
+
+const totalByOrders = computed(() => {
+  return Object.values(totalMoneyGroupOrder.value).reduce(
+    (a, e) => a + e.total,
+    0
+  );
+});
+
 const totalMinutesHistory = computed(() =>
   listData.value.reduce((a, b) => a + b.totalMinutes, 0)
 );
@@ -77,6 +133,8 @@ const onFindPays = () => {
   });
 };
 
+const showDetails = ref(false);
+
 onMounted(() => {
   onFindPays();
 });
@@ -90,7 +148,7 @@ onMounted(() => {
     <!-- {{ totalMoney }}|{{ totalPayed }} -->
 
     <div class="relative overflow-x-auto">
-      <table class="w-full text-left rtl:text-right">
+      <table class="w-full text-left rtl:text-right border-collapse">
         <!-- <thead class="text-sm border-b dark:bg-g-800 dark:border-g-700">
           <tr>
             <th scope="col" class="font-normal px-4 py-3">
@@ -102,17 +160,61 @@ onMounted(() => {
           </tr>
         </thead> -->
         <tbody>
-          <tr class="border-b border-black/5 dark:bg-g-800 dark:border-g-700">
-            <th
+          <tr
+            class="cursor-pointer border-b border-black/5 dark:border-g-900"
+            @click="showDetails = !showDetails"
+          >
+            <td
               scope="row"
               class="px-4 py-2 font-normal text-g-900 dark:text-white"
             >
-              {{ $t("table.financy.totalZpMonth") }}
-            </th>
+              <div class="flex gap-2 items-center">
+                <VIcon
+                  :path="iChevronDown"
+                  :class="[
+                    showDetails ? 'rotate-180' : '',
+                    'transition-transform',
+                  ]"
+                />
+                {{ $t("table.financy.totalZpMonth") }}
+              </div>
+            </td>
             <td
               class="px-6 py-2 text-base text-right text-s-500 whitespace-nowrap dark:text-p-400"
             >
               {{ totalMoney.toLocaleString("ru-RU") }} ₽
+            </td>
+          </tr>
+          <tr
+            v-if="showDetails"
+            class="border-b border-black/5 dark:border-g-900 text-g-500 dark:text-g-400"
+          >
+            <td colspan="2">
+              <div class="bg-s-200 dark:bg-g-900 rounded-lg text-sm">
+                <div
+                  v-for="item in totalMoneyGroupOrder"
+                  class="flex items-center"
+                >
+                  <div class="flex-auto px-4 py-2 font-normal">
+                    №{{ item.order?.number }} {{ item.order?.name }}
+                  </div>
+                  <div
+                    class="px-6 py-2 text-right text-s-500 whitespace-nowrap dark:text-p-400"
+                  >
+                    {{ item.total.toLocaleString("ru-RU") }} ₽
+                  </div>
+                </div>
+                <div class="flex items-center">
+                  <div class="flex-auto px-4 py-2">
+                    {{ $t("table.financy.otherWorks") }}
+                  </div>
+                  <div
+                    class="px-6 py-2 text-right text-s-500 whitespace-nowrap dark:text-p-400"
+                  >
+                    {{ (totalMoney - totalByOrders).toLocaleString("ru-RU") }} ₽
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
           <tr

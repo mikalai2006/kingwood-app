@@ -13,6 +13,8 @@ export interface IWorkHistory {
   status: number;
   from: string;
   to: string;
+  oklad: number;
+  total: number;
   workHistory: IWorkHistory[];
 
   createdAt: Date;

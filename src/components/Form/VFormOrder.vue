@@ -11,7 +11,12 @@ import {
   UnwrapRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { useObjectStore, useOrderStore, useUserStore } from "@/store";
+import {
+  useGeneralStore,
+  useObjectStore,
+  useOrderStore,
+  useUserStore,
+} from "@/store";
 import { IOrder } from "@/api/order/types";
 import { dateFormat } from "@/utils/date";
 import useObject from "@/composable/useObject";
@@ -19,6 +24,7 @@ import { message } from "ant-design-vue";
 import { IValidateError, useError } from "@/composable/useError";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
+import { Colors } from "@/utils/colors";
 
 const props = defineProps<{ data: IOrder; defaultData: IOrder }>();
 const emit = defineEmits(["callback"]);
@@ -28,6 +34,7 @@ const { t } = useI18n();
 const orderStore = useOrderStore();
 const userStore = useUserStore();
 const objectStore = useObjectStore();
+const generalStore = useGeneralStore();
 
 const queryNameObject = ref("");
 const objects = computed(() =>
@@ -387,15 +394,37 @@ const showMore = ref(0);
         />
       </a-form-item>
 
-      <a-collapse v-model:activeKey="showMore" ghost>
+      <a-collapse
+        v-model:activeKey="showMore"
+        :bordered="false"
+        :style="{
+          background:
+            generalStore.themeMode === 'dark' ? Colors.g[700] : Colors.s[100],
+          'margin-bottom': '15px',
+        }"
+      >
         <a-collapse-panel key="1" :header="t('button.moreFields')">
-          <a-form-item :label="$t('form.order.year')" name="year">
-            <template #help>
-              <a-alert :message="$t('info.helpMoreOrderYear')" banner />
-            </template>
-            <a-date-picker v-model:value="year" picker="year" />
-            <!-- <a-input v-model:value="formState.number" :disabled="true" /> -->
-          </a-form-item>
+          <a-tooltip color="#108ee9" :title="$t('info.helpMoreOrderYear')">
+            <a-form-item
+              :label="$t('form.order.year')"
+              name="year"
+              class="pb-4"
+            >
+              <!-- <template #help>
+                <a-alert :message="$t('info.helpMoreOrderYear')" banner />
+              </template> -->
+              <a-date-picker v-model:value="year" picker="year" />
+              <!-- <a-input v-model:value="formState.number" :disabled="true" /> -->
+            </a-form-item>
+          </a-tooltip>
+          <a-tooltip color="#108ee9" :title="$t('info.helpMoreOrderNumber')">
+            <a-form-item :label="$t('form.order.number')" name="number">
+              <!-- <template #help>
+              <a-alert :message="$t('info.helpMoreOrderNumber')" banner />
+            </template> -->
+              <a-input-number v-model:value="formState.number" />
+            </a-form-item>
+          </a-tooltip>
         </a-collapse-panel>
       </a-collapse>
 
