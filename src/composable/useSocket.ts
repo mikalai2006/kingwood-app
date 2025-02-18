@@ -17,6 +17,7 @@ import { h } from "vue";
 import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
 import { replaceSubstringByArray } from "@/utils/utils";
+import { useI18n } from "vue-i18n";
 
 export interface IUseSocketProps {
   router: Router;
@@ -52,26 +53,28 @@ export const useSocket = (props: IUseSocketProps) => {
         modal.confirm({
           title: h(
             "span",
-            { class: "flex-auto text-red-500 dark:text-red-400" },
+            { class: "flex-auto text-g-800 dark:text-g-100" },
             props?.t("info.disableServer")
           ),
           icon: h("span", { class: "anticon flex-none inline-flex " }, [
             h(VIcon, {
               path: iWraningTriangle,
-              class: "text-2xl text-red-500 dark:text-red-400",
+              class: "text-2xl text-g-700 dark:text-g-200",
             }),
           ]),
           content: h(
             "div",
-            { class: "text-red-500 dark:text-red-400" },
+            { class: "text-g-700 dark:text-g-200" },
             props?.t("info.disableServerDescription")
           ),
+          cancelButtonProps: { style: { display: "none" } } as any,
           onOk() {
             props?.router.go(0);
           },
-          onCancel() {
-            props?.router.go(0);
-          },
+          okText: props?.t("button.reload"),
+          // onCancel() {
+          //   props?.router.go(0);
+          // },
           class: "test",
         });
         // console.log("router1", router);

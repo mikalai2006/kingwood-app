@@ -328,7 +328,7 @@ onMounted(() => {
       <a-tab-pane
         key="user"
         :tab="$t('tabs.user.user')"
-        class="bg-white dark:bg-g-900/60 p-4"
+        class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
       >
         <!-- {{ JSON.stringify(formState) }} -->
         <a-form
@@ -534,7 +534,7 @@ onMounted(() => {
         "
         key="password"
         :tab="$t('tabs.user.password')"
-        class="bg-white dark:bg-g-900/60 p-4"
+        class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
       >
         <div class="mb-4">
           {{ $t("form.user.login") }}: {{ formState.auth?.login }}

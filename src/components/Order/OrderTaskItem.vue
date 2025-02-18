@@ -24,6 +24,7 @@ import { useI18n } from "vue-i18n";
 import TaskWorkerStatusTag from "../Task/TaskWorkerStatusTag.vue";
 import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
 import VImg from "../UI/VImg.vue";
+import UserListItem from "../User/UserListItem.vue";
 
 const props = defineProps<{ taskId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -381,21 +382,18 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       v-for="(item, key) in taskWorkers"
       class="flex flex-row items-center gap-4 py-1 px-4"
     >
-      <div class="flex flex-row items-center gap-1">
+      <UserListItem v-if="item.worker" :user-id="item.worker.id" />
+      <!-- <div class="flex flex-row items-center gap-1">
         <div>
           <VImg
             :image="item.worker?.images?.[0]"
             class="w-8 h-8 rounded-full"
           />
         </div>
-        <!-- <img
-          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-          class="w-8 h-8 rounded-full border-2 border-s-200"
-        /> -->
         <div class="text-s-500 dark:text-s-300 flex-auto">
           {{ getShortFIO(item.worker?.name) }}
         </div>
-      </div>
+      </div> -->
       <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
         <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
           <template #title>

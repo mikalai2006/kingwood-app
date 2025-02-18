@@ -33,8 +33,8 @@ const role = computed(() =>
       </div>
     </template>
     <div class="flex flex-row items-center gap-2">
-      <div class="relative w-8 h-8">
-        <VImg :image="user?.images?.[0]" class="w-full h-full" />
+      <div class="relative">
+        <VImg :image="user?.images?.[0]" class="w-10 h-10 rounded-full" />
       </div>
 
       <!-- <div class="flex items-center px-2">

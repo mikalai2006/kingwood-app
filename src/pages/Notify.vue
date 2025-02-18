@@ -5,6 +5,7 @@ import { useAuthStore, useGeneralStore, useNotifyStore } from "@/store";
 import { INotifyInput } from "@/api/notify/types";
 import NotifyList from "@/components/Notify/NotifyList.vue";
 import { Colors } from "@/utils/colors";
+import { message } from "ant-design-vue";
 
 const { t } = useI18n();
 
@@ -14,17 +15,19 @@ const generalStore = useGeneralStore();
 
 const onPatchNotify = async (id: string, data: INotifyInput) => {
   await notifyStore.patch(id, data);
+  message.success(t("message.notifyReadOk"));
 };
 
 const activeKey = ref("new");
 </script>
 <template>
-  <div class="flex-auto p-4">
-    <VHeader :title="$t('page.notify.title')" class="mb-4">
+  <div class="flex-auto">
+    <VHeader :title="$t('page.notify.title')">
       <template #back>&nbsp;</template>
     </VHeader>
-    <div class="max-w-screen-md mx-auto">
+    <div class="">
       <a-tabs
+        v-if="authStore.iam?.id"
         v-model:activeKey="activeKey"
         destroyInactiveTabPane
         type="card"
@@ -38,8 +41,12 @@ const activeKey = ref("new");
             generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
         }"
       >
-        <a-tab-pane key="new" :tab="$t('tabs.notify.new')">
-          <div class="bg-white dark:bg-g-900">
+        <a-tab-pane
+          key="new"
+          :tab="$t('tabs.notify.new')"
+          class="mx-auto max-w-screen-lg"
+        >
+          <div class="bg-white dark:bg-g-900 p-4">
             <NotifyList
               :params="{
                 status: 0,
@@ -50,8 +57,12 @@ const activeKey = ref("new");
             />
           </div>
         </a-tab-pane>
-        <a-tab-pane key="old" :tab="$t('tabs.notify.old')">
-          <div class="bg-white dark:bg-g-900">
+        <a-tab-pane
+          key="old"
+          :tab="$t('tabs.notify.old')"
+          class="mx-auto max-w-screen-lg"
+        >
+          <div class="bg-white dark:bg-g-900 p-4">
             <NotifyList
               :params="{
                 status: 1,

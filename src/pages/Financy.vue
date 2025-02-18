@@ -84,10 +84,10 @@ onMounted(async () => {
 
 <template>
   <div class="flex-auto overflow-hidden max-h-screen">
-    <VHeader :title="$t('page.financy.title')" class="p-4">
+    <VHeader :title="$t('page.financy.title')">
       <template #back>&nbsp;</template>
     </VHeader>
-    <div class="flex-auto p-4">
+    <div class="flex-auto">
       <a-tabs
         v-model:activeKey="activeKey"
         type="editable-card"

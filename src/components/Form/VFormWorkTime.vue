@@ -30,15 +30,24 @@ const formState: UnwrapRef<IWorkTimeInput> = reactive({ ...props.data });
 const formRef = ref();
 
 const rules: Record<string, Rule[]> = {
-  name: [
+  to: [
     {
       required: true,
       message: t("form.workTime.rule.to"),
       trigger: "change",
     },
+  ],
+  from: [
     {
       required: true,
       message: t("form.workTime.rule.from"),
+      trigger: "change",
+    },
+  ],
+  oklad: [
+    {
+      required: true,
+      message: t("form.workTime.rule.oklad"),
       trigger: "change",
     },
   ],
@@ -91,6 +100,7 @@ const onChangeTime = (value: string) => {
     formState.from = dayjs(formState.from)
       .set("hour", from.value.hour())
       .set("minute", from.value.minute())
+      .set("seconds", from.value.second())
       .utc()
       .format();
   }
@@ -98,6 +108,7 @@ const onChangeTime = (value: string) => {
     formState.to = dayjs(formState.to)
       .set("hour", to.value.hour())
       .set("minute", to.value.minute())
+      .set("seconds", to.value.second())
       .utc()
       .format();
   }
@@ -118,7 +129,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    {{ formState }}
+    <!-- {{ formState }} -->
     <a-form
       ref="formRef"
       layout="horizontal"
@@ -129,7 +140,7 @@ onBeforeUnmount(() => {
       <a-form-item :label="$t('form.workTime.from')" name="from">
         <a-time-picker
           v-model:value="from"
-          format="HH:mm"
+          format="HH:mm:ss"
           style="width: 100%"
           @change="onChangeTime"
         />
@@ -138,10 +149,14 @@ onBeforeUnmount(() => {
       <a-form-item :label="$t('form.workTime.to')" name="to">
         <a-time-picker
           v-model:value="to"
-          format="HH:mm"
+          format="HH:mm:ss"
           style="width: 100%"
           @change="onChangeTime"
         />
+      </a-form-item>
+
+      <a-form-item :label="$t('form.workTime.oklad')" name="oklad">
+        <a-input-number class="w-full" v-model:value="formState.oklad" />
       </a-form-item>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">

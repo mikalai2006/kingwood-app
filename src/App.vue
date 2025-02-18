@@ -80,7 +80,7 @@ const onInitData = async () => {
     loadingText.value = t("page.post.title");
     await postStore.find({ $limit: 100 });
     loadingText.value = t("page.user.title");
-    await userStore.find({ $limit: 100 });
+    await userStore.find({ $limit: 500 });
     loadingText.value = t("page.operation.title");
     await operationStore.find({ $limit: 100 });
     // await taskStore.find({ $limit: 300 });
@@ -451,7 +451,7 @@ onErrorCaptured((error: any, vm, info) => {
                 </div>
               </aside>
               <div
-                class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-951"
+                class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
               >
                 <div class="flex-auto flex">
                   <RouterView v-slot="{ Component }">

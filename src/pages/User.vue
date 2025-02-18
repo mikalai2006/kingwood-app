@@ -42,6 +42,15 @@ const postsFilter = computed(() => {
   });
 });
 
+const isWorkFilter = computed(() => {
+  return [0, 1].map((x) => {
+    return {
+      text: t(`table.user.isWork${x}`),
+      value: x,
+    };
+  });
+});
+
 const allColumns = computed(() => [
   { key: "image" },
   {
@@ -57,7 +66,12 @@ const allColumns = computed(() => [
     onFilter: (value: string, record: IUser) =>
       record.postObject.name.indexOf(value) === 0,
   },
-
+  {
+    key: "isWork",
+    fixed: false,
+    filters: isWorkFilter.value,
+    onFilter: (value: number, record: IUser) => record.isWork === value,
+  },
   { key: "role" },
   { key: "birthday" },
   { key: "currentTask" },
@@ -80,8 +94,9 @@ const optionsForSelect = computed(() =>
 const columnKeys = ref([
   "image",
   "name",
+  "isWork",
   "post",
-  "currentTask",
+  "role",
   "lastTime",
   "action",
 ]);
@@ -221,8 +236,8 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex-auto p-4">
-    <VHeader :title="$t('page.user.title')" class="mb-4">
+  <div class="flex-auto">
+    <VHeader :title="$t('page.user.title')">
       <template #back>&nbsp;</template>
       <template #header>
         <div class="flex flex-row items-center">
@@ -282,7 +297,6 @@ onMounted(() => {
       v-model:activeKey="activeKey"
       destroyInactiveTabPane
       type="card"
-      class="mt-4"
       :tabBarStyle="{
         position: 'sticky',
         top: 0,

@@ -41,7 +41,9 @@ const onFinish = async (values: any) => {
         return r;
       })
       .catch((error: any) => {
-        if (error?.errorFields) {
+        if (error?.message == "Failed to fetch") {
+          throw new Error("error.notNet");
+        } else if (error?.errorFields) {
           onGetValidateError(error);
         } else {
           throw new Error(JSON.stringify(error));

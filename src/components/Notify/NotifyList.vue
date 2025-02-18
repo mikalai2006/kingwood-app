@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import sift from "sift";
 import { INotifyFilter } from "@/api/notify/types";
 import UserShortInfo from "../User/UserShortInfo.vue";
+import { replaceSubstringByArray } from "@/utils/utils";
 
 const props = defineProps<{
   keyList: string;
@@ -45,7 +46,7 @@ const onChangePagintaion = async (_page: number, _pageSize: number) => {
   // console.log("load ", _page, _pageSize, _pageSize * _page - 1);
   pagination.value.current = _page;
   pagination.value.pageSize = _pageSize;
-  // onQueryData();
+  onQueryData();
 };
 const pagination = ref({
   total: 10,
@@ -58,6 +59,7 @@ const pagination = ref({
 
 const onQueryData = async () => {
   loading.value = true;
+
   await notifyStore
     .find({
       ...props.params,
@@ -82,14 +84,19 @@ const onQueryData = async () => {
 };
 
 const listData = computed(() => {
-  return notifyStore.items.filter(sift(siftParams.value)).map((x) => {
-    // const object = objectStore.items.find((y) => y.id === x.objectId);
+  return notifyStore.items
+    .filter(sift(siftParams.value))
+    .map((x) => {
+      // const object = objectStore.items.find((y) => y.id === x.objectId);
 
-    return {
-      // object,
-      ...x,
-    };
-  });
+      return {
+        // object,
+        ...x,
+      };
+    })
+    .sort((a, b) =>
+      b.createdAt.toString().localeCompare(a.createdAt.toString())
+    );
 });
 
 onMounted(async () => {
@@ -100,8 +107,15 @@ onMounted(async () => {
 <template>
   <a-list
     item-layout="horizontal"
-    :pagination="pagination"
     :data-source="listData"
+    :pagination="{
+      ...pagination,
+      disabled: loading,
+      onChange: onChangePagintaion,
+      showSizeChanger: true,
+      // showTotal: () =>
+      //   replaceSubstringByArray(t('pagination.notify'), [listData.length]),
+    }"
   >
     <!-- <template #footer>
       <div>
@@ -120,22 +134,25 @@ onMounted(async () => {
                 emit('onPatchNotify', item.id, {
                   status: 1,
                 });
+                pagination.total -= 1;
               }
             "
           >
-            {{ $t("button.read") }}
+            {{ $t("button.ok") }}
           </a-button>
         </template>
         <a-skeleton avatar :title="false" :loading="!!item.loading" active>
           <a-list-item-meta>
             <template #title>
-              <div>
+              <div class="font-medium text-s-950 dark:text-g-100">
                 {{ item.title }}
               </div>
-              {{ item.message }}
+              <div class="text-s-800 dark:text-g-300">
+                {{ item.message }}
+              </div>
             </template>
             <template #description>
-              <p class="mt-1 truncate text-xs text-g-400 dark:text-g-400">
+              <p class="mt-1 truncate text-xs text-g-400 dark:text-g-300">
                 {{ item.createdAt ? dayjs(item.createdAt).fromNow() : "" }}
                 <template v-if="item.status === 1">
                   ({{ $t("button.readed") }} {{ dayjs(item.readAt).fromNow() }})

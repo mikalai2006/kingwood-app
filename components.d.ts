@@ -81,6 +81,7 @@ declare module 'vue' {
     UserExitButton: typeof import('./src/components/User/UserExitButton.vue')['default']
     UserInfoAside: typeof import('./src/components/User/UserInfoAside.vue')['default']
     UserList: typeof import('./src/components/User/UserList.vue')['default']
+    UserListItem: typeof import('./src/components/User/UserListItem.vue')['default']
     UserNotify: typeof import('./src/components/User/UserNotify.vue')['default']
     UserShortInfo: typeof import('./src/components/User/UserShortInfo.vue')['default']
     UserTask: typeof import('./src/components/User/UserTask.vue')['default']

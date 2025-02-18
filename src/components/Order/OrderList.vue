@@ -30,7 +30,6 @@ import OrderObject from "./OrderObject.vue";
 import { Colors } from "@/utils/colors";
 import OrderMessages from "./OrderMessages.vue";
 import OrderTaskList from "./OrderTaskList.vue";
-import FinancyOrder from "../Financy/FinancyOrder.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -374,6 +373,7 @@ const activeKey = ref("list");
       disabled: loading,
       onChange: onChangePagintaion,
       showSizeChanger: true,
+      position: ['bottomCenter'],
     }"
   >
     <template #title>

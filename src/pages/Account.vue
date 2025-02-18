@@ -22,11 +22,11 @@ const dataForm = ref(defaultData);
 </script>
 
 <template>
-  <div class="flex-auto p-4">
-    <VHeader :title="$t('page.account.title')" class="mb-4">
+  <div class="flex-auto">
+    <VHeader :title="$t('page.account.title')">
       <template #back>&nbsp;</template>
     </VHeader>
-    <div class="mx-auto max-w-screen-md">
+    <div>
       <VFormUser
         :data="dataForm"
         :default-data="defaultData"

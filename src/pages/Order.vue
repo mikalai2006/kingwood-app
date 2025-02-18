@@ -167,9 +167,9 @@ onMounted(() => {
 const showFilter = ref(false);
 </script>
 <template>
-  <div class="p-4 flex-auto">
+  <div class="flex-auto">
     <!-- <VTitle :text="$t('page.order.title')" /> -->
-    <VHeader :title="$t('page.order.title')" class="mb-4">
+    <VHeader :title="$t('page.order.title')">
       <template #back>&nbsp;</template>
       <template #header>
         <div class="flex flex-row items-center">

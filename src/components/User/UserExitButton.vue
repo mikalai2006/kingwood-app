@@ -31,7 +31,7 @@ const onLogout = () => {
       [
         h(VIcon, {
           path: iExit,
-          class: "flex-none text-4xl text-p-500 dark:text-g-400",
+          class: "flex-none text-4xl text-g-500 dark:text-g-400",
         }),
         h(
           "div",
@@ -41,12 +41,12 @@ const onLogout = () => {
           [
             h(
               "div",
-              { class: "text-xl font-bold text-p-800 dark:text-g-100" },
+              { class: "text-xl font-bold text-g-800 dark:text-g-100" },
               t("info.logoutQuestionTitle")
             ),
             h(
               "div",
-              { class: "text-lg text-p-500 dark:text-g-300" },
+              { class: "text-base leading-5 text-g-500 dark:text-g-300" },
               t("info.logoutQuestionDescription")
             ),
           ]
@@ -55,7 +55,7 @@ const onLogout = () => {
     ),
     okButtonProps: { type: "primary", danger: false },
     okText: t("button.yes"),
-    cancelText: t("button.cancel"),
+    cancelText: t("button.no"),
     onOk() {
       return new Promise((resolve, reject) => {
         try {

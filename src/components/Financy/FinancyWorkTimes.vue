@@ -19,6 +19,9 @@ import { dateTimeFormat } from "@/utils/date";
 import VFormWorkTime from "../Form/VFormWorkTime.vue";
 import { IWorkTime, IWorkTimeInput } from "@/api/work_time/types";
 import TimePretty from "../Time/TimePretty.vue";
+import { replaceSubstringByArray } from "@/utils/utils";
+
+const COUNT_DAY_ADD_WORKTIME = 31;
 
 const props = defineProps<{
   date: string;
@@ -88,7 +91,6 @@ const listData = computed(() => {
     });
   return _list;
 });
-console.log("listData", listData.value);
 
 const showFormWorkTime = ref(false);
 
@@ -226,7 +228,23 @@ const onAddItem = () => {
       />
     </template> -->
     <template #footer>
-      <a-tooltip v-if="authStore.roles.includes('workTime-create')">
+      <a-alert
+        v-if="dayjs().diff(dayjs(date), 'days') > COUNT_DAY_ADD_WORKTIME"
+        type="warning"
+        show-icon
+        :message="$t('notify.warning')"
+        :description="
+          replaceSubstringByArray($t('info.rangeAddWorkTime'), [
+            COUNT_DAY_ADD_WORKTIME,
+          ])
+        "
+      />
+      <a-tooltip
+        v-if="
+          authStore.roles.includes('workTime-create') &&
+          dayjs().diff(dayjs(date), 'days') <= COUNT_DAY_ADD_WORKTIME
+        "
+      >
         <template #title>
           {{ $t("button.addWorkTime") }}
         </template>

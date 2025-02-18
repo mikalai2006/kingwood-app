@@ -4,6 +4,7 @@ import { IPost } from "../post/types";
 import { IRole } from "../role/types";
 import { ITaskWorker } from "../task_worker/types";
 import { IPaginationParams } from "../types";
+import { IWorkTime } from "../work_time/types";
 
 export interface IUser {
   id: string;
@@ -24,6 +25,8 @@ export interface IUser {
   typePay: number;
   oklad: number;
   lastTime: Date;
+  workTimes: IWorkTime[];
+  isWork: number;
 
   auth: IAuthPublicData;
   taskWorkers: ITaskWorker[];

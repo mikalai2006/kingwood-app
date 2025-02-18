@@ -55,6 +55,7 @@ axiosInstance.interceptors.response.use(
       );
     } else {
       console.log("not response!");
+      return Promise.reject(showMessage(0));
     }
     // showMessage("The network connection is abnormal, please try again later!");
   }
@@ -169,7 +170,7 @@ const request = async <T = any>(config: AxiosRequestConfig): Promise<T> => {
         //     };
         //   }
         // }
-        // console.log("axios err", error.response, err);
+        console.log("axios err", error);
 
         reject(error);
       });

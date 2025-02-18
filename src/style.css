@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  /* body * {
+    @apply !font-sans;
+  } */
+
   .b-scroll::-webkit-scrollbar,
   .ant-modal-wrap::-webkit-scrollbar {
     @apply cursor-pointer w-3;

@@ -14,7 +14,7 @@ const props = defineProps<{
     title: string;
     dataIndex: string;
     customFilterDropdown?: boolean;
-    onFilter?: (value: string, record: IUser) => boolean;
+    onFilter?: (value: any, record: IUser) => boolean;
     sorter?: (a: IUser, b: IUser) => number;
   }[];
 }>();
@@ -52,7 +52,6 @@ const columnsData = computed(() => {
     };
   });
 });
-console.log("siftParams", siftParams, columnsData);
 
 onMounted(async () => {
   await userStore.find({ ...props.params });
@@ -60,11 +59,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <a-table
-    :columns="columns"
-    :data-source="columnsData"
-    :row-class-name="(_record: any, index: number) => (_record.taskWorkers.length === 0 ? 'custom priority cursor-pointer bg-s-500/20 hover:!bg-s-500/40' : 'cursor-pointer')"
-  >
+  <a-table :columns="columns" :data-source="columnsData">
+    <!-- :row-class-name="(_record: any, index: number) => (
+      'custom ' + (
+        _record.taskWorkers.length === 0
+        ? 'priority bg-red-500/20 hover:!bg-red-500/40'
+        : '')
+      )" -->
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'action'">
         <a-button
@@ -79,6 +80,20 @@ onMounted(async () => {
         >
           {{ $t("button.delete") }}
         </a-button>
+      </template>
+      <template v-if="column.key === 'name'">
+        <div>
+          {{ record.name }}
+        </div>
+      </template>
+      <template v-if="column.key === 'isWork'">
+        <a-tag
+          v-if="!record.isWork"
+          :bordered="false"
+          :color="record.isWork ? '#5ea500' : ''"
+        >
+          {{ $t(`table.user.isWork${record.isWork}`) }}
+        </a-tag>
       </template>
       <template v-if="column.key === 'value'">
         <span
@@ -102,7 +117,7 @@ onMounted(async () => {
         <UserTask :workerId="record.id" />
       </template>
       <template v-if="column.key === 'role'">
-        <a-tag>{{ record.roleObject?.name }}</a-tag>
+        <a-tag :bordered="false">{{ record.roleObject?.name }}</a-tag>
       </template>
       <template v-if="column.key === 'image'">
         <!-- <a-avatar
@@ -110,15 +125,12 @@ onMounted(async () => {
                 src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
               /> -->
         <div class="relative w-16 h-16">
-          <VImg
-            :image="record.images?.[0]"
-            class="w-16 h-16 rounded-full"
-            :class="[{ 'border-4 border-green-500': record.online }]"
-          />
-          <!-- <div
-                  v-if="record.online"
-                  class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-green-500 border-4 border-white dark:border-g-900"
-                ></div> -->
+          <VImg :image="record.images?.[0]" class="w-16 h-16 rounded-full" />
+          <!-- :class="[{ 'border-4 border-green-500': record.online }]" -->
+          <div
+            v-if="record.online"
+            class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-4 border-white dark:border-g-900"
+          ></div>
         </div>
       </template>
       <template v-if="column.key === 'birthday'">

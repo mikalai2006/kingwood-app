@@ -139,9 +139,9 @@ const onSetFilter = () => {
 };
 </script>
 <template>
-  <div class="p-4 flex-auto">
+  <div class="flex-auto">
     <!-- <VTitle :text="$t('page.order.title')" /> -->
-    <VHeader v-if="object" :title="object?.name" class="mb-4">
+    <VHeader v-if="object" :title="object?.name">
       <!-- <template #back>&nbsp;</template> -->
       <template #header>
         <div class="flex flex-row items-center">

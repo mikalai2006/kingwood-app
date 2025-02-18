@@ -6,7 +6,9 @@ defineProps<{ title: string }>();
 </script>
 
 <template>
-  <div class="flex flex-row gap-4 items-center pb-1 mt-4">
+  <div
+    class="flex flex-row gap-4 items-center pb-4 pt-8 bg-s-200 dark:bg-g-951"
+  >
     <!-- border-b border-black/5 dark:border-white/5 -->
     <slot name="back">
       <a-tooltip>
