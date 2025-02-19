@@ -126,21 +126,25 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async initToken(): Promise<IUser | null> {
-      const _tokens = localStorage.getItem("tokens");
-      const tokens: IResResultLogin | null = _tokens
-        ? JSON.parse(_tokens)
-        : null;
-      if (tokens?.access_token) {
-        // console.log("init tokens: ", tokens, this.isExpiredAccessToken());
-        this.setTokenData(tokens);
+      try {
+        const _tokens = localStorage.getItem("tokens");
+        const tokens: IResResultLogin | null = _tokens
+          ? JSON.parse(_tokens)
+          : null;
+        if (tokens?.access_token) {
+          // console.log("init tokens: ", tokens, this.isExpiredAccessToken());
+          this.setTokenData(tokens);
 
-        // if (!this.isExpiredAccessToken) {
-        //   setAxiosHeader("Authorization", `Bearer ${tokens?.access_token}`);
-        // } else if (this.isExpiredAccessToken) {
-        //   this.refreshToken();
-        // }
+          // if (!this.isExpiredAccessToken) {
+          //   setAxiosHeader("Authorization", `Bearer ${tokens?.access_token}`);
+          // } else if (this.isExpiredAccessToken) {
+          //   this.refreshToken();
+          // }
 
-        return this.getIAm();
+          return this.getIAm();
+        }
+      } catch (e) {
+        throw e;
       }
       return null;
     },

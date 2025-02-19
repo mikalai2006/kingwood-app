@@ -25,6 +25,8 @@ import TaskWorkerStatusTag from "../Task/TaskWorkerStatusTag.vue";
 import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
 import VImg from "../UI/VImg.vue";
 import UserListItem from "../User/UserListItem.vue";
+import dayjs from "dayjs";
+import { dateFormat } from "@/utils/date";
 
 const props = defineProps<{ taskId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -382,7 +384,13 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       v-for="(item, key) in taskWorkers"
       class="flex flex-row items-center gap-4 py-1 px-4"
     >
-      <UserListItem v-if="item.worker" :user-id="item.worker.id" />
+      <UserListItem v-if="item.worker" :user-id="item.worker.id">
+        <template #description>
+          <!-- c {{ dayjs(item.from).format(dateFormat) }} -->
+          <!-- ->
+          {{ dayjs(item.to).format(dateFormat) }} -->
+        </template>
+      </UserListItem>
       <!-- <div class="flex flex-row items-center gap-1">
         <div>
           <VImg

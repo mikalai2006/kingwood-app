@@ -157,7 +157,7 @@ onMounted(() => {
   <a-textarea
     v-model:value="messageOrder"
     :placeholder="$t('form.message.messagePlaceholder')"
-    class="mb-3"
+    class="mb-3 b-scroll"
   >
   </a-textarea>
   <div class="flex flex-row gap-2">

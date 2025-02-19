@@ -12,7 +12,8 @@ export default function () {
     title?: string,
     type?: "success" | "info" | "warning" | "error",
     placement?: NotificationPlacement,
-    duration?: number
+    duration?: number,
+    onClose?: () => void
   ) => {
     type = type || "info";
     notification[type]({
@@ -20,6 +21,7 @@ export default function () {
       description,
       placement: placement || "bottomRight",
       duration: duration || 0,
+      onClose,
     });
 
     playSoundMessage();

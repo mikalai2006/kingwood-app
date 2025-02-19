@@ -16,6 +16,8 @@ const { t } = useI18n();
 
 <template>
   <span>
+    {{ time.days > 0 ? (!short ? time.days : time.days) : "" }}
+    {{ time.days > 0 ? (!short ? t("time.days") + " " : ":") : "" }}
     {{ time.hours > 0 ? (!short ? time.hours0 : time.hours) : "" }}
     {{ time.hours > 0 ? (!short ? t("time.hours") + " " : ":") : "" }}
     {{ !short ? time.minutes : time.minutes0 }}

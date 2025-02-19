@@ -57,13 +57,13 @@ export const useError = () => {
 
     if (authStore.iam?.id) {
       appErrorStore.create({
-        error: err.message,
+        error: err?.message || err,
         stack: err.stack,
         code: err?.code?.toString(),
       });
     }
 
-    message.error(err.message);
+    message.error(err?.message || err);
   };
 
   return {

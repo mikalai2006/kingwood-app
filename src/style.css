@@ -41,7 +41,6 @@
   .ant-modal-wrap::-webkit-scrollbar:hover {
     @apply w-5;
   }
-
   .ant-table-wrapper
     .ant-table-tbody
     > tr.priority.custom.ant-table-row:hover
@@ -160,4 +159,15 @@ code {
 .ant-image-preview-operations-wrapper {
   top: auto !important;
   bottom: 0 !important;
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  @apply !font-normal bg-white dark:bg-[#343434] text-g-700 dark:text-g-400;
+}
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker,
+.ant-input-number {
+  border-width: 2px !important;
 }

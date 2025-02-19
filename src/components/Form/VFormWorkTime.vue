@@ -15,6 +15,7 @@ import { useError } from "@/composable/useError";
 import { message } from "ant-design-vue";
 import { IWorkTimeInput } from "@/api/work_time/types";
 import dayjs, { Dayjs } from "dayjs";
+import { dateFormat } from "@/utils/date";
 
 const props = defineProps<{
   data: IWorkTimeInput;
@@ -92,10 +93,36 @@ const resetForm = () => {
   formRef.value?.resetFields();
 };
 
+const date = ref<Dayjs>();
 const from = ref<Dayjs>();
 const to = ref<Dayjs>();
 
+const onSyncDate = () => {
+  if (formState.date) {
+    date.value = dayjs(formState.date);
+    formState.from = dayjs(formState.from)
+      .set("date", date.value.date())
+      .utc()
+      .format();
+    formState.to = dayjs(formState.to)
+      .set("date", date.value.date())
+      .utc()
+      .format();
+  }
+};
+
 const onChangeTime = (value: string) => {
+  onSyncDate();
+  // if (date.value) {
+  //   formState.from = dayjs(formState.from)
+  //     .set("date", date.value.date())
+  //     .utc()
+  //     .format();
+  //   formState.to = dayjs(formState.to)
+  //     .set("date", date.value.date())
+  //     .utc()
+  //     .format();
+  // }
   if (from.value) {
     formState.from = dayjs(formState.from)
       .set("hour", from.value.hour())
@@ -115,6 +142,8 @@ const onChangeTime = (value: string) => {
 };
 
 onMounted(() => {
+  onSyncDate();
+
   if (formState.from) {
     from.value = dayjs(formState.from);
   }
@@ -129,7 +158,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <!-- {{ formState }} -->
+    {{ formState }}
     <a-form
       ref="formRef"
       layout="horizontal"
@@ -137,6 +166,14 @@ onBeforeUnmount(() => {
       :model="formState"
       :rules="rules"
     >
+      <!-- <a-form-item :label="$t('form.workTime.date')" name="date">
+        <a-date-picker
+          v-model:value="date"
+          :format="dateFormat"
+          style="width: 100%"
+          @change="onChangeTime"
+        />
+      </a-form-item> -->
       <a-form-item :label="$t('form.workTime.from')" name="from">
         <a-time-picker
           v-model:value="from"

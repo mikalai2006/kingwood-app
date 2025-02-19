@@ -352,6 +352,7 @@ const activeKey = ref("list");
     expandRowByClick
     :loading="loading"
     size="small"
+    class="table_order"
     @change="handleTableChange"
     :row-class-name="(_record: IOrder, index: number) => (_record.group?.includes('create_complete') ? 'custom priority cursor-pointer bg-green-500/40 hover:!bg-green-500/50' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
     :customRow="
@@ -425,6 +426,13 @@ const activeKey = ref("list");
           src="https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png"
         />
       </template>
+
+      <!-- <template v-if="column.key === 'name'">
+        <span class="font-medium">
+          {{ record.name }}
+        </span>
+      </template> -->
+
       <template v-if="column.key === 'group'">
         <a-tag
           v-for="item in record.group"
@@ -531,9 +539,9 @@ const activeKey = ref("list");
       </template>
 
       <template v-if="column.key === 'name'">
-        <p class="">
+        <span class="font-medium">
           {{ record.name }}
-        </p>
+        </span>
         <a-tag
           v-if="record.priority"
           :bordered="false"
@@ -555,7 +563,7 @@ const activeKey = ref("list");
         >
           <!-- {{ record?.object?.name }} -->
           <OrderObject :object-id="record.objectId" />
-          <VIcon :path="iChevronRight" />
+          <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
         </RouterLink>
       </template>
 
@@ -581,19 +589,23 @@ const activeKey = ref("list");
           {{ dayjs(record.dateStart).format(dateFormat) }}
         </div>
         <div v-else>
-          <a-button
-            v-if="authStore.roles.includes('order-add-design')"
-            size="small"
-            @click="
-                  (e: Event) => {
-                    onDateStart(record);
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                "
-          >
-            {{ $t("button.dateStart") }}
-          </a-button>
+          <a-tooltip v-if="authStore.roles.includes('order-add-design')">
+            <template #title>
+              {{ $t("info.dateStart") }}
+            </template>
+            <a-button
+              size="small"
+              @click="
+                    (e: Event) => {
+                      onDateStart(record);
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  "
+            >
+              {{ $t("button.dateStart") }}
+            </a-button>
+          </a-tooltip>
         </div>
       </template>
 
@@ -717,7 +729,7 @@ const activeKey = ref("list");
   <a-modal
     v-model:open="openDateStart"
     :destroyOnClose="true"
-    :title="$t('button.dateStart')"
+    :title="$t('table.order.dateStart')"
     :maskClosable="false"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
@@ -837,5 +849,11 @@ const activeKey = ref("list");
   .ant-modal-close {
     top: 30px !important;
   }
+}
+
+.table_order thead {
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 </style>

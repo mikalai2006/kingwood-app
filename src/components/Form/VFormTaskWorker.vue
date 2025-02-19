@@ -325,7 +325,7 @@ onMounted(() => {
         />
       </a-form-item>
 
-      <a-form-item
+      <!-- <a-form-item
         v-if="authStore.roles.includes('taskWorker-statusId')"
         :label="$t('form.taskWorker.statusId')"
         name="statusId"
@@ -337,7 +337,8 @@ onMounted(() => {
           :options="taskStatuses"
           :disabled="!authStore.roles.includes('taskWorker-statusId')"
         ></a-select>
-      </a-form-item>
+      </a-form-item> -->
+
       <!-- <a-form-item :label="$t('form.post.color')" name="color">
         <a-select
           v-model:value="formState.color"

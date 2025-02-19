@@ -18,11 +18,13 @@ import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
 import { replaceSubstringByArray } from "@/utils/utils";
 import { useI18n } from "vue-i18n";
+import { MessageApi } from "ant-design-vue/es/message";
 
 export interface IUseSocketProps {
   router: Router;
   t: any;
   noty: ReturnType<typeof composableNotification>;
+  message: MessageApi;
 }
 
 export const useSocket = (props: IUseSocketProps) => {
@@ -183,7 +185,22 @@ export const useSocket = (props: IUseSocketProps) => {
               notifyStore.onRemoveItemFromStore(content.id);
             } else {
               notifyStore.onAddItemToStore(content);
-              props.noty.onShowNotify(content.message, content.title);
+              props.noty.onShowNotify(
+                content.message,
+                content.title,
+                "info",
+                "bottomRight",
+                0,
+                () => {
+                  console.log("change status notify: ", content);
+
+                  if (content.id) {
+                    notifyStore.patch(content.id, { status: 1 }).then(() => {
+                      props.message.success(props.t("message.notifyReadOk"));
+                    });
+                  }
+                }
+              );
             }
             break;
 

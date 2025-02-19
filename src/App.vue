@@ -74,25 +74,37 @@ const onInitData = async () => {
     }
 
     loadingText.value = t("page.payTemplate.title");
-    await payTemplateStore.find({ $limit: 100 });
+    await payTemplateStore.find({ $limit: 100 }).catch((e) => {
+      throw e;
+    });
     loadingText.value = t("page.role.title");
-    await roleStore.find({ $limit: 100 });
+    await roleStore.find({ $limit: 100 }).catch((e) => {
+      throw e;
+    });
     loadingText.value = t("page.post.title");
-    await postStore.find({ $limit: 100 });
+    await postStore.find({ $limit: 100 }).catch((e) => {
+      throw e;
+    });
     loadingText.value = t("page.user.title");
-    await userStore.find({ $limit: 500 });
+    await userStore.find({ $limit: 500 }).catch((e) => {
+      throw e;
+    });
     loadingText.value = t("page.operation.title");
-    await operationStore.find({ $limit: 100 });
+    await operationStore.find({ $limit: 100 }).catch((e) => {
+      throw e;
+    });
     // await taskStore.find({ $limit: 300 });
     // loadingText.value = t("page.task.title");
     // await orderStore.find({ $limit: 100 });
     // await taskWorkerStore.find({ $limit: 100 });
     // loadingText.value = t("page.taskWorker.title");
     loadingText.value = t("page.taskStatus.title");
-    await taskStatus.find();
+    await taskStatus.find().catch((e) => {
+      throw e;
+    });
 
     // setTimeout(() => {
-    const { socket: _socket } = useSocket({ router, t, noty });
+    const { socket: _socket } = useSocket({ router, t, noty, message });
     socket = _socket;
 
     // check auth token.

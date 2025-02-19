@@ -24,7 +24,9 @@ const post = computed(() =>
         {{ getShortFIO(user?.name) }}
       </span>
       <span class="truncate text-sm/6 text-gray-500 dark:text-gray-400">
-        {{ post?.name }}
+        <slot name="description">
+          {{ post?.name }}
+        </slot>
       </span>
     </div>
   </div>
