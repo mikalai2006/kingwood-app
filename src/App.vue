@@ -137,10 +137,12 @@ watch(
 );
 
 onMounted(async () => {
-  window?.ipcRenderer.getVersion().then((_version: string) => {
-    console.log(`Version ${version}`);
-    version.value = _version;
-  });
+  if (window?.ipcRenderer) {
+    window?.ipcRenderer?.getVersion().then((_version: string) => {
+      console.log(`Version ${version}`);
+      version.value = _version;
+    });
+  }
 
   // window?.ipcRenderer.on("message", function (event, text) {
   //   // alert(text);
