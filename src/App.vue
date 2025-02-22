@@ -144,7 +144,7 @@ onMounted(async () => {
 
   // Listen for messages
   window?.ipcRenderer.on("message", function (event, text) {
-    alert(text);
+    noty.onShowNotify(text);
   });
 
   // window?.ipcRenderer.on("message", function (event, text) {
