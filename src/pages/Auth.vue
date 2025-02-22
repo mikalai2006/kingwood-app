@@ -52,7 +52,8 @@ const onFinish = async (values: any) => {
   } catch (e: any) {
     // console.log(typeof e, typeof e.message);
 
-    message.error(te(e?.message) ? t(e?.message) : e?.message);
+    // message.error(te(e?.message) ? t(e?.message) : e?.message);
+    throw e;
   } finally {
     loading.value = false;
   }
