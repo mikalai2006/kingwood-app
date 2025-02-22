@@ -1,5 +1,6 @@
 {
   "nameApp": "KW",
+  "version": "версия",
   "privilege": {
     "auth-resetpass": "Сброс пароля",
     "auth-create": "Пользователь: создание",

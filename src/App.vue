@@ -459,7 +459,9 @@ onErrorCaptured((error: any, vm, info) => {
                   <div class="flex flex-row pl-2">
                     <VChangerMode />
                   </div>
-                  <div class="flex-auto pr-4">version: {{ version }}</div>
+                  <div class="flex-auto pr-4">
+                    {{ $t("version") }}: {{ version }}
+                  </div>
                   <div class="flex-auto"></div>
                   <div class="px-4">
                     <UserNotify v-if="authStore.iam?.id" />
