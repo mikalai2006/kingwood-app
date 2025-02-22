@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);
   },
+  getVersion: () => ipcRenderer.invoke("get-version"),
 
   show: (title, body) => {
     new Notification({
@@ -118,11 +119,14 @@ function useLoading() {
     `;
   const oStyle = document.createElement("style");
   const oDiv = document.createElement("div");
-
+  // <img src="${path.join(
+  //   process.env.VITE_PUBLIC,
+  //   "logo-t.png"
+  // )}" />
   oStyle.id = "app-loading-style";
   oStyle.innerHTML = styleContent;
   oDiv.className = "app-loading-wrap";
-  oDiv.innerHTML = `<img src="./public/logo-t.png" /><div class="${className}"><div></div></div>`;
+  oDiv.innerHTML = `<div class="${className}"><div></div></div>`;
 
   return {
     appendLoading() {

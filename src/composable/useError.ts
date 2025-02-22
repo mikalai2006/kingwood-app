@@ -1,5 +1,6 @@
 import { useAppErrorStore, useAuthStore } from "@/store";
 import { message } from "ant-design-vue";
+import { useI18n } from "vue-i18n";
 
 export interface IFailedFinishForm extends IValidateError {
   values: { [key: string]: any };
@@ -19,6 +20,8 @@ export interface IValidateError extends Error {
 export const useError = () => {
   const appErrorStore = useAppErrorStore();
   const authStore = useAuthStore();
+
+  const { t } = useI18n();
 
   const onGetValidateError = (
     error: IValidateError,
@@ -53,7 +56,7 @@ export const useError = () => {
 
   const onShowError = (err: any) => {
     // code: string = "", stack: string = ""
-    console.log("onShowError: ", err);
+    console.log("onShowError: ", err, typeof err);
 
     if (authStore.iam?.id) {
       appErrorStore.create({
@@ -63,7 +66,7 @@ export const useError = () => {
       });
     }
 
-    message.error(err?.message || err);
+    message.error(t(err?.message || err));
   };
 
   return {

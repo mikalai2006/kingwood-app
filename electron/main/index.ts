@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, nativeImage } from "electron";
+import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -109,6 +109,12 @@ async function createWindow() {
 
 app.whenReady().then(async () => {
   await createWindow();
+
+  ipcMain.handle("get-version", () => {
+    const version = app.getVersion();
+    console.log("Version:", version);
+    return version;
+  });
 
   //-------------------------------------------------------------------
   // Auto updates - Option 1 - Simplest version

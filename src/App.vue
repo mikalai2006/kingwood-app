@@ -137,6 +137,11 @@ watch(
 );
 
 onMounted(async () => {
+  window?.ipcRenderer.getVersion().then((_version: string) => {
+    console.log(`Version ${version}`);
+    version.value = _version;
+  });
+
   // window?.ipcRenderer.on("message", function (event, text) {
   //   // alert(text);
   //   noty.onShowNotify(text);
@@ -174,6 +179,8 @@ onMounted(async () => {
     errorApp.value = e;
   }
 });
+
+const version = ref("0.0.0");
 
 onUnmounted(() => {
   socket?.close();
@@ -374,12 +381,15 @@ onErrorCaptured((error: any, vm, info) => {
             >
               <aside
                 id="sidebar"
-                class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between py-4"
+                class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
               >
                 <div class="flex items-center justify-center">
                   <a href="#" class="" :title="$t('nameApp')">
                     <img src="/logo-t-white.png" class="" />
                   </a>
+                </div>
+                <div>
+                  <!-- {{ window.require("electron").remote.app.getVersion() }} -->
                 </div>
                 <div class="flex flex-col">
                   <VNavbar v-if="authStore.tokenData" />
@@ -428,38 +438,27 @@ onErrorCaptured((error: any, vm, info) => {
                 </div>
                 <div class="flex-auto"></div>
 
-                <div class="flex flex-row px-4 mb-6">
-                  <VChangerMode />
-                  <!-- <a
-                    href="#"
-                    class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
-                  >
-                    asd
-                  </a> -->
-
-                  <!-- <a
-                href="#"
-                class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
-              >
-                asd
-              </a>
-              <a
-                href="#"
-                class="block py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
-              >
-                asd
-              </a> -->
-                  <div class="flex-auto"></div>
-                  <UserNotify v-if="authStore.iam?.id" />
-                </div>
                 <div
                   v-if="authStore.iam?.id"
-                  class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2"
+                  class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2 mb-4"
                 >
                   <div class="flex-auto">
                     <UserInfoAside />
                   </div>
                   <UserExitButton />
+                </div>
+
+                <div
+                  class="py-1.5 bg-black/20 w-full text-sm text-s-500 dark:text-g-500 flex items-center"
+                >
+                  <div class="flex flex-row pl-2">
+                    <VChangerMode />
+                  </div>
+                  <div class="flex-auto pr-4">version: {{ version }}</div>
+                  <div class="flex-auto"></div>
+                  <div class="px-4">
+                    <UserNotify v-if="authStore.iam?.id" />
+                  </div>
                 </div>
               </aside>
               <div

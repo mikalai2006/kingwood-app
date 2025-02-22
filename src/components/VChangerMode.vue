@@ -7,11 +7,12 @@ const generalStore = useGeneralStore();
   <div class>
     <a-button
       v-if="generalStore.themeMode === 'light'"
+      class="px-1"
       type="link"
       @click="generalStore.onSetMode('dark')"
     >
       <VIcon
-        class="text-g-300 text-xl"
+        class="text-s-500 text-base"
         path="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278
         7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1
         .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0
@@ -21,9 +22,14 @@ const generalStore = useGeneralStore();
         0-8.343-3.714-8.343-8.29 0-1.167.242-2.278.681-3.286z"
       />
     </a-button>
-    <a-button v-else type="link" @click="generalStore.onSetMode('light')">
+    <a-button
+      v-else
+      type="link"
+      class="px-1"
+      @click="generalStore.onSetMode('light')"
+    >
       <VIcon
-        class="text-white text-xl"
+        class="text-g-500 text-base"
         path="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8
         0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1
         .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0

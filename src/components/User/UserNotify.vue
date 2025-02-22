@@ -37,7 +37,7 @@ onMounted(() => {
       <VIcon :path="iBell" class="text-2xl" />
       <div
         v-if="newNotify.length"
-        class="absolute -top-3 -right-3 px-1.5 py-0.5 leading-4 rounded-full bg-green-500 border-[3px] border-s-900 dark:border-g-950"
+        class="text-white absolute -top-3 -right-3 px-1.5 py-0.5 leading-4 rounded-full bg-green-500 border-[3px] border-s-900 dark:border-g-950"
       >
         {{ newNotify.length }}
       </div>

@@ -158,7 +158,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    {{ formState }}
+    <!-- {{ formState }} -->
     <a-form
       ref="formRef"
       layout="horizontal"

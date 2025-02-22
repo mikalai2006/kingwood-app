@@ -9,7 +9,7 @@ import { IFailedFinishForm, useError } from "@/composable/useError";
 
 const router = useRouter();
 
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const authStore = useAuthStore();
 
@@ -46,11 +46,13 @@ const onFinish = async (values: any) => {
         } else if (error?.errorFields) {
           onGetValidateError(error);
         } else {
-          throw new Error(JSON.stringify(error));
+          throw new Error(JSON.stringify(error.message));
         }
       });
   } catch (e: any) {
-    message.error(t(e?.message));
+    // console.log(typeof e, typeof e.message);
+
+    message.error(te(e?.message) ? t(e?.message) : e?.message);
   } finally {
     loading.value = false;
   }

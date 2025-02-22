@@ -613,9 +613,10 @@ const activeKey = ref("list");
         {{ dayjs(record.updatedAt).format("DD MMM YYYY") }}
         {{ dayjs(record.updatedAt).fromNow() }}
       </template>
-      <!-- <template v-if="column.key === 'name'">
-          <a-tag :color="record.color">{{ record.name }}</a-tag>
-        </template> -->
+
+      <template v-if="column.key === 'number'">
+        <div class="text-right">{{ record.number }}</div>
+      </template>
     </template>
 
     <template
