@@ -142,6 +142,11 @@ onMounted(async () => {
     version.value = _version;
   });
 
+  // Listen for messages
+  window?.ipcRenderer.on("message", function (event, text) {
+    alert(text);
+  });
+
   // window?.ipcRenderer.on("message", function (event, text) {
   //   // alert(text);
   //   noty.onShowNotify(text);
