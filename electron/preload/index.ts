@@ -21,7 +21,7 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
     const [channel, ...omit] = args;
     return ipcRenderer.invoke(channel, ...omit);
   },
-  getVersion: () => ipcRenderer.invoke("get-version"),
+  // getVersiokn: () => ipcRenderer.invoke("get-version"),
 
   show: (title, body) => {
     new Notification({
