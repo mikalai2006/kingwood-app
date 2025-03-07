@@ -24,7 +24,9 @@ const taskWorkerStore = useTaskWorkerStore();
 const allTaskWorker = computed(() =>
   taskWorkerStore.items.filter(
     (x) =>
-      x.workerId == props.taskMW.item.workerId && x.objectId == props.objectId
+      x.workerId == props.taskMW.item.workerId &&
+      x.orderId === props.taskMW.item.orderId &&
+      x.operationId === props.taskMW.item.operationId // x.objectId == props.objectId
   )
 );
 
@@ -72,11 +74,13 @@ const activeStyle = computed(() => {
         {{ $t("button.editTask") }}
       </template>
       <div
-        class="flex gap-1 p-1 w-32 cursor-pointer"
+        class="flex gap-1 p-1 w-32 cursor-pointer text-xs"
         @click="emit('onEditTaskWorker', taskMW.item, objectId)"
       >
         <TaskWorkerStatusTagDot :task-worker-id="activeTaskWorker?.id" />
-        {{ getShortFIO(taskMW?.item?.worker?.name, true) }} |
+        <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
+        {{ getShortFIO(activeTaskWorker?.worker?.name, true) }}
+        - №{{ activeTaskWorker?.order.number }}
         {{ activeTaskWorker?.order.name }}
       </div>
     </a-tooltip>

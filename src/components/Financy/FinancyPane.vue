@@ -182,11 +182,11 @@ onMounted(() => {
 
 <template>
   <div class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50">
-    <div class="flex flex-row items-stretch w-96">
-      <div class="py-4 pl-4 overflow-hidden">
+    <div class="flex flex-row items-stretch basis-5/12 shrink-0 grow-1">
+      <div class="py-4 pl-4 overflow-hidden w-full">
         <!-- {{ JSON.stringify(daysList) }} -->
         <div class="p-4 bg-s-100 dark:bg-g-800 rounded-lg">
-          <a-form layout="vertical" class="w-80">
+          <a-form layout="vertical">
             <!-- <a-form-item :label="$t('form.order.name')" name="orderId">
             <a-select
               v-model:value="orderId"

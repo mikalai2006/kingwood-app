@@ -103,6 +103,14 @@ export const replaceSubstringByArray = function (
   return _text;
 };
 
+export const colorWorkTimeProgress = [
+  "bg-g-200 dark:bg-g-500 hover:bg-s-500 dark:hover:bg-g-400",
+  "bg-g-300 dark:bg-g-600 hover:bg-s-500 dark:hover:bg-g-500",
+  "bg-g-400 dark:bg-g-700 hover:bg-s-500 dark:hover:bg-g-500",
+  "bg-s-500 dark:bg-g-800 hover:bg-s-500 dark:hover:bg-g-500",
+  "bg-s-600 dark:bg-g-900 hover:bg-s-500 dark:hover:bg-g-500",
+];
+
 // var randomRgb = function () {
 //   var r = Math.floor(Math.random() * 256);
 //   var g = Math.floor(Math.random() * 256);

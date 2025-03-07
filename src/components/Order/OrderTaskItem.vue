@@ -299,7 +299,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       <VIcon
         v-if="taskStatus?.icon"
         :path="taskStatus?.icon"
-        :class="['text-xl', taskStatus.animate]"
+        :class="['text-sm', taskStatus.animate]"
       />
     </div>
     <div
@@ -315,7 +315,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
 
   <div class="pl-2 flex-auto group pb-2">
     <div class="flex flex-row items-center gap-1">
-      <div class="font-medium pb-2 text-base">
+      <div class="font-bold pb-2 text-lg">
         <!-- {{ typeof task?.sortOrder == "number" && task.sortOrder + 1 }}) -->
         {{ task?.name }}
         <!-- <a-tag v-if="task?.active" color="#0d913d"> Активное задание </a-tag> -->
@@ -382,8 +382,24 @@ const onEditTaskWorker = (item: ITaskWorker) => {
 
     <div
       v-for="(item, key) in taskWorkers"
-      class="flex flex-row items-center gap-4 py-1 px-4"
+      class="relative bg-white dark:bg-g-800 mb-1 flex flex-row items-center gap-4 py-1 px-4 border-g-200 dark:border-g-700 rounded-lg"
     >
+      <!-- :style="{
+        background: taskStatus?.color + '50',
+        color: invertColor(taskStatus?.color, true),
+      }" -->
+      <div
+        class="absolute -left-[25px] h-[1px] w-6 bg-g-300 dark:bg-g-700"
+        :style="{
+          // background: taskStatus?.color,
+        }"
+      ></div>
+      <div
+        class="absolute -left-[27px] h-1.5 w-1.5 rounded-full"
+        :style="{
+          background: taskStatus?.color,
+        }"
+      ></div>
       <UserListItem v-if="item.worker" :user-id="item.worker.id">
         <template #description>
           <!-- c {{ dayjs(item.from).format(dateFormat) }} -->
@@ -402,40 +418,44 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           {{ getShortFIO(item.worker?.name) }}
         </div>
       </div> -->
-      <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
-        <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
-          <template #title>
-            {{ $t("button.patchTaskWorker") }}
-          </template>
-          <a-button size="small" @click="onEditTaskWorker(item as ITaskWorker)">
-            <div class="flex gap-1 items-center">
-              <VIcon :path="iPen" class="text-xs" />
-              <!-- {{ $t("button.edit") }} -->
-            </div>
-          </a-button>
-        </a-tooltip>
+      <div class="flex-auto">
+        <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
+          <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
+            <template #title>
+              {{ $t("button.patchTaskWorker") }}
+            </template>
+            <a-button
+              size="small"
+              @click="onEditTaskWorker(item as ITaskWorker)"
+            >
+              <div class="flex gap-1 items-center">
+                <VIcon :path="iPen" class="text-xs" />
+                <!-- {{ $t("button.edit") }} -->
+              </div>
+            </a-button>
+          </a-tooltip>
 
-        <a-tooltip
-          v-if="
-            authStore.roles?.includes('taskWorker-delete') &&
-            item.status === 'wait'
-          "
-        >
-          <template #title>
-            {{ $t("button.deleteTaskWorker") }}
-          </template>
-          <a-button
-            size="small"
-            danger
-            class="hidden group-hover:block"
-            @click="onDeleteTaskWorker(item as ITaskWorker)"
+          <a-tooltip
+            v-if="
+              authStore.roles?.includes('taskWorker-delete') &&
+              item.status === 'wait'
+            "
           >
-            <div class="flex gap-1 items-center">
-              <VIcon :path="iTrashFill" />
-            </div>
-          </a-button>
-        </a-tooltip>
-        <!-- <a-popconfirm
+            <template #title>
+              {{ $t("button.deleteTaskWorker") }}
+            </template>
+            <a-button
+              size="small"
+              danger
+              class="hidden group-hover:block"
+              @click="onDeleteTaskWorker(item as ITaskWorker)"
+            >
+              <div class="flex gap-1 items-center">
+                <VIcon :path="iTrashFill" />
+              </div>
+            </a-button>
+          </a-tooltip>
+          <!-- <a-popconfirm
           v-if="authStore.roles?.includes('taskWorker-delete')"
           :cancelText="$t('button.cancel')"
           :okText="$t('button.delete')"
@@ -469,6 +489,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
             </a-button>
           </a-tooltip>
         </a-popconfirm> -->
+        </div>
       </div>
       <div>
         <TaskWorkerStatusTag :task-worker-id="item.id" />
@@ -480,7 +501,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
         authStore.roles?.includes('taskWorker-create') &&
         task?.status != 'finish'
       "
-      class="flex flex-row items-center gap-4 py-1 px-4"
+      class="flex flex-row items-center gap-4 py-1"
     >
       <div class="flex flex-row flex-auto items-center gap-1">
         <a-tooltip>
@@ -488,13 +509,13 @@ const onEditTaskWorker = (item: ITaskWorker) => {
             {{ $t("form.taskWorker.add") }}
           </template>
           <a-button
-            shape="circle"
-            type="dashed"
+            type="primary"
             size="middle"
             @click="onAddNewTaskWorker(task?.orderId)"
           >
-            <div class="flex items-center justify-center">
-              <VIcon :path="iPlusLg" class="text-xl" />
+            <div class="flex items-center justify-center gap-2">
+              <VIcon :path="iPlusLg" class="text-base" />
+              {{ $t("form.taskWorker.add") }}
             </div>
           </a-button>
         </a-tooltip>

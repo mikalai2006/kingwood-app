@@ -133,6 +133,9 @@ watch(
     } else {
       socket?.close();
     }
+  },
+  {
+    immediate: true,
   }
 );
 
@@ -143,9 +146,10 @@ onMounted(async () => {
   });
 
   // Listen for messages
-  window?.ipcRenderer.on("message", function (event, text) {
-    noty.onShowNotify(text);
-  });
+  window?.ipcRenderer &&
+    window?.ipcRenderer.on("message", function (event, text) {
+      noty.onShowNotify(text);
+    });
 
   // window?.ipcRenderer.on("message", function (event, text) {
   //   // alert(text);
@@ -471,7 +475,10 @@ onErrorCaptured((error: any, vm, info) => {
               <div
                 class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
               >
-                <div class="flex-auto flex">
+                <div
+                  v-if="taskStatus.items.length > 0 || !authStore.tokenData"
+                  class="flex-auto flex"
+                >
                   <RouterView v-slot="{ Component }">
                     <template v-if="Component">
                       <!-- <Transition mode="out-in"> -->

@@ -345,7 +345,11 @@ const useOrder = () => {
   };
 
   const onFetchOrders = debounce((value: string) => {
-    console.log("fetching orders", value);
+    // if (!value) {
+    //   return;
+    // }
+
+    // console.log("fetching orders", value);
     state.value = onNormalizeStr(value);
     lastFetchId += 1;
     const fetchId = lastFetchId;
@@ -353,7 +357,8 @@ const useOrder = () => {
     state.fetching = true;
     orderStore
       .find({
-        name: value,
+        query: value,
+        year: dayjs().year(),
       })
       .then((body) => {
         if (fetchId !== lastFetchId) {

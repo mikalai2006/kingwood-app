@@ -34,9 +34,6 @@ const taskWorkerStore = useTaskWorkerStore();
 
 const { t } = useI18n();
 
-orderStore.find({ stolyarComplete: 1, malyarComplete: 1, status: 1 });
-// taskStore.find({ $limit: 100 });
-
 const operationMontaj = computed(() =>
   operationStore.items.filter(
     (x) => x.name.toLowerCase().indexOf("монтаж") > -1
@@ -49,7 +46,13 @@ const idsInstallOperation = computed(() =>
 
 const ordersForMontaj = computed(() =>
   orderStore.items
-    .filter((x) => x.stolyarComplete === 1 && x.malyarComplete === 1)
+    .filter(
+      (x) =>
+        // x.stolyarComplete === 1 &&
+        // x.malyarComplete === 1 &&
+        // x.shlifComplete === 1 &&
+        x.goComplete === 1 && x.status === 1
+    )
     .map((x) => {
       const taskMontaj = taskStore.items.filter(
         (y) => y.orderId === x.id && y.name.toLowerCase().indexOf("монтаж") > -1
@@ -231,7 +234,7 @@ const newTaskMontajWorkers = computed(() => {
           // dayjs(x.from).diff(d.day, "day") <= 0 &&
           // dayjs(x.to).diff(d.day, "day") <= 0
           // dayjs(x.order.dateOtgruzka).year() != 1 &&
-          operationMontaj.value.map((x) => x.id).includes(x.operationId) &&
+          operationMontaj.value.map((xx) => xx.id).includes(x.operationId) &&
           dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
       )
       .map((y) => {
@@ -338,6 +341,15 @@ const onSetSizeColumn = () => {
 onMounted(async () => {
   onCreateWeekDays(week.value.startOf("week"));
 
+  await orderStore.find({
+    // stolyarComplete: 1,
+    // shlifComplete: 1,
+    // malyarComplete: 1,
+    goComplete: 1,
+    status: 1,
+  });
+  // taskStore.find({ $limit: 100 });
+
   await taskWorkerStore.find({
     date: week.value.startOf("week").utc().format(),
     operationId: operationMontaj.value.map((x) => x.id),
@@ -355,8 +367,8 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div class="flex-auto p-4">
-    <VHeader :title="$t('page.montajList.title')" class="mb-4">
+  <div class="flex-auto">
+    <VHeader :title="$t('page.montajList.title')">
       <template #back>&nbsp;</template>
     </VHeader>
     <div class="flex-auto">
@@ -365,7 +377,7 @@ onBeforeUnmount(() => {
           {{ $t("form.add") }}
         </a-button> -->
       </div>
-      <div class="">
+      <div class="px-4 pt-4">
         <div class="flex flex-row items-center">
           <a-date-picker
             v-model:value="week"

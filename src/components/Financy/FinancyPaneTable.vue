@@ -168,13 +168,13 @@ const workTimeDate = ref<string>("");
       <VIcon
         v-if="!expanded"
         :path="iChevronDown"
-        class="transition-all rotate-0"
+        class="transition-all rotate-0 text-g-300 dark:text-g-600"
         @click="(e) => onExpand(record, e)"
       />
       <VIcon
         v-else
         :path="iChevronDown"
-        class="transition-all rotate-180"
+        class="transition-all rotate-180 text-g-300 dark:text-g-600"
         @click="(e) => onExpand(record, e)"
       />
     </template>

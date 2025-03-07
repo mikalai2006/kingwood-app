@@ -25,6 +25,7 @@ import { IValidateError, useError } from "@/composable/useError";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
 import { Colors } from "@/utils/colors";
+import VObject from "../V/VObject.vue";
 
 const props = defineProps<{ data: IOrder; defaultData: IOrder }>();
 const emit = defineEmits(["callback"]);
@@ -184,13 +185,13 @@ const orderStatuses = computed(() => {
 //   }
 // };
 
-const { onCreateObject, onFetchObjects, state } = useObject();
+// const { onCreateObject, onFetchObjects, state } = useObject();
 
 const year = ref<Dayjs>(dayjs(new Date()));
 
 onMounted(() => {
-  const object = objectStore.items.find((x) => x.id === formState.objectId);
-  object?.name && onFetchObjects(object?.name);
+  // const object = objectStore.items.find((x) => x.id === formState.objectId);
+  // object?.name && onFetchObjects(object?.name);
 
   if (formState.year) {
     year.value = dayjs().year(formState.year);
@@ -243,7 +244,9 @@ const showMore = ref(0);
         <a-input v-model:value="formState.number" :disabled="true" />
       </a-form-item>
 
-      <a-form-item :label="$t('form.order.objectId')" name="objectId">
+      <VObject v-model="formState.objectId" />
+
+      <!-- <a-form-item :label="$t('form.order.objectId')" name="objectId">
         <a-select
           v-model:value="formState.objectId"
           style="width: 100%"
@@ -273,26 +276,8 @@ const showMore = ref(0);
               <a-spin v-if="state.fetching" size="small" />
             </div>
           </template>
-          <!-- <template #dropdownRender="{ menuNode: menu }">
-            <a-space style="padding: 4px 8px">
-              <a-input
-                ref="inputRef"
-                v-model:value="queryObject"
-                placeholder="Please enter item"
-              />
-              <a-button type="text" @click="onFindObjects">
-                <template #icon>
-                  <VIcon :path="iSearch" class="inline" />
-                </template>
-                Search
-              </a-button>
-            </a-space>
-            <a-divider style="margin: 4px 0" />
-            <v-nodes v-if="!loading" :vnodes="menu" />
-            <a-spin v-else />
-          </template> -->
         </a-select>
-      </a-form-item>
+      </a-form-item> -->
 
       <a-form-item :label="$t('form.order.constructorId')" name="constructorId">
         <a-select

@@ -7,19 +7,18 @@ import {
   useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { computed, ref } from "vue";
-import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
+import { computed, ref, useTemplateRef } from "vue";
+import { useResizeObserver } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
-import FinancyPaneTableTotal from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
-import FinancyDetails from "./FinancyDetails.vue";
 import VIcon from "../UI/VIcon.vue";
-import { iChevronDown, iMinus, iPen, iPlusLg, iTrashFill } from "@/utils/icons";
+import { iPen, iPlusLg } from "@/utils/icons";
 import { dateTimeFormat } from "@/utils/date";
 import VFormWorkTime from "../Form/VFormWorkTime.vue";
 import { IWorkTime, IWorkTimeInput } from "@/api/work_time/types";
 import TimePretty from "../Time/TimePretty.vue";
-import { replaceSubstringByArray } from "@/utils/utils";
+import { colorWorkTimeProgress, replaceSubstringByArray } from "@/utils/utils";
+import FinancyWorkTimesHistory from "./FinancyWorkTimesHistory.vue";
 
 const COUNT_DAY_ADD_WORKTIME = 31;
 
@@ -132,9 +131,100 @@ const onAddItem = () => {
   );
   showFormWorkTime.value = true;
 };
+
+const timeline = useTemplateRef<HTMLElement>("timeline");
+const widthTimeline = ref(0);
+const widthFirstTime = ref(0);
+useResizeObserver(timeline, (entries) => {
+  const entry = entries[0];
+  const child = entry.target.querySelector(".child")?.getBoundingClientRect();
+  // console.log(child?.width);
+  if (child) {
+    widthFirstTime.value = child.width;
+  }
+
+  const { width } = entry.contentRect;
+  widthTimeline.value = width;
+});
+
+const widthOneMs = computed(() => widthTimeline.value / (86400000 + 1800000));
+const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
 </script>
 
 <template>
+  <!-- {{ widthOneMs }} {{ startDayMs }}
+  <br />
+  wf={{ widthTimeline }} w={{ widthTimeline / 49 }} ws={{
+    widthOneMs * 1800000
+  }} -->
+  <div ref="timeline" class="mt-6 w-full mx-auto relative">
+    <!-- <div class="flex flex-row items-center justify-center text-left">
+      <div v-for="i in 25" class="flex-auto">
+        {{ i - 1 }}
+      </div>
+    </div> -->
+    <div class="flex flex-row items-end">
+      <div
+        v-for="i in Array.from(Array(49).keys())"
+        class="m-0 p-0 border border-transparent border-l-g-200 border-b-g-50 dark:border-l-g-700 dark:border-b-g-700 relative box-border z-10"
+        :class="[i % 2 !== 0 ? 'h-2' : 'h-3', `child n_${i}`]"
+        :style="[{ 'flex-basis': widthOneMs * 1800000 + 'px' }]"
+      >
+        <div
+          v-if="i % 2 === 0"
+          class="absolute -top-[20px] -left-[9px] w-4 text-center text-g-400 dark:text-g-500"
+        >
+          {{ i / 2 }}
+        </div>
+        <!-- <div class="rotate-90">&#8211;</div> -->
+      </div>
+    </div>
+
+    <div class="h-10">
+      <div class="flex flex-row items-end absolute inset-0 z-0 top-3">
+        <div
+          v-for="i in Array.from(Array(49).keys())"
+          class="m-0 p-0 border border-dashed border-transparent border-l-g-100 dark:border-l-g-700 relative box-border"
+          :class="['h-full', `child n_${i}`]"
+          :style="[{ 'flex-basis': widthOneMs * 1800000 + 'px' }]"
+        ></div>
+      </div>
+      <div
+        v-for="(item, index) in listData"
+        :key="item.id"
+        class="h-10 cursor-pointer absolute"
+        :class="[colorWorkTimeProgress[index]]"
+        :style="{
+          width:
+            Math.max(
+              (dayjs(item.to).valueOf() - dayjs(item.from).valueOf()) *
+                widthOneMs,
+              5
+            ) + 'px',
+          marginLeft:
+            Math.abs(dayjs(item.from).valueOf() - startDayMs) * widthOneMs +
+            'px',
+        }"
+        @click="
+          () => {
+            onEditItem(item);
+          }
+        "
+      >
+        <FinancyWorkTimesHistory
+          v-for="history in item.workHistory"
+          :date="date"
+          :history-id="history.id"
+          :workTime="item"
+          :widthOneMs="widthOneMs"
+        />
+        <!-- <div v-for="order in item.workHistory" class="bg-s-500">
+          {{ order.id }}
+        </div> -->
+      </div>
+    </div>
+  </div>
+
   <a-table
     :columns="columns"
     :data-source="listData"

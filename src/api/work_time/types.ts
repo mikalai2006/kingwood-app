@@ -20,6 +20,8 @@ export interface IWorkTime {
 
 export type IWorkTimeInput = {
   [Property in keyof IWorkTime]?: IWorkTime[Property];
+} & {
+  orderId?: string;
 };
 
 export interface IWorkTimeFilter extends IPaginationParams<IWorkTime> {

@@ -1,5 +1,5 @@
 <script setup lang="ts" async>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onActivated, onMounted, reactive, ref, watch } from "vue";
 import dayjs from "@/utils/dayjs";
 import { useAuthStore, useGeneralStore } from "@/store";
 import { IOrder, IOrderFilter, IOrderInput } from "@/api/order/types";
@@ -7,16 +7,25 @@ import { ITask } from "@/api/task/types";
 import OrderTaskList from "@/components/Order/OrderTaskList.vue";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
-import { iCog } from "@/utils/icons";
+import { iCog, iTrashFill } from "@/utils/icons";
 import { Dayjs } from "dayjs";
 import VHeader from "@/components/V/VHeader.vue";
 import OrderList from "@/components/Order/OrderList.vue";
 import useOrder from "@/composable/useOrder";
 import { Colors } from "@/utils/colors";
+import {
+  onBeforeRouteUpdate,
+  RouteLocationNormalizedGeneric,
+  useRoute,
+  useRouter,
+} from "vue-router";
 
 dayjs.locale("ru");
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
+
+const route = useRoute();
+const router = useRouter();
 
 const { t } = useI18n();
 
@@ -140,6 +149,11 @@ const nameKeyLocalStorageColumns = ref("order.column");
 //   localStorage.setItem(nameKeyLocalFilterAll.value, JSON.stringify(_range));
 // };
 
+const onChangeTab = (key: string) => {
+  router.push({ ...route, hash: `#${key}` });
+  console.log(key);
+};
+
 onMounted(() => {
   // rangeSearch.value = [
   //   dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
@@ -162,9 +176,24 @@ onMounted(() => {
       year.value = dayjs().set("year", filter.value.year);
     }
   }
+
+  onCheckHash(route);
+});
+
+onBeforeRouteUpdate((to, from) => {
+  onCheckHash(to);
 });
 
 const showFilter = ref(false);
+
+function onCheckHash(to: RouteLocationNormalizedGeneric) {
+  // hash active tab.
+  const _activeTabKey = to.hash.replace("#", "");
+  if (_activeTabKey) {
+    activeKey.value = _activeTabKey;
+  }
+  console.log("_activeTabKey: ", _activeTabKey);
+}
 </script>
 <template>
   <div class="flex-auto">
@@ -244,6 +273,7 @@ const showFilter = ref(false);
         background:
           generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
       }"
+      @change="onChangeTab"
     >
       <a-tab-pane key="inWork">
         <template #tab>
@@ -449,13 +479,25 @@ const showFilter = ref(false);
                     {{ t("button.filter") }}
                   </div>
                   <a-tag
-                    color="success"
+                    color="green"
                     closable
                     class="text-md"
                     v-for="[k, v] in Object.entries(filterParams)"
                     @close="() => onRemoveFilterKey(k as keyof IOrderFilter)"
                   >
-                    {{ $t(`form.order.${k}`) }} - {{ v }}
+                    <span> {{ $t(`form.order.${k}`) }} - {{ v }} </span>
+
+                    <template #closeIcon>
+                      <a-tooltip>
+                        <template #title>
+                          {{ $t("button.deleteFilter") }}
+                        </template>
+                        <VIcon
+                          :path="iTrashFill"
+                          class="inline-block text-sm text-r-500 dark:text-r-500"
+                        />
+                      </a-tooltip>
+                    </template>
                   </a-tag>
                   <!-- <template v-else>
                     <a-alert

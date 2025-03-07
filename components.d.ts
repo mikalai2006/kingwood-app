@@ -45,6 +45,7 @@ declare module 'vue' {
     ATimePicker: typeof import('ant-design-vue/es')['TimePicker']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     AUpload: typeof import('ant-design-vue/es')['Upload']
+    copy: typeof import('./src/components/Financy/FinancyWorkTimes copy.vue')['default']
     FinancyDetails: typeof import('./src/components/Financy/FinancyDetails.vue')['default']
     FinancyDetailsList: typeof import('./src/components/Financy/FinancyDetailsList.vue')['default']
     FinancyOrder: typeof import('./src/components/Financy/FinancyOrder.vue')['default']
@@ -54,6 +55,7 @@ declare module 'vue' {
     FinancyPaneTableTotal: typeof import('./src/components/Financy/FinancyPaneTableTotal.vue')['default']
     FinancyTotal: typeof import('./src/components/Financy/FinancyTotal.vue')['default']
     FinancyWorkTimes: typeof import('./src/components/Financy/FinancyWorkTimes.vue')['default']
+    FinancyWorkTimesHistory: typeof import('./src/components/Financy/FinancyWorkTimesHistory.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     Install: typeof import('./src/components/Cms/Install.vue')['default']
     MontajListItem: typeof import('./src/components/Montaj/MontajListItem.vue')['default']
@@ -108,6 +110,8 @@ declare module 'vue' {
     VImg: typeof import('./src/components/UI/VImg.vue')['default']
     VNavbar: typeof import('./src/components/VNavbar.vue')['default']
     VNavbarCMS: typeof import('./src/components/VNavbarCMS.vue')['default']
+    VObject: typeof import('./src/components/V/VObject.vue')['default']
+    VOrder: typeof import('./src/components/V/VOrder.vue')['default']
     VTitle: typeof import('./src/components/VTitle.vue')['default']
   }
 }

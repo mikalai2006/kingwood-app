@@ -27,9 +27,9 @@ onMounted(() => {});
       <UserAvatar :user-id="message.userId" />
     </div>
     <div class="px-4 text-black dark:text-white">
-      <div class="relative bg-s-100 dark:bg-g-700 p-4 rounded-md">
+      <div class="relative bg-white dark:bg-g-700 p-4 rounded-md">
         <div
-          class="absolute top-3 w-4 h-4 bg-s-100 dark:bg-g-700 rotate-45 -left-1"
+          class="absolute top-3 w-4 h-4 bg-white dark:bg-g-700 rotate-45 -left-1"
         ></div>
         <div class="flex flex-row gap-1">
           <template

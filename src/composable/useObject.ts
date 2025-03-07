@@ -39,27 +39,39 @@ const useObject = () => {
     return String(_str).charAt(0).toUpperCase() + String(_str).slice(1);
   };
 
-  const onFetchObjects = debounce((value: string) => {
-    console.log("fetching objects", value);
+  const onFetchObjects = debounce(async (value: string) => {
+    // console.log("fetching objects", value);
     state.value = onNormalizeStr(value);
     lastFetchId += 1;
     const fetchId = lastFetchId;
     state.data = [];
     state.fetching = true;
-    objectStore
+    const body = await objectStore
       .find({
         name: value,
       })
-      .then((body) => {
+      .then((_body) => {
         if (fetchId !== lastFetchId) {
           // for fetch callback order
           return;
         }
-        onSetStateData(body.data);
+        onSetStateData(_body.data);
+        return _body;
       })
       .finally(() => {
         state.fetching = false;
       });
+
+    // setTimeout(() => {
+    //   if (fetchId !== lastFetchId) {
+    //     // for fetch callback order
+    //     return;
+    //   }
+
+    //   body?.data && onSetStateData(body.data);
+
+    //   state.fetching = false;
+    // }, 500);
   }, 300);
 
   const onCreateObject = async (callback: (result: IObject) => void) => {

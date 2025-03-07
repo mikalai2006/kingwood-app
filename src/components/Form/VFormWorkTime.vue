@@ -16,6 +16,7 @@ import { message } from "ant-design-vue";
 import { IWorkTimeInput } from "@/api/work_time/types";
 import dayjs, { Dayjs } from "dayjs";
 import { dateFormat } from "@/utils/date";
+import VOrder from "../V/VOrder.vue";
 
 const props = defineProps<{
   data: IWorkTimeInput;
@@ -158,7 +159,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <!-- {{ formState }} -->
+    {{ formState }}
     <a-form
       ref="formRef"
       layout="horizontal"
@@ -179,6 +180,13 @@ onBeforeUnmount(() => {
           v-model:value="from"
           format="HH:mm:ss"
           style="width: 100%"
+          :disabled-time="(now: Dayjs) => {
+            return {
+              disabledHours: () => [],
+              disabledMinutes: (selectedHour: number) => [],
+              disabledSeconds: (selectedHour: number, selectedMinute: number) => [],
+            }
+          }"
           @change="onChangeTime"
         />
       </a-form-item>
@@ -195,6 +203,8 @@ onBeforeUnmount(() => {
       <a-form-item :label="$t('form.workTime.oklad')" name="oklad">
         <a-input-number class="w-full" v-model:value="formState.oklad" />
       </a-form-item>
+
+      <VOrder v-model="formState.orderId" />
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">

@@ -8,7 +8,6 @@ import {
   useObjectStore,
   useOrderStore,
 } from "@/store";
-import { IMessage } from "@/api/message/types";
 import OrderMessage from "./OrderMessage.vue";
 import OrderMessagesForm from "./OrderMessagesForm.vue";
 import { useI18n } from "vue-i18n";
@@ -119,7 +118,7 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col items-stretch el overflow-hidden">
-    <div ref="el" class="flex-auto overflow-auto b-scroll px-4">
+    <div ref="el" class="flex-auto overflow-auto b-scroll px-4 pt-4">
       <div class="flex items-center justify-center">
         <a-button
           v-if="!noMoreContent"
@@ -139,7 +138,7 @@ onMounted(() => {
         <a-spin :spinning="loading"> </a-spin>
       </div>
     </div>
-    <div class="bg-s-100 dark:bg-g-800 p-2.5">
+    <div class="bg-s-200 dark:bg-g-800 p-2.5">
       <OrderMessagesForm
         :order-id="orderId"
         @submit-callback="

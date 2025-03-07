@@ -41,6 +41,7 @@ export interface IOrderFilter extends IPaginationParams<IOrderInput> {
   name?: string;
   number?: number;
   year?: number;
+  query?: string;
   group?: string[];
   status?: number;
   objectId?: string[];

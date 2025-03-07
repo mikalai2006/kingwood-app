@@ -28,7 +28,7 @@ const onLoadWorkHistoryStat = () => {
         userStore.onAddItemToStore(el.worker);
       }
     });
-    data.value = r.map((x) => {
+    data.value = r?.map((x) => {
       return {
         ...x,
         key: x.workerId,
@@ -37,7 +37,9 @@ const onLoadWorkHistoryStat = () => {
   });
 };
 
-const total = computed(() => data.value.reduce((a, e) => a + e.total, 0));
+const total = computed(() =>
+  data.value ? data.value?.reduce((a, e) => a + e.total, 0) : 0
+);
 
 const columns = [
   { title: t("table.financyOrder.worker"), dataIndex: "worker", key: "worker" },
