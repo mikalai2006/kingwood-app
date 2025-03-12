@@ -18,7 +18,11 @@ import {
   iWraningTriangle,
 } from "@/utils/icons";
 import { dateFormat } from "@/utils/date";
-import { getShortFIO, replaceSubstringByArray } from "@/utils/utils";
+import {
+  getObjectId,
+  getShortFIO,
+  replaceSubstringByArray,
+} from "@/utils/utils";
 import colors from "tailwindcss/colors";
 import sift from "sift";
 import OrderGroupBadge from "./OrderGroupBadge.vue";
@@ -480,12 +484,14 @@ const activeKey = ref("list");
       <template v-if="column.key === 'goComplete'">
         <div
           v-if="record.goComplete"
-          class="relative min-w-32 min-h-16 rounded-md bg-green-500 dark:bg-green-700 flex items-center justify-center"
+          class="relative min-w-32 min-h-16 rounded-md bg-green-600 dark:bg-green-700 flex items-center justify-center"
         >
           <div
             class="absolute w-2 h-2 top-1 left-1/2 bg-white dark:bg-g-900 rounded-full z-10"
           ></div>
-          <div class="p-2 pt-4 text-black dark:text-white text-center">
+          <div
+            class="p-2 pt-4 text-white dark:text-white text-center leading-5"
+          >
             <template v-if="dayjs(record.dateOtgruzka).year() == 1">
               <div>
                 {{ $t("groupOperation.4") }}
@@ -527,9 +533,12 @@ const activeKey = ref("list");
       <template v-if="column.key === 'constructorId'">
         <p class="text-nowrap">
           {{
-            getShortFIO(
-              userStore.items.find((x) => x.id === record.constructorId)?.name
-            )
+            getObjectId(record.constructorId) != "0"
+              ? getShortFIO(
+                  userStore.items.find((x) => x.id === record.constructorId)
+                    ?.name
+                )
+              : "-"
           }}
         </p>
       </template>

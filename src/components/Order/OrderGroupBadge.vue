@@ -129,7 +129,7 @@ const allWorkers = computed(() =>
       {
         'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700': !status,
       },
-      { 'bg-green-500 dark:bg-green-700': status },
+      { 'bg-green-600 dark:bg-green-700': status },
     ]"
   >
     <div
@@ -211,7 +211,7 @@ const allWorkers = computed(() =>
             class="text-sm text-nowrap"
             :class="
               status
-                ? 'text-black dark:text-white'
+                ? 'text-white dark:text-white'
                 : 'text-black dark:text-g-200'
             "
           >
@@ -251,7 +251,7 @@ const allWorkers = computed(() =>
           </span>
         </div> -->
         </div>
-        <div v-if="allWorkersInOrder.length - 1 > 0">
+        <div v-if="allWorkersInOrder.length - 1 > 0" class="text-xs">
           +{{ allWorkersInOrder.length - 1 }}
           {{ $t("info.user", allWorkersInOrder.length - 1) }}
         </div>
