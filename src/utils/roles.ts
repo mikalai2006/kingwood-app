@@ -55,4 +55,10 @@ export const roles = [
   "workTime-patch",
   "workTime-delete",
   "workTime-list",
+
+  "workHistory-create",
+  "workHistory-patch",
+  "workHistory-delete",
+  "workHistory-list",
+  "workHistory-view-changes",
 ];

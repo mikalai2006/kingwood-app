@@ -3,6 +3,7 @@ import { find, get } from "@/api/operation";
 import { IRequestParams } from "@/api/types";
 // import sift from 'sift'
 import { IOperation } from "@/api/operation/types";
+import { getObjectId } from "@/utils/utils";
 
 export const useOperationStore = defineStore("operation", {
   state() {
@@ -41,8 +42,12 @@ export const useOperationStore = defineStore("operation", {
     //   console.log('user: findInStore params=', params)
     //   return item[0] || null
     // },
-    onAddItemToStore(item: IOperation) {
+    onAddItemToStore(item: IOperation, forceNull?: boolean) {
       const existsItem = this.onExists(item.id);
+      if (getObjectId(item.id) === "0" && !forceNull) {
+        return;
+      }
+
       if (existsItem.index == -1) {
         this._items.push(item);
       } else {

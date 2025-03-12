@@ -5,12 +5,11 @@ import {
   IPaneOptionFinancyInput,
 } from "@/api/types";
 import useOrder from "@/composable/useOrder";
-import { usePostStore, useUserStore, useWorkTimeStore } from "@/store";
+import { usePostStore, useUserStore, useWorkHistoryStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import groupBy from "lodash-es/groupBy";
 import { computed, onMounted, ref } from "vue";
 import FinancyTotal from "./FinancyTotal.vue";
-import FinancyDay from "./FinancyDay.vue";
 import FinancyPaneTable from "./FinancyPaneTable.vue";
 import { IPay, IPayInput } from "@/api/pay/types";
 import VFormPay from "../Form/VFormPay.vue";
@@ -28,7 +27,7 @@ const emit = defineEmits({
 
 const userStore = useUserStore();
 const postStore = usePostStore();
-const workTimeStore = useWorkTimeStore();
+const workHistoryStore = useWorkHistoryStore();
 
 const month = ref(dayjs(props.pane.month) || "");
 const workerId = ref<string>(props.pane.workerId || "");
@@ -97,7 +96,7 @@ const onQuery = (isSaveOption: boolean) => {
   if (!workerId.value || !month.value) {
     return;
   }
-  workTimeStore.find({
+  workHistoryStore.find({
     workerId: workerId.value ? [workerId.value] : undefined,
     from: month.value ? currentDate.value.startOf("month").format() : undefined,
     to: month.value ? currentDate.value.endOf("month").format() : undefined,
@@ -106,7 +105,7 @@ const onQuery = (isSaveOption: boolean) => {
 };
 
 const listData = computed(() => {
-  const _list = workTimeStore.items
+  const _list = workHistoryStore.items
     .filter(
       (x) =>
         workerId.value?.includes(x.workerId) &&
@@ -284,7 +283,7 @@ onMounted(() => {
       <FinancyPaneTable
         :data="daysList"
         :pane="pane"
-        :work-times="listDataGroupDays"
+        :work-historys="listDataGroupDays"
       />
     </div>
   </div>

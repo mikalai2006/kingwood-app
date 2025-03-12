@@ -1,3 +1,5 @@
+import { IObject } from "../object/types";
+import { IOrder } from "../order/types";
 import { IPaginationParams } from "../types";
 import { IUser } from "../user/types";
 
@@ -8,14 +10,28 @@ export interface IWorkHistory {
   orderId: string;
   taskId: string;
   workerId: string;
+  taskWorkerId: string;
   workTimeId: string;
   operationId: string;
   status: number;
+  date: string;
   from: string;
   to: string;
   oklad: number;
   total: number;
+  totalTime: number;
   workHistory: IWorkHistory[];
+
+  props: {
+    [key: string]: {
+      userId: string;
+      item: IWorkHistory;
+    };
+  };
+
+  order: IOrder;
+  worker: IUser;
+  object: IObject;
 
   createdAt: Date;
   updatedAt: Date;
@@ -44,6 +60,8 @@ export interface IWorkHistoryFilter extends IPaginationParams<IWorkHistory> {
   workTimeId?: string[];
   workerId?: string[];
   taskId?: string[];
+  from?: string;
+  to?: string;
   orderId?: string[];
   status?: number;
 }

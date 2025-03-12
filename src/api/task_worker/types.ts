@@ -36,6 +36,7 @@ export type ITaskWorkerInput = {
 
 export interface ITaskWorkerFilter extends IPaginationParams<ITaskWorkerInput> {
   id?: string[];
+  query?: string;
   objectId?: string[];
   orderId?: string[];
   taskId?: string[];

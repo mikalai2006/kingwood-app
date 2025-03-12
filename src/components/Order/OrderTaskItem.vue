@@ -389,13 +389,13 @@ const onEditTaskWorker = (item: ITaskWorker) => {
         color: invertColor(taskStatus?.color, true),
       }" -->
       <div
-        class="absolute -left-[25px] h-[1px] w-6 bg-g-300 dark:bg-g-700"
+        class="absolute -left-[25px] h-[1px] w-6 bg-g-200 dark:bg-g-700"
         :style="{
           // background: taskStatus?.color,
         }"
       ></div>
       <div
-        class="absolute -left-[27px] h-1.5 w-1.5 rounded-full"
+        class="absolute -left-[26px] h-1.5 w-1.5 rounded-full"
         :style="{
           background: taskStatus?.color,
         }"
@@ -508,11 +508,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           <template #title>
             {{ $t("form.taskWorker.add") }}
           </template>
-          <a-button
-            type="primary"
-            size="middle"
-            @click="onAddNewTaskWorker(task?.orderId)"
-          >
+          <a-button size="middle" @click="onAddNewTaskWorker(task?.orderId)">
             <div class="flex items-center justify-center gap-2">
               <VIcon :path="iPlusLg" class="text-base" />
               {{ $t("form.taskWorker.add") }}

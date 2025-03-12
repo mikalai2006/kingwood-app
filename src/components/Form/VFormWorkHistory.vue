@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { create, patch } from "@/api/work_time";
 import { Rule } from "ant-design-vue/es/form";
 import {
   onBeforeUnmount,
@@ -10,46 +9,59 @@ import {
   UnwrapRef,
 } from "vue";
 import { useI18n } from "vue-i18n";
-import { useWorkTimeStore } from "@/store";
+import { useTaskWorkerStore, useWorkHistoryStore } from "@/store";
 import { useError } from "@/composable/useError";
 import { message } from "ant-design-vue";
-import { IWorkTimeInput } from "@/api/work_time/types";
 import dayjs, { Dayjs } from "dayjs";
 import { dateFormat } from "@/utils/date";
 import VOrder from "../V/VOrder.vue";
+import { IWorkHistoryInput } from "@/api/work_history/types";
+import { create, patch } from "@/api/work_history";
+import VTaskWorker from "../V/VTaskWorker.vue";
+import { ITaskWorker } from "@/api/task_worker/types";
+import { getObjectId } from "@/utils/utils";
 
 const props = defineProps<{
-  data: IWorkTimeInput;
-  defaultData: IWorkTimeInput;
+  data: IWorkHistoryInput;
+  defaultData: IWorkHistoryInput;
 }>();
 const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
 
-const workTimeStore = useWorkTimeStore();
+const workHistoryStore = useWorkHistoryStore();
 
-const formState: UnwrapRef<IWorkTimeInput> = reactive({ ...props.data });
+const taskWorkerStore = useTaskWorkerStore();
+
+const formState: UnwrapRef<IWorkHistoryInput> = reactive({ ...props.data });
 const formRef = ref();
 
 const rules: Record<string, Rule[]> = {
   to: [
     {
       required: true,
-      message: t("form.workTime.rule.to"),
+      message: t("form.workHistory.rule.to"),
       trigger: "change",
     },
   ],
   from: [
     {
       required: true,
-      message: t("form.workTime.rule.from"),
+      message: t("form.workHistory.rule.from"),
       trigger: "change",
     },
   ],
   oklad: [
     {
       required: true,
-      message: t("form.workTime.rule.oklad"),
+      message: t("form.workHistory.rule.oklad"),
+      trigger: "change",
+    },
+  ],
+  taskWorkerId: [
+    {
+      required: true,
+      message: t("form.workHistory.rule.taskWorkerId"),
       trigger: "change",
     },
   ],
@@ -65,15 +77,15 @@ const onSubmit = async () => {
   await formRef.value
     .validate()
     .then(async () => {
-      const data = toRaw(formState) as IWorkTimeInput;
+      const data = toRaw(formState) as IWorkHistoryInput;
       if (data.id) {
         const result = await patch(data.id, data);
-        workTimeStore.onAddItemToStore(result);
+        workHistoryStore.onAddItemToStore(result);
       } else {
         data.status = 1;
         // data.date = data.from;
         const result = await create(data);
-        workTimeStore.onAddItemToStore(result);
+        workHistoryStore.onAddItemToStore(result);
       }
       message.success(t("form.message.successSave"));
       emit("callback");
@@ -142,6 +154,21 @@ const onChangeTime = (value: string) => {
   }
 };
 
+const onChangeTaskWorker = (idTaskWorker: string) => {
+  const taskWorker = taskWorkerStore.items.find((x) => x.id === idTaskWorker);
+  console.log("onChangeTaskWorker: ", taskWorker);
+  formState.objectId = taskWorker?.objectId;
+  formState.operationId = taskWorker?.operationId;
+  formState.taskId = taskWorker?.taskId;
+
+  if (getObjectId(taskWorker?.workerId) != "0") {
+    formState.workerId = taskWorker?.workerId;
+  }
+
+  formState.orderId = taskWorker?.orderId;
+  console.log("onChangeTaskWorker 2: ", formState);
+};
+
 onMounted(() => {
   onSyncDate();
 
@@ -160,14 +187,8 @@ onBeforeUnmount(() => {
 <template>
   <div>
     <!-- {{ formState }} -->
-    <a-form
-      ref="formRef"
-      layout="horizontal"
-      style="max-width: 600px"
-      :model="formState"
-      :rules="rules"
-    >
-      <!-- <a-form-item :label="$t('form.workTime.date')" name="date">
+    <a-form ref="formRef" layout="horizontal" :model="formState" :rules="rules">
+      <!-- <a-form-item :label="$t('form.workHistory.date')" name="date">
         <a-date-picker
           v-model:value="date"
           :format="dateFormat"
@@ -175,7 +196,7 @@ onBeforeUnmount(() => {
           @change="onChangeTime"
         />
       </a-form-item> -->
-      <a-form-item :label="$t('form.workTime.from')" name="from">
+      <a-form-item :label="$t('form.workHistory.from')" name="from">
         <a-time-picker
           v-model:value="from"
           format="HH:mm:ss"
@@ -191,7 +212,7 @@ onBeforeUnmount(() => {
         />
       </a-form-item>
 
-      <a-form-item :label="$t('form.workTime.to')" name="to">
+      <a-form-item :label="$t('form.workHistory.to')" name="to">
         <a-time-picker
           v-model:value="to"
           format="HH:mm:ss"
@@ -200,11 +221,16 @@ onBeforeUnmount(() => {
         />
       </a-form-item>
 
-      <a-form-item :label="$t('form.workTime.oklad')" name="oklad">
+      <a-form-item :label="$t('form.workHistory.oklad')" name="oklad">
         <a-input-number class="w-full" v-model:value="formState.oklad" />
       </a-form-item>
 
-      <!-- <VOrder v-model="formState.orderId" /> -->
+      <VTaskWorker
+        v-if="formState.workerId"
+        v-model="formState.taskWorkerId"
+        :worker-id="formState.workerId"
+        @change="onChangeTaskWorker"
+      />
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">

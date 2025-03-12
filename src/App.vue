@@ -4,6 +4,7 @@ import ruRU from "ant-design-vue/es/locale/ru_RU";
 import {
   useAuthStore,
   useGeneralStore,
+  useObjectStore,
   useOperationStore,
   useOrderStore,
   usePayTemplateStore,
@@ -45,6 +46,7 @@ const authStore = useAuthStore();
 const userStore = useUserStore();
 const roleStore = useRoleStore();
 const postStore = usePostStore();
+const objectStore = useObjectStore();
 const operationStore = useOperationStore();
 const taskStore = useTaskStore();
 const orderStore = useOrderStore();
@@ -102,6 +104,44 @@ const onInitData = async () => {
     await taskStatus.find().catch((e) => {
       throw e;
     });
+
+    const fakeOrder = {
+      id: "000000000000000000000000",
+      name: "Хоз. работы",
+      number: 0,
+      objectId: "000000000000000000000000",
+    } as any;
+    orderStore.onAddItemToStore(fakeOrder, true);
+
+    objectStore.onAddItemToStore(
+      {
+        id: "000000000000000000000000",
+        name: "Цех",
+      } as any,
+      true
+    );
+
+    operationStore.onAddItemToStore(
+      {
+        id: "000000000000000000000000",
+        name: "Выполнение хоз. работ",
+      } as any,
+      true
+    );
+
+    taskWorkerStore.onAddItemToStore(
+      {
+        id: "000000000000000000000000",
+        taskId: "000000000000000000000000",
+        objectId: "000000000000000000000000",
+        operationId: "000000000000000000000000",
+        orderId: "000000000000000000000000",
+        statusId: "000000000000000000000000",
+        workerId: "000000000000000000000000",
+        order: fakeOrder,
+      } as any,
+      true
+    );
 
     // setTimeout(() => {
     const { socket: _socket } = useSocket({ router, t, noty, message });

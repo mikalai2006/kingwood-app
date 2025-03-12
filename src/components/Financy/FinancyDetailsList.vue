@@ -1,34 +1,53 @@
 <script setup lang="ts">
 import {
+  useAuthStore,
   useObjectStore,
   useOperationStore,
   useOrderStore,
+  useUserStore,
   useWorkHistoryStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { computed, onMounted, ref } from "vue";
-import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
-import { getObjectTime } from "@/utils/time";
+import FinancyPaneTableTotal, {
+  IWorkHistoryExtends,
+} from "./FinancyPaneTableTotal.vue";
 import { useI18n } from "vue-i18n";
 import { IOrder } from "@/api/order/types";
 import FinancyOrder from "./FinancyOrder.vue";
+import VImage from "../UI/VImage.vue";
+import { getObjectTime } from "@/utils/time";
+import { IPaneOptionFinancy } from "@/api/types";
+import { IWorkHistory, IWorkHistoryInput } from "@/api/work_history/types";
+import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
+import { iChanged, iPen, iPlusLg } from "@/utils/icons";
+import FinancyWorkHistoryChanges from "./FinancyWorkHistoryChanges.vue";
 
 const props = defineProps<{
-  workTimes: IWorTimeExtends[];
+  workHistorys: IWorkHistoryExtends[];
+  date: string;
+  pane: IPaneOptionFinancy;
+  showButtonAdd?: boolean;
 }>();
 
 const { t } = useI18n();
 
+const authStore = useAuthStore();
+const userStore = useUserStore();
 const workHistoryStore = useWorkHistoryStore();
 const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const operationStore = useOperationStore();
 
-const idsWorkTime = computed(() => props.workTimes.map((x) => x.id));
+// const idsWorkHistory = computed(() => props.workHistorys.map((x) => x.id));
 
 const workHistory = computed(() => {
   const _list = workHistoryStore.items
-    .filter((x) => idsWorkTime.value.includes(x.workTimeId))
+    // .filter((x) => idsWorkHistory.value.includes(x.workTimeId))
+    .filter(
+      (x) =>
+        dayjs(x.date).date().toString() == props.date && dayjs(x.to).year() != 1
+    )
     .map((x) => {
       // console.log("x.workHistory: ", x.workHistory);
 
@@ -79,13 +98,203 @@ const innerColumns = [
   },
 ];
 
+const showFormWorkHistory = ref(false);
+
+const defaultDataForm: IWorkHistoryInput = {};
+
+const dataForm = ref(defaultDataForm);
+
+// const onAddNewItem = () => {
+//   dataForm.value = Object.assign({}, defaultData);
+//   showModal();
+// };
+
+const onEditItem = (item: IWorkHistory) => {
+  console.log("edit WorkHistory: ", item);
+
+  dataForm.value = Object.assign({}, item);
+  showFormWorkHistory.value = true;
+};
+
+const onAddItem = () => {
+  const userForPayload = userStore.items.find(
+    (x) => x.id === props.pane.workerId
+  );
+  if (!userForPayload) {
+    return;
+  }
+
+  const timeFrom = dayjs(props.date);
+  const timeTo = dayjs(props.date);
+  dataForm.value = Object.assign(
+    {},
+    {
+      workerId: userForPayload.id,
+      from: timeFrom.format(),
+      date: timeFrom.set("hour", 12).format(),
+      to: timeTo.endOf("day").set("seconds", 0).format(),
+      oklad: userForPayload.oklad,
+      workTimeId: props.workHistorys[0].id,
+    }
+  );
+  showFormWorkHistory.value = true;
+};
+
+const workHistoryViewChangedId = ref("");
+const showWorkHistoryChanged = ref(false);
+const onViewChanged = (item: IWorkHistory) => {
+  workHistoryViewChangedId.value = item.id;
+  showWorkHistoryChanged.value = true;
+};
+
 onMounted(() => {});
 </script>
 
 <template>
-  <div v-for="item in workHistory"></div>
+  <div
+    class="p-4 ml-[39px] border-l border-b rounded-bl-lg border-g-100 dark:border-g-700 bg-white dark:bg-g-950/40"
+  >
+    <a-list item-layout="horizontal" :data-source="workHistory">
+      <template #footer>
+        <a-tooltip
+          v-if="authStore.roles.includes('workHistory-create') && showButtonAdd"
+        >
+          <template #title>
+            {{ $t("button.addWorkHistory") }}
+          </template>
+          <a-button
+            @click="(e: Event) => {onAddItem(); e.preventDefault(); e.stopPropagation()}"
+          >
+            <div class="flex gap-2 items-center">
+              <VIcon :path="iPlusLg" class="text-g-400 dark:text-g-300" />
+              <div>
+                {{ $t("button.addWorkHistory") }}
+              </div>
+            </div>
+          </a-button>
+        </a-tooltip>
+      </template>
+      <template #renderItem="{ item }">
+        <a-list-item>
+          <a-list-item-meta>
+            <!-- <template #title>
+              <button
+                type="button"
+                class="bg-transparent"
+                @click="onViewFinancyOrder(item.order.id)"
+              >
+                <span class="underline">
+                  {{
+                    item.order?.number ? "№" + item.order?.number + " - " : ""
+                  }}
+                  {{ item.order?.name }}
+                </span>
+              </button>
+            </template> -->
+            <template #description>
+              <div class="flex flex-row items-center leading-4 group">
+                <div class="flex-auto">
+                  <a-tooltip>
+                    <template #title>
+                      {{ $t("table.financy.viewReport") }}
+                    </template>
+                    <button
+                      type="button"
+                      class="bg-transparent leading-6 font-medium text-black dark:text-g-100 group"
+                      @click="onViewFinancyOrder(item.order.id)"
+                    >
+                      <span class="no-underline group-hover:underline">
+                        {{
+                          item.order?.number
+                            ? "№" + item.order?.number + " - "
+                            : ""
+                        }}
+                        {{ item.order?.name }}
+                      </span>
+                    </button>
+                  </a-tooltip>
 
-  <a-table
+                  <div>
+                    {{ $t("table.financy.operation") }}:
+                    {{ item.operation?.name }}, {{ t("table.financy.object") }}:
+                    {{ item.object?.name }}
+                  </div>
+                </div>
+                <div class="flex flex-row items-center gap-4">
+                  <div class="flex flex-row gap-2">
+                    <a-tooltip>
+                      <template #title>
+                        {{ $t("button.edit") }}
+                      </template>
+                      <a-button
+                        type="text"
+                        ghost
+                        class="hidden group-hover:block"
+                        @click="
+                          () => {
+                            onEditItem(item);
+                          }
+                        "
+                      >
+                        <VIcon :path="iPen" />
+                      </a-button>
+                    </a-tooltip>
+
+                    <a-tooltip>
+                      <template #title>
+                        {{ $t("modal.changedView") }}
+                      </template>
+                      <a-button
+                        v-if="
+                          item.props &&
+                          Object.values(item.props).length &&
+                          authStore.roles.includes('workHistory-view-changes')
+                        "
+                        type="text"
+                        ghost
+                        class="p-0"
+                        @click="
+                          () => {
+                            onViewChanged(item);
+                          }
+                        "
+                      >
+                        <a-badge :count="Object.values(item.props).length">
+                          <div class="flex gap-2 px-2.5">
+                            <VIcon :path="iChanged" />
+                          </div>
+                        </a-badge>
+                      </a-button>
+                    </a-tooltip>
+                  </div>
+                  <div class="text-end">
+                    <div
+                      class="text-p-700 dark:text-p-400 font-medium text-base leading-5"
+                    >
+                      {{ item.total.toLocaleString("ru-RU") }} ₽
+                    </div>
+                    <!-- <FinancyPaneTableTotal
+                  v-if="workTimes"
+                  :data="workTimes"
+                  :pane="pane"
+                /> -->
+                    <TimePretty :time="getObjectTime(item.totalMinutes)" />
+                  </div>
+                </div>
+              </div>
+            </template>
+            <!-- <template #avatar>
+              <VImage
+                class="w-10 h-10 object-cover rounded-full"
+                :image="item.order.images ? item.order.images[0] : null"
+              />
+            </template> -->
+          </a-list-item-meta>
+        </a-list-item>
+      </template>
+    </a-list>
+  </div>
+  <!-- <a-table
     :columns="innerColumns"
     :data-source="workHistory"
     :pagination="false"
@@ -97,18 +306,6 @@ onMounted(() => {});
         </p>
       </template>
       <template v-if="column.key === 'order'">
-        <!-- <RouterLink
-          :to="{
-            name: 'financyOrder',
-            params: {
-              orderId: record.order.id,
-            },
-          }"
-        >
-          <span class="underline">
-            №{{ record.order?.number }} - {{ record.order?.name }}
-          </span>
-        </RouterLink> -->
         <a-button type="link" @click="onViewFinancyOrder(record.order.id)">
           <span class="underline">
             №{{ record.order?.number }} - {{ record.order?.name }}
@@ -122,13 +319,9 @@ onMounted(() => {});
       </template>
       <template v-if="column.key === 'time'">
         <TimePretty :time="getObjectTime(record.totalMinutes)" />
-        <!-- <span>
-          <a-badge status="success" />
-          Finished
-        </span> -->
       </template>
     </template>
-  </a-table>
+  </a-table> -->
 
   <a-modal
     v-model:open="openFinancyOrder"
@@ -149,7 +342,7 @@ onMounted(() => {});
     "
   >
     <template #title>
-      <p class="text-xl leading-6">
+      <p class="text-xl leading-6 px-4 py-2">
         {{ $t("page.financyOrder.title") }} №{{ activeFinancyOrder?.number }}
         -
         {{ activeFinancyOrder?.name }}
@@ -158,5 +351,37 @@ onMounted(() => {});
     <div v-if="activeFinancyOrder" class="">
       <FinancyOrder :order-id="activeFinancyOrder.id" />
     </div>
+  </a-modal>
+
+  <a-modal
+    v-model:open="showFormWorkHistory"
+    :style="{ width: '800px' }"
+    :destroyOnClose="true"
+    :title="$t('form.workHistory.modalTitle')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormWorkHistory
+      :data="dataForm"
+      :default-data="defaultDataForm"
+      @callback="
+        () => {
+          showFormWorkHistory = false;
+        }
+      "
+    />
+  </a-modal>
+
+  <a-modal
+    v-model:open="showWorkHistoryChanged"
+    :style="{ width: '800px' }"
+    :destroyOnClose="true"
+    :title="$t('modal.changedTitle')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <FinancyWorkHistoryChanges :work-history-id="workHistoryViewChangedId" />
   </a-modal>
 </template>

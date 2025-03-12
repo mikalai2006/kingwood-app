@@ -9,7 +9,7 @@ import {
 } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { computed, onMounted, ref } from "vue";
-import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
+import { IWorkHistoryExtends } from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
 import { useI18n } from "vue-i18n";
 import { RouterLink } from "vue-router";
@@ -18,7 +18,7 @@ import { IOrder } from "@/api/order/types";
 import FinancyOrder from "./FinancyOrder.vue";
 
 const props = defineProps<{
-  workTimes: IWorTimeExtends[];
+  workTimes: IWorkHistoryExtends[];
 }>();
 
 const { t } = useI18n();
@@ -118,6 +118,7 @@ onMounted(() => {});
     :data-source="workHistory"
     :pagination="false"
   >
+    <!-- :showHeader="false" -->
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'object'">
         <p>
@@ -177,7 +178,7 @@ onMounted(() => {});
     "
   >
     <template #title>
-      <p class="text-xl leading-6">
+      <p class="text-xl leading-6 py-4">
         {{ $t("page.financyOrder.title") }} №{{ activeFinancyOrder?.number }}
         -
         {{ activeFinancyOrder?.name }}

@@ -6,8 +6,9 @@ import { computed, ref } from "vue";
 import { IWorkTime } from "@/api/work_time/types";
 import { getObjectTime } from "@/utils/time";
 import TimePretty from "../Time/TimePretty.vue";
+import { IWorkHistory } from "@/api/work_history/types";
 
-export interface IWorTimeExtends extends IWorkTime {
+export interface IWorkHistoryExtends extends IWorkHistory {
   totalMs: number;
   day: number;
 }
@@ -15,7 +16,7 @@ export interface IWorTimeExtends extends IWorkTime {
 const props = defineProps<{
   pane: IPaneOptionFinancy;
   day: number;
-  data: IWorTimeExtends[];
+  data: IWorkHistoryExtends[];
 }>();
 
 const emit = defineEmits({
@@ -43,7 +44,7 @@ const totalMoney = computed(() => props.data.reduce((a, b) => a + b.total, 0));
 
 <template>
   <div class="flex-auto flex items-center gap-4">
-    <div class="text-base text-p-700 dark:text-p-400">
+    <div class="text-base font-medium text-p-700 dark:text-p-400">
       {{ totalMoney.toLocaleString("ru-RU") }}
       ₽
     </div>

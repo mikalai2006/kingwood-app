@@ -90,8 +90,8 @@ export function invertColor(hex?: string, bw?: boolean) {
   );
 }
 
-export const getObjectId = (id: string) => {
-  return id === "000000000000000000000000" ? "0" : id;
+export const getObjectId = (id?: string) => {
+  return id ? (id === "000000000000000000000000" ? "0" : id) : "0";
 };
 
 export const replaceSubstringByArray = function (

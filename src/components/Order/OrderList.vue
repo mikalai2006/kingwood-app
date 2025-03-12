@@ -803,7 +803,6 @@ const activeKey = ref("list");
               />
               <a-button
                 v-if="authStore.roles.includes('task-create')"
-                type="primary"
                 @click="onAddNewTask(currentOrderInModal)"
                 class="mt-4"
               >

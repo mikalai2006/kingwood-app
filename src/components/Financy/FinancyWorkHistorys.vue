@@ -2,8 +2,10 @@
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
 import {
   useAuthStore,
+  useOrderStore,
   usePostStore,
   useUserStore,
+  useWorkHistoryStore,
   useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
@@ -12,13 +14,17 @@ import { useResizeObserver } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { getObjectTime } from "@/utils/time";
 import VIcon from "../UI/VIcon.vue";
-import { iPen, iPlusLg } from "@/utils/icons";
+import { iChevronDown, iPen, iPlusLg } from "@/utils/icons";
 import { dateTimeFormat } from "@/utils/date";
 import VFormWorkTime from "../Form/VFormWorkTime.vue";
 import { IWorkTime, IWorkTimeInput } from "@/api/work_time/types";
 import TimePretty from "../Time/TimePretty.vue";
 import { colorWorkTimeProgress, replaceSubstringByArray } from "@/utils/utils";
 import FinancyWorkTimesHistory from "./FinancyWorkTimesHistory.vue";
+import FinancyDetails from "./FinancyDetails.vue";
+import FinancyDetailsList from "./FinancyDetailsList.vue";
+import { IWorkHistoryInput } from "@/api/work_history/types";
+import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
 
 const COUNT_DAY_ADD_WORKTIME = 31;
 
@@ -36,7 +42,8 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const postStore = usePostStore();
 const authStore = useAuthStore();
-const workTimeStore = useWorkTimeStore();
+const orderStore = useOrderStore();
+const workHistoryStore = useWorkHistoryStore();
 
 const columns = ref([
   {
@@ -74,7 +81,7 @@ const columns = ref([
 const currentDate = computed(() => dayjs(props.date));
 
 const listData = computed(() => {
-  const _list = workTimeStore.items
+  const _list = workHistoryStore.items
     .filter(
       (x) =>
         props.pane.workerId == x.workerId &&
@@ -83,9 +90,16 @@ const listData = computed(() => {
     )
     .map((x) => {
       const _totalMs = dayjs(x.to).diff(x.from);
+      const _order = orderStore.items.find((ord) => ord.id == x.orderId);
+      // const workHistory = workHistoryStore.items.filter(
+      //   (w) => w.workTimeId === x.id
+      // );
       return {
         ...x,
         totalMs: _totalMs,
+        key: x.id,
+        order: _order,
+        // workHistory,
       };
     });
   return _list;
@@ -93,7 +107,7 @@ const listData = computed(() => {
 
 const showFormWorkTime = ref(false);
 
-const defaultDataForm: IWorkTimeInput = {};
+const defaultDataForm: IWorkHistoryInput = {};
 
 const dataForm = ref(defaultDataForm);
 
@@ -102,8 +116,8 @@ const dataForm = ref(defaultDataForm);
 //   showModal();
 // };
 
-const onEditItem = (item: IWorkTime) => {
-  console.log("edit WorkTime: ", item);
+const onEditItem = (item: IWorkHistoryInput) => {
+  console.log("edit WorkHistory: ", item);
 
   dataForm.value = Object.assign({}, item);
   showFormWorkTime.value = true;
@@ -157,7 +171,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
   wf={{ widthTimeline }} w={{ widthTimeline / 49 }} ws={{
     widthOneMs * 1800000
   }} -->
-  <div ref="timeline" class="mt-6 w-full mx-auto relative">
+  <div ref="timeline" class="my-6 w-full mx-auto relative">
     <!-- <div class="flex flex-row items-center justify-center text-left">
       <div v-for="i in 25" class="flex-auto">
         {{ i - 1 }}
@@ -166,7 +180,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
     <div class="flex flex-row items-end">
       <div
         v-for="i in Array.from(Array(49).keys())"
-        class="m-0 p-0 border border-transparent border-l-g-200 border-b-g-50 dark:border-l-g-700 dark:border-b-g-700 relative box-border z-10"
+        class="m-0 p-0 border border-transparent border-l-g-200 dark:border-l-g-700 last:border-r-g-200 dark:last:border-r-g-700 border-b-g-50 dark:border-b-g-700 relative box-border z-10"
         :class="[i % 2 !== 0 ? 'h-2' : 'h-3', `child n_${i}`]"
         :style="[{ 'flex-basis': widthOneMs * 1800000 + 'px' }]"
       >
@@ -174,54 +188,60 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
           v-if="i % 2 === 0"
           class="absolute -top-[20px] -left-[9px] w-4 text-center text-g-400 dark:text-g-500"
         >
-          {{ i / 2 }}
+          {{ i / 2 < 10 ? "0" : "" }}{{ i / 2 }}
         </div>
         <!-- <div class="rotate-90">&#8211;</div> -->
       </div>
     </div>
 
-    <div class="h-10">
-      <div class="flex flex-row items-end absolute inset-0 z-0 top-3">
+    <div class="">
+      <div
+        class="flex flex-row items-end absolute inset-0 z-0 top-3 border-b border-b-g-100 dark:border-b-g-700"
+      >
         <div
           v-for="i in Array.from(Array(49).keys())"
-          class="m-0 p-0 border border-dashed border-transparent border-l-g-100 dark:border-l-g-700 relative box-border"
+          class="m-0 p-0 border border-dashed border-transparent border-l-g-100 dark:border-l-g-700 last:border-r-g-100 dark:last:border-r-g-700 relative box-border"
           :class="['h-full', `child n_${i}`]"
           :style="[{ 'flex-basis': widthOneMs * 1800000 + 'px' }]"
         ></div>
       </div>
-      <div
-        v-for="(item, index) in listData"
-        :key="item.id"
-        class="h-10 cursor-pointer absolute"
-        :class="[colorWorkTimeProgress[index]]"
-        :style="{
-          width:
-            Math.max(
-              (dayjs(item.to).valueOf() - dayjs(item.from).valueOf()) *
-                widthOneMs,
-              5
-            ) + 'px',
-          marginLeft:
-            Math.abs(dayjs(item.from).valueOf() - startDayMs) * widthOneMs +
-            'px',
-        }"
-        @click="
-          () => {
-            onEditItem(item);
-          }
-        "
-      >
-        <FinancyWorkTimesHistory
+      <!-- :class="[colorWorkTimeProgress[index]]" -->
+      <a-tooltip v-for="(item, index) in listData">
+        <template #title>
+          {{ item.order?.name }}
+        </template>
+        <div
+          :key="item.id"
+          class="cursor-pointer relative bg-g-200/50 dark:bg-g-500/50 hover:bg-g-300/50 hover:dark:bg-g-400/50 h-5"
+          :style="{
+            width:
+              Math.max(
+                (dayjs(item.to).valueOf() - dayjs(item.from).valueOf()) *
+                  widthOneMs,
+                2
+              ) + 'px',
+            marginLeft:
+              Math.abs(dayjs(item.from).valueOf() - startDayMs) * widthOneMs +
+              'px',
+          }"
+          @click="
+            () => {
+              onEditItem(item);
+            }
+          "
+        >
+          <!-- <FinancyWorkTimesHistory
           v-for="history in item.workHistory"
           :date="date"
           :history-id="history.id"
           :workTime="item"
           :widthOneMs="widthOneMs"
-        />
-        <!-- <div v-for="order in item.workHistory" class="bg-s-500">
+        /> -->
+          <!-- <div v-for="order in item.workHistory" class="bg-s-500">
           {{ order.id }}
         </div> -->
-      </div>
+        </div>
+      </a-tooltip>
     </div>
   </div>
 
@@ -231,6 +251,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
     bordered
     expandRowByClick
     sticky
+    class="financy_table"
     size="small"
     :pagination="{
       pageSize: 32,
@@ -296,14 +317,19 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
     </template>
 
     <!-- <template #expandedRowRender="{ record }">
-      <template v-if="workTimes[record.day]?.length">
-        <FinancyDetails :work-times="workTimes[record.day]" />
+      <template v-if="record.workHistory">
+        <FinancyDetailsList
+          :work-times="[record]"
+          :pane="pane"
+          :date="date"
+          :show-button-add="true"
+        />
       </template>
       <template v-else>
         <p>{{ $t("info.notFoundWorkHistory") }}</p>
       </template>
-    </template>
-    <template #expandIcon="{ expanded, onExpand, record }">
+    </template> -->
+    <!-- <template #expandIcon="{ expanded, onExpand, record }">
       <VIcon
         v-if="!expanded"
         :path="iChevronDown"
@@ -342,9 +368,9 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
           @click="(e: Event) => {onAddItem(); e.preventDefault(); e.stopPropagation()}"
         >
           <div class="flex gap-2 items-center">
-            <VIcon :path="iPlusLg" class="text-s-400 dark:text-g-300" />
+            <VIcon :path="iPlusLg" class="text-g-400 dark:text-g-300" />
             <div>
-              {{ $t("form.add") }}
+              {{ $t("button.addWorkTime") }}
             </div>
           </div>
         </a-button>
@@ -360,7 +386,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >
-    <VFormWorkTime
+    <VFormWorkHistory
       :data="dataForm"
       :default-data="defaultDataForm"
       @callback="

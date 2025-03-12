@@ -284,8 +284,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />
@@ -306,8 +306,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />
@@ -328,8 +328,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />
@@ -358,8 +358,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />
@@ -388,8 +388,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />
@@ -418,8 +418,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
+                  ? Colors.s[100]
+                  : Colors.g[500],
               color: Colors.black,
             }"
           />

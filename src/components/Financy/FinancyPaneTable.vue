@@ -1,24 +1,18 @@
 <script setup lang="ts">
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
-import {
-  useAuthStore,
-  usePostStore,
-  useUserStore,
-  useWorkTimeStore,
-} from "@/store";
+import { useAuthStore, usePostStore, useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { ref } from "vue";
-import { IWorTimeExtends } from "./FinancyPaneTableTotal.vue";
+import { IWorkHistoryExtends } from "./FinancyPaneTableTotal.vue";
 import { useI18n } from "vue-i18n";
 import FinancyPaneTableTotal from "./FinancyPaneTableTotal.vue";
 import { getObjectTime } from "@/utils/time";
-import FinancyDetails from "./FinancyDetails.vue";
 import VIcon from "../UI/VIcon.vue";
-import { iChevronDown, iMinus, iPen, iPlusLg, iTrashFill } from "@/utils/icons";
-import FinancyWorkTimes from "./FinancyWorkTimes.vue";
-import { Dayjs } from "dayjs";
+import { iChevronDown, iPen } from "@/utils/icons";
+import FinancyWorkHistorys from "./FinancyWorkHistorys.vue";
 import { dateFormat } from "@/utils/date";
 import TimePretty from "../Time/TimePretty.vue";
+import FinancyDetailsList from "./FinancyDetailsList.vue";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -28,7 +22,7 @@ const props = defineProps<{
     dayName: string;
     date: string;
   }[];
-  workTimes: { [key: string]: IWorTimeExtends[] };
+  workHistorys: { [key: string]: IWorkHistoryExtends[] };
 }>();
 
 const emit = defineEmits({
@@ -40,7 +34,6 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const postStore = usePostStore();
 const authStore = useAuthStore();
-const workTimeStore = useWorkTimeStore();
 
 const columns = ref([
   {
@@ -79,12 +72,13 @@ const workTimeDate = ref<string>("");
     :data-source="data"
     bordered
     expandRowByClick
+    class="financy_table"
     sticky
     size="small"
     :pagination="{
       pageSize: 32,
     }"
-    :row-class-name="(_record: any, index: number) => ([0,6].includes(_record.dayWeek)  ? 'custom priority cursor-pointer bg-p-500/30 dark:bg-p-500/15 hover:!bg-p-500/40 dark:hover:!bg-p-500/30' : 'cursor-pointer')"
+    :row-class-name="(_record: any, index: number) => ([0,6].includes(_record.dayWeek)  ? 'custom priority cursor-pointer bg-p-500/10 dark:bg-p-500/15 hover:!bg-p-500/20 dark:hover:!bg-p-500/30' : 'cursor-pointer')"
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'day'">
@@ -98,8 +92,8 @@ const workTimeDate = ref<string>("");
 
       <template v-if="column.key === 'total'">
         <FinancyPaneTableTotal
-          v-if="workTimes[record.day]"
-          :data="workTimes[record.day]"
+          v-if="workHistorys[record.day]"
+          :data="workHistorys[record.day]"
           :pane="pane"
           :day="record.day"
         />
@@ -108,13 +102,13 @@ const workTimeDate = ref<string>("");
       <template v-if="column.key === 'totalTime'">
         <!-- {{ workTimes[record.day]?.length }} -->
         <div
-          v-if="workTimes[record.day]"
+          v-if="workHistorys[record.day]"
           class="text-base text-g-500 dark:text-g-400"
         >
           <TimePretty
             :time="
               getObjectTime(
-                workTimes[record.day]?.reduce(
+                workHistorys[record.day]?.reduce(
                   (a, b) => a + dayjs(b.to).diff(b.from),
                   0
                 )
@@ -130,10 +124,10 @@ const workTimeDate = ref<string>("");
             {{ $t("button.edit") }}
           </template>
           <a-button
-            type="link"
+            type="text"
             @click="(e: Event) => {workTimeDate=record.date; openModalWorkTime=true; e.preventDefault(); e.stopPropagation()}"
           >
-            <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+            <VIcon :path="iPen" />
           </a-button>
         </a-tooltip>
 
@@ -153,9 +147,14 @@ const workTimeDate = ref<string>("");
     </template>
 
     <template #expandedRowRender="{ record }">
-      <template v-if="workTimes[record.day]?.length">
+      <template v-if="workHistorys[record.day]?.length">
         <!-- record {{ workTimes[record.day][0]?.id }} -->
-        <FinancyDetailsList :work-times="workTimes[record.day]" />
+        <FinancyDetailsList
+          :work-historys="workHistorys[record.day]"
+          :pane="pane"
+          :date="record.day.toString()"
+          :show-button-add="false"
+        />
       </template>
       <template v-else>
         <p>{{ $t("info.notFoundWorkHistory") }}</p>
@@ -191,6 +190,6 @@ const workTimeDate = ref<string>("");
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >
-    <FinancyWorkTimes :date="workTimeDate" :pane="pane" />
+    <FinancyWorkHistorys :date="workTimeDate" :pane="pane" />
   </a-modal>
 </template>

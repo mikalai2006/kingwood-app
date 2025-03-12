@@ -28,7 +28,7 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
       const _data = await findPopulate(data || {});
       _data.data?.forEach((el) => this.onAddItemToStore(el));
       // }
-      return data;
+      return _data;
     },
     /**
      * Check exists item to store.
@@ -47,8 +47,13 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
     //   console.log('user: findInStore params=', params)
     //   return item[0] || null
     // },
-    onAddItemToStore(item: ITaskWorker) {
+    onAddItemToStore(item: ITaskWorker, forceNull?: boolean) {
       const existsItem = this.onExists(item.id);
+
+      if (getObjectId(item.id) === "0" && !forceNull) {
+        return;
+      }
+
       if (existsItem.index == -1) {
         this._items.push(item);
       } else {

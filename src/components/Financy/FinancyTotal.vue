@@ -2,27 +2,27 @@
 import { IOrder } from "@/api/order/types";
 import { IPaneOptionFinancy } from "@/api/types";
 import {
+  useObjectStore,
   useOrderStore,
   usePayStore,
   useUserStore,
   useWorkHistoryStore,
-  useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { getObjectTime } from "@/utils/time";
 import { groupBy } from "lodash-es";
 import { computed, onMounted, ref } from "vue";
 import VIcon from "../UI/VIcon.vue";
 import { iChevronDown } from "@/utils/icons";
+import { IObject } from "@/api/object/types";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
 }>();
 
 const userStore = useUserStore();
-const workTimeStore = useWorkTimeStore();
-const workHistory = useWorkHistoryStore();
+const workHistoryStore = useWorkHistoryStore();
 const orderStore = useOrderStore();
+const objectStore = useObjectStore();
 const payStore = usePayStore();
 
 const worker = computed(() =>
@@ -32,7 +32,7 @@ const worker = computed(() =>
 const currentDate = computed(() => dayjs(dayjs(props.pane.month)));
 
 const listData = computed(() => {
-  const _list = workTimeStore.items
+  const _list = workHistoryStore.items
     .filter(
       (x) =>
         props.pane.workerId?.includes(x.workerId) &&
@@ -47,15 +47,15 @@ const listData = computed(() => {
           )
     )
     .map((x) => {
-      const _totalMinutes = x.workHistory.reduce((a, b) => {
-        const dayTo = dayjs(b.to);
-        // console.log(dayTo.year(), dayTo.diff(b.from));
+      // const _totalMinutes = x.workHistory.reduce((a, b) => {
+      //   const dayTo = dayjs(b.to);
+      //   // console.log(dayTo.year(), dayTo.diff(b.from));
 
-        return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
-      }, 0);
+      //   return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
+      // }, 0);
       return {
         ...x,
-        totalMinutes: _totalMinutes,
+        totalMinutes: dayjs(x.to).year() != 1 ? dayjs(x.to).diff(x.from) : 0,
       };
     });
   return _list;
@@ -66,7 +66,7 @@ const totalMoney = computed(() =>
 );
 
 const totalMoneyGroupOrder = computed(() => {
-  const _list = workHistory.items
+  const _list = workHistoryStore.items
     .filter(
       (x) =>
         props.pane.workerId?.includes(x.workerId) &&
@@ -88,13 +88,19 @@ const totalMoneyGroupOrder = computed(() => {
 
   const _group = groupBy(_list, "orderId");
   const _result: {
-    [key: string]: { total: number; order: IOrder | undefined };
+    [key: string]: {
+      total: number;
+      order: IOrder | undefined;
+      object: IObject | undefined;
+    };
   } = {};
 
   for (const key in _group) {
+    const _order = orderStore.items.find((x) => x.id === key);
     _result[key] = {
       total: _group[key].reduce((a, e) => a + e.total, 0),
-      order: orderStore.items.find((x) => x.id === key),
+      order: _order,
+      object: objectStore.items.find((x) => x.id === _order?.objectId),
     };
   }
 
@@ -196,7 +202,8 @@ onMounted(() => {
                   class="flex items-center"
                 >
                   <div class="flex-auto px-4 py-2 font-normal">
-                    №{{ item.order?.number }} {{ item.order?.name }}
+                    {{ item.order?.number ? "№" + item.order?.number + " " : ""
+                    }}{{ item.order?.name }}, {{ item.object?.name }}
                   </div>
                   <div
                     class="px-6 py-2 text-right text-s-500 whitespace-nowrap dark:text-p-400"
@@ -204,7 +211,7 @@ onMounted(() => {
                     {{ item.total.toLocaleString("ru-RU") }} ₽
                   </div>
                 </div>
-                <div class="flex items-center">
+                <!-- <div class="flex items-center">
                   <div class="flex-auto px-4 py-2">
                     {{ $t("table.financy.otherWorks") }}
                   </div>
@@ -213,7 +220,7 @@ onMounted(() => {
                   >
                     {{ (totalMoney - totalByOrders).toLocaleString("ru-RU") }} ₽
                   </div>
-                </div>
+                </div> -->
               </div>
             </td>
           </tr>

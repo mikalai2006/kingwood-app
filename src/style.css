@@ -171,3 +171,8 @@ code {
 .ant-input-number {
   border-width: 2px !important;
 }
+
+.financy_table .ant-table-expanded-row > .ant-table-cell {
+  padding-top: 0 !important;
+  padding-right: 0 !important;
+}

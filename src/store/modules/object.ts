@@ -42,9 +42,9 @@ export const useObjectStore = defineStore("object", {
     //   console.log('user: findInStore params=', params)
     //   return item[0] || null
     // },
-    onAddItemToStore(item: IObject) {
+    onAddItemToStore(item: IObject, forceNull?: boolean) {
       const existsItem = this.onExists(item.id);
-      if (getObjectId(item.id) === "0") {
+      if (getObjectId(item.id) === "0" && !forceNull) {
         return;
       }
 
