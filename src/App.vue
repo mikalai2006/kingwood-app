@@ -442,6 +442,19 @@ onErrorCaptured((error: any, vm, info) => {
                 </div>
                 <div class="flex flex-col">
                   <VNavbar v-if="authStore.tokenData" />
+                  <div v-else class="p-4">
+                    <RouterLink
+                      to="/auth"
+                      class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
+                      :class="[
+                        route.name === 'auth'
+                          ? 'bg-white  dark:bg-g-700 text-black dark:text-white'
+                          : 'text-s-200 dark:text-g-400',
+                      ]"
+                    >
+                      <span>{{ $t("page.auth.title") }}</span>
+                    </RouterLink>
+                  </div>
                   <!-- <VNavbarCMS v-if="authStore.tokenData" /> -->
                   <!-- <nav data-dev-hint="main navigation">
               <a
