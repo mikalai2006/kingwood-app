@@ -231,7 +231,6 @@ onMounted(() => {});
                       </template>
                       <a-button
                         type="text"
-                        ghost
                         class="hidden group-hover:block"
                         @click="
                           () => {
@@ -254,7 +253,6 @@ onMounted(() => {});
                           authStore.roles.includes('workHistory-view-changes')
                         "
                         type="text"
-                        ghost
                         class="p-0"
                         @click="
                           () => {
