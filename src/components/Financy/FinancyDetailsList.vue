@@ -46,7 +46,9 @@ const workHistory = computed(() => {
     // .filter((x) => idsWorkHistory.value.includes(x.workTimeId))
     .filter(
       (x) =>
-        dayjs(x.date).date().toString() == props.date && dayjs(x.to).year() != 1
+        props.pane.workerId == x.workerId &&
+        dayjs(x.date).date().toString() == props.date &&
+        dayjs(x.to).year() != 1
     )
     .map((x) => {
       // console.log("x.workHistory: ", x.workHistory);
@@ -194,6 +196,7 @@ onMounted(() => {});
             <template #description>
               <div class="flex flex-row items-center leading-4 group">
                 <div class="flex-auto">
+                  {{ item.workerId }}
                   <a-tooltip>
                     <template #title>
                       {{ $t("table.financy.viewReport") }}

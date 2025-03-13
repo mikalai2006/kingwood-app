@@ -108,7 +108,7 @@ const listData = computed(() => {
   const _list = workHistoryStore.items
     .filter(
       (x) =>
-        workerId.value?.includes(x.workerId) &&
+        workerId.value == x.workerId &&
         dayjs(x.to).year() > 1 &&
         dayjs(x.to)
           .utc(true)
@@ -201,6 +201,7 @@ onMounted(() => {
           </a-form-item> -->
 
             <a-form-item :label="$t('form.financy.workerId')" name="workerId">
+              {{ workerId }}
               <a-select
                 v-model:value="workerId"
                 show-search
