@@ -4,7 +4,7 @@ import { IPost } from "../post/types";
 import { IRole } from "../role/types";
 import { ITaskWorker } from "../task_worker/types";
 import { IPaginationParams } from "../types";
-import { IWorkTime } from "../work_time/types";
+import { IWorkHistory } from "../work_history/types";
 
 export interface IUser {
   id: string;
@@ -25,7 +25,7 @@ export interface IUser {
   typePay: number;
   oklad: number;
   lastTime: Date;
-  workTimes: IWorkTime[];
+  WorkHistorys: IWorkHistory[];
   isWork: number;
 
   auth: IAuthPublicData;

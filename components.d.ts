@@ -121,5 +121,6 @@ declare module 'vue' {
     VOrder: typeof import('./src/components/V/VOrder.vue')['default']
     VTaskWorker: typeof import('./src/components/V/VTaskWorker.vue')['default']
     VTitle: typeof import('./src/components/VTitle.vue')['default']
+    WidgetFreeUser: typeof import('./src/components/Widget/WidgetFreeUser.vue')['default']
   }
 }

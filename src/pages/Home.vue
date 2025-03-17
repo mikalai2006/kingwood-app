@@ -1,8 +1,5 @@
-<template>
-  <div>Home page</div>
-</template>
-
 <script setup lang="ts">
+import WidgetFreeUser from "@/components/Widget/WidgetFreeUser.vue";
 import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 
@@ -15,4 +12,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<template>
+  <div>Home page</div>
+  <WidgetFreeUser />
+</template>
