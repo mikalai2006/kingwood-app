@@ -5,6 +5,7 @@ import { useAuthStore, useTaskWorkerStore, useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import sift from "sift";
 import UserTask from "./UserTask.vue";
+import { iPen, iTrashFill } from "@/utils/icons";
 
 const props = defineProps<{
   keyList: string;
@@ -68,21 +69,46 @@ onMounted(async () => {
       )" -->
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'action'">
-        <div>
+        <!-- <div>
           {{ record.auth?.pushToken }}
+        </div> -->
+        <div class="flex gap-0">
+          <a-tooltip v-if="authStore.roles.includes('user-patch')">
+            <template #title>
+              {{ $t("button.edit") }}
+            </template>
+            <a-button
+              type="text"
+              @click="(e: Event) => {emit('onEditItem', record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iPen" />
+            </a-button>
+          </a-tooltip>
+          <!-- <a-button
+            v-if="authStore.roles.includes('user-patch')"
+            @click="emit('onEditItem', record)"
+          >
+            {{ $t("button.edit") }}
+          </a-button> -->
+          <a-tooltip v-if="authStore.roles.includes('user-delete')">
+            <template #title>
+              {{ $t("button.delete") }}
+            </template>
+            <a-button
+              danger
+              type="link"
+              @click="(e: Event) => {emit('onRemoveItem', record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iTrashFill" />
+            </a-button>
+          </a-tooltip>
+          <!-- <a-button
+            v-if="authStore.roles.includes('user-delete')"
+            @click="emit('onRemoveItem', record)"
+          >
+            {{ $t("button.delete") }}
+          </a-button> -->
         </div>
-        <a-button
-          v-if="authStore.roles.includes('user-patch')"
-          @click="emit('onEditItem', record)"
-        >
-          {{ $t("button.edit") }}
-        </a-button>
-        <a-button
-          v-if="authStore.roles.includes('user-delete')"
-          @click="emit('onRemoveItem', record)"
-        >
-          {{ $t("button.delete") }}
-        </a-button>
       </template>
       <template v-if="column.key === 'name'">
         <div>
