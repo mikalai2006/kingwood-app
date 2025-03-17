@@ -91,7 +91,7 @@ async function createWindow() {
     win.webContents.session.clearCache();
   } else {
     win.loadFile(indexHtml);
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
   }
 
   // Test actively push message to the Electron-Renderer
