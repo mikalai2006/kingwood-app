@@ -4,8 +4,6 @@ import { computed, ref } from "vue";
 
 const props = defineProps<{ image?: IImage; src?: string; one?: string }>();
 
-console.log("dev=", import.meta);
-
 const srcAttr = computed(() => {
   if (props.image) {
     return `${import.meta.env.VITE_HOSTIMAGE}/images/${props.image.service}/${
