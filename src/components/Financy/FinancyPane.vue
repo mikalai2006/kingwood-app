@@ -201,7 +201,7 @@ onMounted(() => {
           </a-form-item> -->
 
             <a-form-item :label="$t('form.financy.workerId')" name="workerId">
-              {{ workerId }}
+              <!-- {{ workerId }} -->
               <a-select
                 v-model:value="workerId"
                 show-search
@@ -238,7 +238,11 @@ onMounted(() => {
           <div class="text-s-500 dark:text-p-400 px-4">
             {{ $t("table.financy.totalByMonth") }}
           </div>
-          <FinancyTotal :pane="pane" :key="pane.month?.toString()" />
+          <FinancyTotal
+            :pane="pane"
+            :key="pane.month?.toString()"
+            @onEditPay="onEditPay"
+          />
 
           <div>
             <a-button type="primary" @click="onAddPay">

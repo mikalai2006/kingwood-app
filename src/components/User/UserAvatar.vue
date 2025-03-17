@@ -36,7 +36,7 @@ const role = computed(() =>
       <VImg :image="user?.images?.[0]" class="w-10 h-10 rounded-full" />
       <div
         v-if="user?.online"
-        class="absolute bottom-1 right-0 w-4 h-4 rounded-full bg-green-500 border-[3px] border-white dark:border-g-900"
+        class="absolute bottom-1 right-0 w-4 h-4 rounded-full bg-green-500 border-[3px] border-s-100 dark:border-g-900"
       ></div>
     </div>
   </a-tooltip>

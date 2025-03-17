@@ -2,6 +2,7 @@
 import { IOrder } from "@/api/order/types";
 import { IPaneOptionFinancy } from "@/api/types";
 import {
+  useAuthStore,
   useObjectStore,
   useOrderStore,
   usePayStore,
@@ -12,13 +13,17 @@ import dayjs from "@/utils/dayjs";
 import { groupBy } from "lodash-es";
 import { computed, onMounted, ref } from "vue";
 import VIcon from "../UI/VIcon.vue";
-import { iChevronDown } from "@/utils/icons";
+import { iChange, iChevronDown, iPen } from "@/utils/icons";
 import { IObject } from "@/api/object/types";
+import { IPay } from "@/api/pay/types";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
 }>();
 
+const emit = defineEmits(["onEditPay"]);
+
+const authStore = useAuthStore();
 const userStore = useUserStore();
 const workHistoryStore = useWorkHistoryStore();
 const orderStore = useOrderStore();
@@ -141,6 +146,13 @@ const onFindPays = () => {
 
 const showDetails = ref(false);
 
+const payViewChangedId = ref("");
+const showPayChanged = ref(false);
+const onViewChanged = (item: IPay) => {
+  payViewChangedId.value = item.id;
+  showPayChanged.value = true;
+};
+
 onMounted(() => {
   onFindPays();
 });
@@ -235,11 +247,52 @@ onMounted(() => {
               class="px-4 py-2 font-normal text-g-900 dark:text-white"
             >
               {{ pay.name }}
+
+              <a-tooltip>
+                <template #title>
+                  {{ $t("modal.changedPayButton") }}
+                </template>
+                <a-button
+                  v-if="
+                    pay.props &&
+                    Object.values(pay.props).length &&
+                    authStore.roles.includes('pay-view-changes')
+                  "
+                  type="text"
+                  class="p-0"
+                  @click="
+                    () => {
+                      onViewChanged(pay);
+                    }
+                  "
+                >
+                  <a-badge :count="Object.values(pay.props).length">
+                    <div class="flex gap-2 px-2.5">
+                      <VIcon :path="iChange" />
+                    </div>
+                  </a-badge>
+                </a-button>
+              </a-tooltip>
             </th>
             <td
               class="px-6 py-2 text-base text-right text-s-800 dark:text-p-400 whitespace-nowrap"
             >
               {{ pay.total.toLocaleString("ru-RU") }} ₽
+
+              <a-tooltip v-if="authStore.roles?.includes('pay-patch')">
+                <template #title>
+                  {{ $t("button.edit") }}
+                </template>
+                <a-button
+                  size="small"
+                  type="text"
+                  @click="emit('onEditPay', pay)"
+                >
+                  <div class="flex gap-1 items-center">
+                    <VIcon :path="iPen" class="text-xs" />
+                  </div>
+                </a-button>
+              </a-tooltip>
             </td>
           </tr>
         </tbody>
@@ -267,4 +320,16 @@ onMounted(() => {
       </div> -->
     </div>
   </div>
+
+  <a-modal
+    v-model:open="showPayChanged"
+    :style="{ width: '800px' }"
+    :destroyOnClose="true"
+    :title="$t('modal.changedPayTitle')"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <FinancyPayChanges :pay-id="payViewChangedId" />
+  </a-modal>
 </template>

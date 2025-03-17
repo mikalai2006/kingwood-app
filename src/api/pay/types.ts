@@ -9,6 +9,14 @@ export interface IPay {
   total: number;
   name: string;
 
+  props: {
+    [key: string]: {
+      userId: string;
+      item: IPay;
+      time: string;
+    };
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }

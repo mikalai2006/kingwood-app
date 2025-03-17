@@ -26,6 +26,7 @@ export interface IWorkHistory {
     [key: string]: {
       userId: string;
       item: IWorkHistory;
+      time: string;
     };
   };
 

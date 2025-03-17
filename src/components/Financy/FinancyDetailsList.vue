@@ -20,7 +20,7 @@ import { getObjectTime } from "@/utils/time";
 import { IPaneOptionFinancy } from "@/api/types";
 import { IWorkHistory, IWorkHistoryInput } from "@/api/work_history/types";
 import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
-import { iChanged, iPen, iPlusLg } from "@/utils/icons";
+import { iChange, iChanged, iPen, iPlusLg } from "@/utils/icons";
 import FinancyWorkHistoryChanges from "./FinancyWorkHistoryChanges.vue";
 
 const props = defineProps<{
@@ -196,7 +196,7 @@ onMounted(() => {});
             <template #description>
               <div class="flex flex-row items-center leading-4 group">
                 <div class="flex-auto">
-                  {{ item.workerId }}
+                  <!-- {{ item.workerId }} -->
                   <a-tooltip>
                     <template #title>
                       {{ $t("table.financy.viewReport") }}
@@ -262,7 +262,7 @@ onMounted(() => {});
                       >
                         <a-badge :count="Object.values(item.props).length">
                           <div class="flex gap-2 px-2.5">
-                            <VIcon :path="iChanged" />
+                            <VIcon :path="iChange" />
                           </div>
                         </a-badge>
                       </a-button>

@@ -369,9 +369,9 @@ onMounted(() => {
           accept="image/*"
           capture
         /> -->
-            <div v-if="imageList?.length">
+            <!-- <div v-if="imageList?.length">
               {{ imageList }}
-            </div>
+            </div> -->
             <a-upload
               v-model:file-list="imageList"
               :customRequest="previewFile"

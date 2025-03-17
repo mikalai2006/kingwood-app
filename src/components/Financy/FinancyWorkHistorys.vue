@@ -289,7 +289,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
         </div>
       </template>
       <template v-if="column.key === 'action'">
-        <a-tooltip v-if="authStore.roles.includes('workTime-patch')">
+        <a-tooltip v-if="authStore.roles.includes('workHistory-patch')">
           <template #title>
             {{ $t("button.edit") }}
           </template>
@@ -357,7 +357,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
       />
       <a-tooltip
         v-if="
-          authStore.roles.includes('workTime-create') &&
+          authStore.roles.includes('workHistory-create') &&
           dayjs().diff(dayjs(date), 'days') <= COUNT_DAY_ADD_WORKTIME
         "
       >
@@ -383,6 +383,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
     :destroyOnClose="true"
     :title="$t('form.workTime.modalTitle')"
     :maskClosable="false"
+    :style="{ width: '800px' }"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >

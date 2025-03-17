@@ -118,7 +118,7 @@ const workTimeDate = ref<string>("");
         </div>
       </template>
       <template v-if="column.key === 'action'">
-        <a-tooltip v-if="authStore.roles.includes('workTime-list')">
+        <a-tooltip v-if="authStore.roles.includes('workHistory-patch')">
           <template #title>
             {{ $t("button.edit") }}
           </template>

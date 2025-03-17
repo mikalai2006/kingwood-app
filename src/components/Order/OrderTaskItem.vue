@@ -27,6 +27,8 @@ import VImg from "../UI/VImg.vue";
 import UserListItem from "../User/UserListItem.vue";
 import dayjs from "dayjs";
 import { dateFormat } from "@/utils/date";
+import TimePretty from "../Time/TimePretty.vue";
+import { getObjectTime } from "@/utils/time";
 
 const props = defineProps<{ taskId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -407,6 +409,13 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           {{ dayjs(item.to).format(dateFormat) }} -->
         </template>
       </UserListItem>
+      <div class="text-g-300 dark:text-g-500 self-start">
+        {{ $t("from") }} {{ dayjs(item.from).format(dateFormat) }}
+        <!-- <TimePretty
+          :time="getObjectTime(dayjs(new Date()).diff(item.from))"
+          short
+        /> -->
+      </div>
       <!-- <div class="flex flex-row items-center gap-1">
         <div>
           <VImg

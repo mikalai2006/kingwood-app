@@ -160,7 +160,10 @@ const activeKey = ref("list");
         }"
       >
         <a-tab-pane key="list" :tab="$t('tabs.task.list')" force-render> -->
-      <div v-if="tasksByOrder.length === 0" class="text-g-500 dark:text-g-300">
+      <div
+        v-if="tasksByOrder.length === 0"
+        class="text-g-500 dark:text-g-300 p-4"
+      >
         {{ $t("info.notFoundTasks") }}
       </div>
       <div

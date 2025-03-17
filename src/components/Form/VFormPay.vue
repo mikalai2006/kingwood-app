@@ -168,7 +168,7 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div>
-    <!-- {{ JSON.stringify(formState) }} -->
+    <!-- {{ JSON.stringify(formState.id) }} -->
     <a-form
       ref="formRef"
       layout="horizontal"
