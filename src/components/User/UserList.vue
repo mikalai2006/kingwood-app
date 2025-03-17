@@ -68,6 +68,9 @@ onMounted(async () => {
       )" -->
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'action'">
+        <div>
+          {{ record.auth?.pushToken }}
+        </div>
         <a-button
           v-if="authStore.roles.includes('user-patch')"
           @click="emit('onEditItem', record)"

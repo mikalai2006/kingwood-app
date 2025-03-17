@@ -212,7 +212,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
         </template>
         <div
           :key="item.id"
-          class="cursor-pointer relative bg-g-200/50 dark:bg-g-500/50 hover:bg-g-300/50 hover:dark:bg-g-400/50 h-5"
+          class="cursor-pointer relative bg-s-500 dark:bg-s-500/80 hover:bg-s-700/50 hover:dark:bg-g-400/50 h-5"
           :style="{
             width:
               Math.max(
@@ -285,7 +285,7 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
           v-if="record.totalMs != undefined"
           class="text-base text-g-500 dark:text-g-400"
         >
-          <TimePretty :time="getObjectTime(record.totalMs)" hide-seconds />
+          <TimePretty :time="getObjectTime(record.totalMs)" />
         </div>
       </template>
       <template v-if="column.key === 'action'">

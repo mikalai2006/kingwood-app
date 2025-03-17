@@ -4,6 +4,7 @@ import { computed } from "vue";
 import {
   useGeneralStore,
   useOperationStore,
+  useOrderStore,
   usePostStore,
   useTaskStatusStore,
   useTaskStore,
@@ -27,12 +28,16 @@ const generalStore = useGeneralStore();
 const userStore = useUserStore();
 const taskStore = useTaskStore();
 const taskWorkerStore = useTaskWorkerStore();
-const postStore = usePostStore();
+const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
 const operationStore = useOperationStore();
 
 const operationsByGroup = computed(() =>
   operationStore.items.filter((x) => x.group === props.group)
+);
+
+const order = computed(() =>
+  orderStore.items.find((x) => x.id === props.orderId)
 );
 
 const tasks = computed(() => {
@@ -126,9 +131,14 @@ const allWorkers = computed(() =>
     v-if="allWorkers.length"
     class="relative min-w-32 min-h-16 rounded-md"
     :class="[
-      {
-        'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700': !status,
-      },
+      // {
+      //   'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700': !status,
+      // },
+      !status
+        ? order?.priority
+          ? 'bg-red-400 dark:bg-r-700 border border-red-500 dark:border-r-700'
+          : 'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700'
+        : '',
       { 'bg-green-600 dark:bg-green-700': status },
     ]"
   >

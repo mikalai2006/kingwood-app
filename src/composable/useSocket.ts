@@ -10,6 +10,7 @@ import {
   useTaskStore,
   useTaskWorkerStore,
   useUserStore,
+  useWorkHistoryStore,
 } from "@/store";
 import { iWraningTriangle } from "@/utils/icons";
 import modal from "ant-design-vue/es/modal";
@@ -36,6 +37,7 @@ export const useSocket = (props: IUseSocketProps) => {
   const taskWorkerStore = useTaskWorkerStore();
   const messageStore = useMessageStore();
   const orderStore = useOrderStore();
+  const workHistoryStore = useWorkHistoryStore();
   const notifyStore = useNotifyStore();
 
   // console.log("router0", router.currentRoute);
@@ -206,8 +208,17 @@ export const useSocket = (props: IUseSocketProps) => {
 
           case "order":
             if (method === "DELETE") {
+              orderStore.onRemoveItemFromStore(content.id);
             } else {
               orderStore.onAddItemToStore(content);
+            }
+            break;
+
+          case "workHistory":
+            if (method === "DELETE") {
+              workHistoryStore.onRemoveItemFromStore(content.id);
+            } else {
+              workHistoryStore.onAddItemToStore(content);
             }
             break;
 

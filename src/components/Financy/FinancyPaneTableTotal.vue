@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
-import { usePostStore, useUserStore, useWorkTimeStore } from "@/store";
-import dayjs from "@/utils/dayjs";
+import { usePostStore, useUserStore } from "@/store";
 import { computed, ref } from "vue";
-import { IWorkTime } from "@/api/work_time/types";
-import { getObjectTime } from "@/utils/time";
-import TimePretty from "../Time/TimePretty.vue";
 import { IWorkHistory } from "@/api/work_history/types";
 
 export interface IWorkHistoryExtends extends IWorkHistory {
@@ -25,7 +21,6 @@ const emit = defineEmits({
 
 const userStore = useUserStore();
 const postStore = usePostStore();
-const workTimeStore = useWorkTimeStore();
 
 const worker = computed(() =>
   userStore.items.find((x) => x.id === props.pane.workerId)

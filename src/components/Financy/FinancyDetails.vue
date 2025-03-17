@@ -5,7 +5,6 @@ import {
   useOrderStore,
   useUserStore,
   useWorkHistoryStore,
-  useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { computed, onMounted, ref } from "vue";
@@ -24,7 +23,6 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const userStore = useUserStore();
-const workTimeStore = useWorkTimeStore();
 const workHistoryStore = useWorkHistoryStore();
 const orderStore = useOrderStore();
 const objectStore = useObjectStore();

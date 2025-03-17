@@ -247,7 +247,14 @@ const handleTableChange: any = (
 };
 
 const onDeleteOrder = (input: IOrder) => {
-  orderStore.deleteItem(input.id);
+  orderStore.deleteItem(input.id).then((r) => {
+    message.success(
+      replaceSubstringByArray(t("message.deleteOrderOk"), [
+        `№${input.number}-${input.name}`,
+      ])
+    );
+    return r;
+  });
 };
 
 const onDeleteAlert = (record: IOrder) => {
@@ -394,10 +401,10 @@ const activeKey = ref("list");
               {{ $t("button.edit") }}
             </template>
             <a-button
-              type="link"
+              type="text"
               @click="(e: Event) => {emit('onEditItem',record); e.preventDefault(); e.stopPropagation()}"
             >
-              <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+              <VIcon :path="iPen" />
             </a-button>
           </a-tooltip>
 
@@ -549,9 +556,12 @@ const activeKey = ref("list");
       </template>
 
       <template v-if="column.key === 'name'">
-        <span class="font-medium">
-          {{ record.name }}
-        </span>
+        <div class="flex gap-2 items-center">
+          <span class="font-medium">
+            {{ record.name }}
+          </span>
+          <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
+        </div>
         <a-tag
           v-if="record.priority"
           :bordered="false"
@@ -826,7 +836,11 @@ const activeKey = ref("list");
         <a-tab-pane key="message" :tab="$t('tabs.task.message')">
           <OrderMessages :orderId="currentOrderInModal.id" />
         </a-tab-pane>
-        <a-tab-pane key="financy" :tab="$t('tabs.order.financy')">
+        <a-tab-pane
+          v-if="authStore.roles.includes('financy-list')"
+          key="financy"
+          :tab="$t('tabs.order.financy')"
+        >
           <FinancyOrder :order-id="currentOrderInModal.id" />
         </a-tab-pane>
       </a-tabs>
