@@ -75,7 +75,7 @@ const onSaveSortOrder = async () => {
     .finally(() => {
       loading.value = false;
     });
-  console.log("data: ", data);
+  import.meta.env.VIEW_CONSOLE && console.log("data: ", data);
 };
 
 // () => {

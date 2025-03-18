@@ -59,7 +59,7 @@ const onAddNewItem = () => {
 };
 
 const onEditItem = (item: IPost) => {
-  console.log("item: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("item: ", item);
 
   dataForm.value = Object.assign({}, item);
   showModal();

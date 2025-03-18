@@ -48,12 +48,14 @@ const showModal = () => {
 };
 
 const columnsData = computed(() => {
-  return operationStore.items.map((x) => {
-    return {
-      ...x,
-      key: x.id,
-    };
-  });
+  return operationStore.items
+    .filter((x) => x.id != "000000000000000000000000")
+    .map((x) => {
+      return {
+        ...x,
+        key: x.id,
+      };
+    });
 });
 const defaultData: IOperationInput = {};
 const dataForm = ref(defaultData);

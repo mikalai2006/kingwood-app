@@ -60,7 +60,7 @@ const statuses = computed(() => [
 // );
 
 const onDeleteTask = (item: any) => {
-  console.log("Delete task: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("Delete task: ", item);
   //   await emit("onDeleteTask", item);
   return new Promise((resolve) => {
     setTimeout(() => resolve(true), 3000);

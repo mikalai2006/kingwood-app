@@ -168,7 +168,7 @@ const onAddPay = () => {
 };
 
 const onEditPay = (item: IPay) => {
-  console.log("Edit pay item: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("Edit pay item: ", item);
 
   dataForm.value = { ...item };
   showModal();

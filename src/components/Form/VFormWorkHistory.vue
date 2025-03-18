@@ -156,7 +156,8 @@ const onChangeTime = (value: string) => {
 
 const onChangeTaskWorker = (idTaskWorker: string) => {
   const taskWorker = taskWorkerStore.items.find((x) => x.id === idTaskWorker);
-  console.log("onChangeTaskWorker: ", taskWorker);
+  import.meta.env.VIEW_CONSOLE &&
+    console.log("onChangeTaskWorker: ", taskWorker);
   formState.objectId = taskWorker?.objectId;
   formState.operationId = taskWorker?.operationId;
   formState.taskId = taskWorker?.taskId;
@@ -166,7 +167,8 @@ const onChangeTaskWorker = (idTaskWorker: string) => {
   }
 
   formState.orderId = taskWorker?.orderId;
-  console.log("onChangeTaskWorker 2: ", formState);
+  import.meta.env.VIEW_CONSOLE &&
+    console.log("onChangeTaskWorker 2: ", formState);
 };
 
 onMounted(() => {

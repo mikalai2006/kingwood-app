@@ -60,7 +60,7 @@ const onAddNewItem = () => {
 };
 
 const onEditItem = (item: ITaskStatus) => {
-  console.log("edit taskStatus: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("edit taskStatus: ", item);
 
   dataForm.value = Object.assign({}, item);
   showModal();

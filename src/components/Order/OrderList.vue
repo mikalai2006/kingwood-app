@@ -129,6 +129,7 @@ const siftParams = computed(() => {
         }
       })
   );
+  _result.id = { $ne: "000000000000000000000000" };
   return _result;
 });
 // console.log("siftParams: ", siftParams.value);
@@ -635,7 +636,7 @@ const activeKey = ref("list");
       </template>
 
       <template v-if="column.key === 'number'">
-        <div class="text-right">{{ record.number }}</div>
+        <div class="text-center">{{ record.number }}</div>
       </template>
     </template>
 

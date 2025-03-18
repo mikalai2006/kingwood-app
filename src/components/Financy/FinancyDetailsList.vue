@@ -112,7 +112,7 @@ const dataForm = ref(defaultDataForm);
 // };
 
 const onEditItem = (item: IWorkHistory) => {
-  console.log("edit WorkHistory: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("edit WorkHistory: ", item);
 
   dataForm.value = Object.assign({}, item);
   showFormWorkHistory.value = true;

@@ -4,6 +4,7 @@ import {
   useAuthStore,
   useMessageStore,
   useNotifyStore,
+  useObjectStore,
   useOrderStore,
   usePayStore,
   useTaskStatusStore,
@@ -18,7 +19,6 @@ import { h } from "vue";
 import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
 import { replaceSubstringByArray } from "@/utils/utils";
-import { useI18n } from "vue-i18n";
 import { MessageApi } from "ant-design-vue/es/message";
 
 export interface IUseSocketProps {
@@ -37,6 +37,7 @@ export const useSocket = (props: IUseSocketProps) => {
   const taskWorkerStore = useTaskWorkerStore();
   const messageStore = useMessageStore();
   const orderStore = useOrderStore();
+  const objectStore = useObjectStore();
   const workHistoryStore = useWorkHistoryStore();
   const notifyStore = useNotifyStore();
 
@@ -96,9 +97,10 @@ export const useSocket = (props: IUseSocketProps) => {
       const data: IWsMessage = JSON.parse(event.data);
       const { method, content, service } = data;
 
-      console.groupCollapsed(`Event > ${service}: ${method}`);
-      console.dir(JSON.parse(event.data));
-      console.groupEnd();
+      import.meta.env.VIEW_CONSOLE &&
+        console.groupCollapsed(`Event > ${service}: ${method}`);
+      import.meta.env.VIEW_CONSOLE && console.dir(JSON.parse(event.data));
+      import.meta.env.VIEW_CONSOLE && console.groupEnd();
 
       if (!content || !service) {
         return;
@@ -194,7 +196,8 @@ export const useSocket = (props: IUseSocketProps) => {
                 "bottomRight",
                 0,
                 () => {
-                  console.log("change status notify: ", content);
+                  import.meta.env.VIEW_CONSOLE &&
+                    console.log("change status notify: ", content);
 
                   if (content.id) {
                     notifyStore.patch(content.id, { status: 1 }).then(() => {
@@ -214,6 +217,14 @@ export const useSocket = (props: IUseSocketProps) => {
             }
             break;
 
+          case "object":
+            if (method === "DELETE") {
+              objectStore.onRemoveItemFromStore(content.id);
+            } else {
+              objectStore.onAddItemToStore(content);
+            }
+            break;
+
           case "workHistory":
             if (method === "DELETE") {
               workHistoryStore.onRemoveItemFromStore(content.id);
@@ -223,12 +234,12 @@ export const useSocket = (props: IUseSocketProps) => {
             break;
 
           default:
-            console.log("UNKNOWN EVENT", event);
+            import.meta.env.VIEW_CONSOLE && console.log("UNKNOWN EVENT", event);
 
             break;
         }
       } catch (e) {
-        console.log("useSocket error: ", e);
+        console.error("useSocket error: ", e);
       }
     };
     return _socket;

@@ -117,7 +117,7 @@ const dataForm = ref(defaultDataForm);
 // };
 
 const onEditItem = (item: IWorkHistoryInput) => {
-  console.log("edit WorkHistory: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("edit WorkHistory: ", item);
 
   dataForm.value = Object.assign({}, item);
   showFormWorkTime.value = true;

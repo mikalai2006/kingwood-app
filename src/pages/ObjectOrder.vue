@@ -53,7 +53,7 @@ const {
   optionsForSelect,
   onSetColumns,
   onAddNewItem,
-  counter,
+  counterObject,
 } = useOrder();
 
 const dateFormat = "DD.MM.YYYY";
@@ -221,8 +221,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.inWork") }}
           <a-badge
-            v-if="counter.inWork.length"
-            :count="counter.inWork.length"
+            v-if="counterObject.inWork.length"
+            :count="counterObject.inWork.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
@@ -243,8 +243,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.notWork") }}
           <a-badge
-            v-if="counter.notWork.length"
-            :count="counter.notWork.length"
+            v-if="counterObject.notWork.length"
+            :count="counterObject.notWork.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
@@ -265,8 +265,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.stolyarComplete") }}
           <a-badge
-            v-if="counter.stolyarComplete.length"
-            :count="counter.stolyarComplete.length"
+            v-if="counterObject.stolyarComplete.length"
+            :count="counterObject.stolyarComplete.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
@@ -296,8 +296,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.shlifComplete") }}
           <a-badge
-            v-if="counter.shlifComplete.length"
-            :count="counter.shlifComplete.length"
+            v-if="counterObject.shlifComplete.length"
+            :count="counterObject.shlifComplete.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
@@ -327,8 +327,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.malyarComplete") }}
           <a-badge
-            v-if="counter.malyarComplete.length"
-            :count="counter.malyarComplete.length"
+            v-if="counterObject.malyarComplete.length"
+            :count="counterObject.malyarComplete.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'
@@ -358,8 +358,8 @@ const onSetFilter = () => {
         <template #tab>
           {{ $t("tabs.order.goComplete") }}
           <a-badge
-            v-if="counter.goComplete.length"
-            :count="counter.goComplete.length"
+            v-if="counterObject.goComplete.length"
+            :count="counterObject.goComplete.length"
             :number-style="{
               backgroundColor:
                 generalStore.themeMode !== 'dark'

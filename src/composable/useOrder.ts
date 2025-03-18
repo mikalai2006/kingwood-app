@@ -13,9 +13,12 @@ import {
 import dayjs from "@/utils/dayjs";
 import { useI18n } from "vue-i18n";
 import { IObject } from "@/api/object/types";
+import { useRoute } from "vue-router";
 
 const useOrder = () => {
   const { t } = useI18n();
+  const route = useRoute();
+  const { params } = route;
 
   const taskStatusStore = useTaskStatusStore();
   const userStore = useUserStore();
@@ -66,6 +69,65 @@ const useOrder = () => {
           // x.malyarComplete === 1 &&
           x.goComplete === 1 &&
           dayjs(x.dateOtgruzka).year() == 1
+        //  &&
+        // x.montajComplete === 0
+      ),
+    };
+  });
+
+  const counterObject = computed(() => {
+    return {
+      inWork: orderStore.items.filter(
+        (x) => x.status === 1 && x.objectId === params?.objectId
+      ),
+      notWork: orderStore.items.filter(
+        (x) => x.status === 0 && x.objectId === params?.objectId
+      ),
+      stolyarComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          x.stolyarComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1 &&
+          x.objectId === params?.objectId
+        //  &&
+        // x.shlifComplete === 0 &&
+        // x.malyarComplete === 0 &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      shlifComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          x.shlifComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1 &&
+          x.objectId === params?.objectId
+        // &&
+        // x.malyarComplete === 0 &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      malyarComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          x.malyarComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1 &&
+          x.objectId === params?.objectId
+        // &&
+        // x.goComplete === 0 &&
+        // x.montajComplete === 0
+      ),
+      goComplete: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          // x.malyarComplete === 1 &&
+          x.goComplete === 1 &&
+          dayjs(x.dateOtgruzka).year() == 1 &&
+          x.objectId === params?.objectId
         //  &&
         // x.montajComplete === 0
       ),
@@ -136,7 +198,7 @@ const useOrder = () => {
   };
 
   const onEditItem = (item: IOrder) => {
-    console.log("edit order: ", item);
+    import.meta.env.VIEW_CONSOLE && console.log("edit order: ", item);
 
     dataForm.value = Object.assign({}, item);
     showModal();
@@ -171,7 +233,7 @@ const useOrder = () => {
   };
 
   const onEditTask = (item: ITask) => {
-    console.log("Edit task: ", item);
+    import.meta.env.VIEW_CONSOLE && console.log("Edit task: ", item);
 
     dataTaskForm.value = Object.assign({}, item, {
       objectId: currentOrderInModal.value?.objectId,
@@ -187,20 +249,20 @@ const useOrder = () => {
   const allColumns = ref([
     { key: "number", sorter: (a: IOrder, b: IOrder) => a.number - b.number },
     {
-      key: "objectId",
-      sorter: (a: IOrder, b: IOrder) =>
-        a.object && b.object ? a.object?.name.localeCompare(b.object?.name) : 0,
-      // customFilterDropdown: true,
-      // onFilter: (value: string, record: IOrder) =>
-      //   record.objectId.toLowerCase().indexOf(value.toLowerCase()),
-    },
-    {
       key: "name",
       sorter: (a: IOrder, b: IOrder) => a.name.localeCompare(b.name),
       // defaultSortOrder: "descend" as const,
       // customFilterDropdown: true,
       // onFilter: (value: string, record: IOrder) =>
       //   record.name.toLowerCase().indexOf(value.toLowerCase()),
+    },
+    {
+      key: "objectId",
+      sorter: (a: IOrder, b: IOrder) =>
+        a.object && b.object ? a.object?.name.localeCompare(b.object?.name) : 0,
+      // customFilterDropdown: true,
+      // onFilter: (value: string, record: IOrder) =>
+      //   record.objectId.toLowerCase().indexOf(value.toLowerCase()),
     },
     {
       key: "term",
@@ -413,6 +475,7 @@ const useOrder = () => {
     onFetchOrders,
 
     counter,
+    counterObject,
   };
 };
 

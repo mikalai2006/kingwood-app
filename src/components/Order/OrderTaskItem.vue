@@ -257,7 +257,8 @@ const dataTaskForm = ref(defaultDataTask);
 const onAddNewTaskWorker = (orderId: string | undefined) => {
   if (!orderId) return;
 
-  console.log("Add task worker: taskId=", props.taskId);
+  import.meta.env.VIEW_CONSOLE &&
+    console.log("Add task worker: taskId=", props.taskId);
 
   dataTaskForm.value = {
     ...defaultDataTask,
@@ -270,7 +271,7 @@ const onAddNewTaskWorker = (orderId: string | undefined) => {
 };
 
 const onEditTaskWorker = (item: ITaskWorker) => {
-  console.log("Edit taskWorker: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("Edit taskWorker: ", item);
 
   dataTaskForm.value = Object.assign({}, item, {
     orderId: task.value?.orderId,

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { find, get } from "@/api/object";
+import { find, get, remove } from "@/api/object";
 import { IRequestParams } from "@/api/types";
-import { IObject } from "@/api/object/types";
+import { IObject, IObjectInput } from "@/api/object/types";
 import { getObjectId } from "@/utils/utils";
 // import sift from 'sift'
 
@@ -80,6 +80,34 @@ export const useObjectStore = defineStore("object", {
         item = this._items.find((el: IObject) => el.id == id);
       }
       return item || null;
+    },
+
+    async deleteItem(id: string | undefined) {
+      if (!id) {
+        return;
+      }
+
+      const data = await remove(id).then((r) => {
+        this.onRemoveItemFromStore(id);
+        return r;
+      });
+
+      return data;
+    },
+
+    onRemoveItemFromStore(id: string | number, params?: IObjectInput): number {
+      let itemIndex = -1;
+      if (params) {
+        // search by params
+      } else {
+        itemIndex = this._items.findIndex((el: IObject) => el.id == id);
+      }
+
+      if (itemIndex !== -1) {
+        this._items.splice(itemIndex, 1);
+      }
+
+      return itemIndex;
     },
   },
 });

@@ -266,7 +266,7 @@ const errorApp = ref<any>(null);
 onErrorCaptured((error: any, vm, info) => {
   // this.error = error;
   // this.errorMessage = info;
-  console.log("Error onErrorCaptured: ", error, vm, info);
+  console.error("Error onErrorCaptured: ", error, vm, info);
   if (error?.code == 500) {
     errorApp.value = error;
   }

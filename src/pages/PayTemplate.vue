@@ -66,7 +66,7 @@ const onAddNewItem = () => {
 };
 
 const onEditItem = (item: IPayTemplateInput) => {
-  console.log("edit payTemplate: ", item);
+  import.meta.env.VIEW_CONSOLE && console.log("edit payTemplate: ", item);
 
   dataForm.value = Object.assign({}, item);
   showModal();

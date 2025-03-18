@@ -1,4 +1,4 @@
-import { $get, $patch, $post } from "@/utils/http/axios";
+import { $delete, $get, $patch, $post } from "@/utils/http/axios";
 import { IRequestParams, IResponseData } from "@/api/types";
 import { IObject, IObjectInput } from "./types";
 
@@ -34,4 +34,9 @@ const patch = async (id: string | number, data: IObjectInput) =>
     data,
   });
 
-export { find, get, create, patch, sort };
+const remove = async (id: string | number) =>
+  $delete<IObject>({
+    url: `${URLS.path}/${id}`,
+  });
+
+export { find, get, create, patch, sort, remove };

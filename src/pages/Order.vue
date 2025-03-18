@@ -192,7 +192,6 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
   if (_activeTabKey) {
     activeKey.value = _activeTabKey;
   }
-  console.log("_activeTabKey: ", _activeTabKey);
 }
 </script>
 <template>
