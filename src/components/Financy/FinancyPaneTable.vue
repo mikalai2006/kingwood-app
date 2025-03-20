@@ -78,13 +78,13 @@ const workTimeDate = ref<string>("");
     :pagination="{
       pageSize: 32,
     }"
-    :row-class-name="(_record: any, index: number) => ([0,6].includes(_record.dayWeek)  ? 'custom priority cursor-pointer bg-p-500/10 dark:bg-p-500/15 hover:!bg-p-500/20 dark:hover:!bg-p-500/30' : 'cursor-pointer')"
+    :row-class-name="(_record: any, index: number) => (([0,6].includes(_record.dayWeek)  ? 'custom priority cursor-pointer bg-p-500/10 dark:bg-p-500/15 hover:!bg-p-500/20 dark:hover:!bg-p-500/30' : 'cursor-pointer') + ' row-small')"
   >
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'day'">
         <div class="text-xl text-g-800 dark:text-g-200">
           {{ record.day }}
-          <span class="text-sm text-g-500 dark:text-g-400">
+          <span class="text-sm text-g-300 dark:text-g-400">
             {{ record.dayName }}
           </span>
         </div>
@@ -163,18 +163,20 @@ const workTimeDate = ref<string>("");
       <span style="color: red">More</span>
     </template> -->
     <template #expandIcon="{ expanded, onExpand, record }">
-      <VIcon
-        v-if="!expanded"
-        :path="iChevronDown"
-        class="transition-all rotate-0 text-g-300 dark:text-g-600"
-        @click="(e) => onExpand(record, e)"
-      />
-      <VIcon
-        v-else
-        :path="iChevronDown"
-        class="transition-all rotate-180 text-g-300 dark:text-g-600"
-        @click="(e) => onExpand(record, e)"
-      />
+      <div class="flex items-center justify-center">
+        <VIcon
+          v-if="!expanded"
+          :path="iChevronDown"
+          class="transition-all rotate-0 text-g-300 dark:text-g-600"
+          @click="(e) => onExpand(record, e)"
+        />
+        <VIcon
+          v-else
+          :path="iChevronDown"
+          class="transition-all rotate-180 text-g-300 dark:text-g-600"
+          @click="(e) => onExpand(record, e)"
+        />
+      </div>
     </template>
   </a-table>
 

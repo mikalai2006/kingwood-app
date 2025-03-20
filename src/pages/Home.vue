@@ -13,6 +13,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>Home page</div>
-  <WidgetFreeUser />
+  <div class="p-6">
+    <WidgetFreeUser />
+  </div>
 </template>

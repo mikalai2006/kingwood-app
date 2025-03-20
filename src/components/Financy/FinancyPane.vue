@@ -51,7 +51,7 @@ const daysList = computed(() =>
       day: x + 1,
       date: _date.format(),
       dayWeek: _date.day(),
-      dayName: _date.format("dddd"),
+      dayName: _date.format("dd"),
     };
   })
 );

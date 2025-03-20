@@ -4,18 +4,16 @@ import VFormUser from "@/components/Form/VFormUser.vue";
 import { useUserStore } from "@/store/modules/user";
 import { computed, ref, onMounted, h } from "vue";
 import dayjs from "@/utils/dayjs";
-import { DownOutlined } from "@ant-design/icons-vue";
 import {
   useAuthStore,
   useGeneralStore,
   usePostStore,
+  useRoleStore,
   useTaskStore,
   useTaskWorkerStore,
 } from "@/store";
-import UserTask from "@/components/User/UserTask.vue";
-import { invertColor, replaceSubstringByArray } from "@/utils/utils";
+import { replaceSubstringByArray } from "@/utils/utils";
 import { useI18n } from "vue-i18n";
-import VImg from "@/components/UI/VImg.vue";
 import UserList from "@/components/User/UserList.vue";
 import { message, Modal } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
@@ -26,6 +24,7 @@ dayjs.locale("ru");
 const userStore = useUserStore();
 const postStore = usePostStore();
 const generalStore = useGeneralStore();
+const roleStore = useRoleStore();
 
 const { t } = useI18n();
 
@@ -227,6 +226,10 @@ const onSetColumns = (value: string, key: string, data: string[]) => {
 
 const activeKey = ref("current");
 
+const roleUser = computed(() =>
+  roleStore.items.filter((x) => x.code === "user").map((x) => x.id)
+);
+
 onMounted(() => {
   // sync columns from localStorage.
   const _columns = localStorage.getItem(nameKeyLocalStorageColumns.value);
@@ -314,6 +317,20 @@ onMounted(() => {
           :params="{
             archive: 0,
             hidden: 0,
+          }"
+          @on-edit-item="onEditItem"
+          @on-remove-item="onRemoveItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="notTask" :tab="$t('tabs.user.notTask')">
+        <UserList
+          :columns="columns"
+          key-list="notTask"
+          :params="{
+            archive: 0,
+            hidden: 0,
+            taskWorkers: { $size: 0 },
+            roleId: roleUser,
           }"
           @on-edit-item="onEditItem"
           @on-remove-item="onRemoveItem"

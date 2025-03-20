@@ -177,6 +177,10 @@ code {
   padding-right: 0 !important;
 }
 
-.ant-table-wrapper .ant-table.ant-table-small .ant-table-tbody > tr > td {
+.ant-table-wrapper
+  .ant-table.ant-table-small
+  .ant-table-tbody
+  > tr.row-small
+  > td {
   padding: 5px !important;
 }

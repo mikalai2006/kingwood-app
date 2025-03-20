@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePostStore, useRoleStore, useUserStore } from "@/store";
 import { computed } from "vue";
+import UserInfoTag from "../User/UserInfoTag.vue";
 
 const userStore = useUserStore();
 const postStore = usePostStore();
@@ -12,15 +13,20 @@ const roles = computed(() =>
 
 const freeUsers = computed(() =>
   userStore.items.filter(
-    (x) => !x.WorkHistorys?.length && roles.value.includes(x.roleId)
+    (x) => !x.taskWorkers?.length && roles.value.includes(x.roleId)
   )
 );
 </script>
 
 <template>
-  <div>
+  <div class="bg-white dark:bg-g-800 p-4 rounded-lg min-w-60">
+    <div class="text-p-600 dark:text-p-300 pb-4 text-base">
+      {{ $t("info.freeUser") }}
+    </div>
     <div v-for="user in freeUsers" :key="user.id">
-      {{ user.name }} | {{ user.WorkHistorys?.length }}
+      <UserInfoTag :user-id="user.id" showPost />
+      <!-- {{ user.id }}-{{ user.name }} | {{ user.WorkHistorys?.length }} |
+      {{ user.taskWorkers?.length }} -->
     </div>
   </div>
 </template>

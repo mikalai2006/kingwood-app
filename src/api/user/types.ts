@@ -45,4 +45,5 @@ export interface IUserFilter extends IPaginationParams<IUserInput> {
   roleId?: string[];
   hidden?: number;
   archive?: number;
+  taskWorkers?: any;
 }

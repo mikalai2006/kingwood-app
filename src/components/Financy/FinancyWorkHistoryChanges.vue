@@ -112,7 +112,7 @@ const workHistoryProps = computed(() => {
         </div>
         <div class="flex flex-row gap-3 items-center">
           <div class="">
-            <UserInfoTag :user-id="item.userId" />
+            <UserInfoTag :user-id="item.userId" showRole />
           </div>
           <div
             class="flex-auto flex flex-row gap-3 border border-g-50 dark:border-g-700 p-2 rounded-lg bg-g-50 dark:bg-g-500/10"

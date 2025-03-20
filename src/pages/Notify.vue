@@ -21,7 +21,7 @@ const onPatchNotify = async (id: string, data: INotifyInput) => {
 const activeKey = ref("new");
 </script>
 <template>
-  <div class="flex-auto">
+  <div class="flex-auto bg-white dark:bg-g-900">
     <VHeader :title="$t('page.notify.title')">
       <template #back>&nbsp;</template>
     </VHeader>

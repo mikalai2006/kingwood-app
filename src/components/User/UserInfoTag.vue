@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoleStore, useUserStore } from "@/store";
+import { usePostStore, useRoleStore, useUserStore } from "@/store";
 import { getShortFIO } from "@/utils/utils";
 import { useRouter } from "vue-router";
 
 const props = defineProps<{
   userId: string;
+  showRole?: boolean;
+  showPost?: boolean;
 }>();
 
 const userStore = useUserStore();
 const roleStore = useRoleStore();
+const postStore = usePostStore();
 
 const router = useRouter();
 
@@ -17,6 +20,9 @@ const user = computed(() => userStore.items.find((x) => x.id === props.userId));
 
 const role = computed(() =>
   roleStore.items.find((x) => x.id === user.value?.roleId)
+);
+const post = computed(() =>
+  postStore.items.find((x) => x.id === user.value?.postId)
 );
 </script>
 
@@ -46,7 +52,12 @@ const role = computed(() =>
       <span
         class="block font-normal leading-3 text-xs text-s-400 dark:text-g-300"
       >
-        {{ role?.name }}
+        <template v-if="showRole">
+          {{ role?.name }}
+        </template>
+        <template v-if="showPost">
+          {{ post?.name }}
+        </template>
       </span>
     </div>
   </div>

@@ -526,7 +526,7 @@ onErrorCaptured((error: any, vm, info) => {
                 </div>
               </aside>
               <div
-                class="flex-auto flex flex-col overflow-auto b-scroll bg-white dark:bg-g-900"
+                class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-900"
               >
                 <div
                   v-if="taskStatus.items.length > 0 || !authStore.tokenData"

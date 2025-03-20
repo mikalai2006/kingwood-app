@@ -59,7 +59,7 @@ const payProps = computed(() => {
       class="flex flex-row gap-4 p-4 border-l border rounded-lg border-g-100 dark:border-g-700 bg-g-100 dark:bg-g-950/40 mb-4"
     >
       <div>
-        <UserInfoTag :user-id="pay.userId" />
+        <UserInfoTag :user-id="pay.userId" showRole />
       </div>
       <div class="">
         <p class="font-medium">
@@ -98,7 +98,7 @@ const payProps = computed(() => {
         </div>
         <div class="flex gap-3 flex-row items-center">
           <div>
-            <UserInfoTag :user-id="item.userId" />
+            <UserInfoTag :user-id="item.userId" showRole />
           </div>
           <div
             class="flex-auto flex gap-3 border border-g-50 dark:border-g-700 p-2 rounded-lg bg-g-50 dark:bg-g-500/10"
