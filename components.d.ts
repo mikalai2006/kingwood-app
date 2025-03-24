@@ -7,7 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    2: typeof import('./src/components/Financy/FinancyReportPane copy 2.vue')['default']
     AAlert: typeof import('ant-design-vue/es')['Alert']
     AApp: typeof import('ant-design-vue/es')['App']
     AAutoComplete: typeof import('ant-design-vue/es')['AutoComplete']
@@ -48,7 +47,6 @@ declare module 'vue' {
     ATimePicker: typeof import('ant-design-vue/es')['TimePicker']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     AUpload: typeof import('ant-design-vue/es')['Upload']
-    copy: typeof import('./src/components/Financy/FinancyReportPane copy.vue')['default']
     FinancyDetails: typeof import('./src/components/Financy/FinancyDetails.vue')['default']
     FinancyDetailsList: typeof import('./src/components/Financy/FinancyDetailsList.vue')['default']
     FinancyOrder: typeof import('./src/components/Financy/FinancyOrder.vue')['default']
