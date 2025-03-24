@@ -8,8 +8,6 @@ import FinancyPane from "@/components/Financy/FinancyPane.vue";
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
 import { Colors } from "@/utils/colors";
 import { useGeneralStore } from "@/store";
-import FinancyReportForm from "@/components/Financy/FinancyReportForm.vue";
-import FinancyReportPane from "@/components/Financy/FinancyReportPane.vue";
 
 dayjs.locale("ru");
 
@@ -72,8 +70,6 @@ const onEdit = (targetKey: string | MouseEvent, action: string) => {
   }
 };
 
-const mode = ref("left");
-
 onMounted(async () => {
   const _panes = localStorage.getItem(nameKeyLocalStorage.value);
   if (_panes) {
@@ -88,61 +84,9 @@ onMounted(async () => {
 
 <template>
   <div class="flex-auto overflow-hidden max-h-screen">
-    <VHeader :title="$t('page.financy.title')">
+    <VHeader :title="$t('page.financyWorker.title')">
       <template #back>&nbsp;</template>
     </VHeader>
-    <!-- <div class="flex-0 flex-initial bg-s-200 dark:bg-g-951 min-w-80">
-      <VHeader :title="$t('page.financy.title')">
-        <template #back>&nbsp;</template>
-      </VHeader>
-      <a-tabs
-        v-model:activeKey="activeKey"
-        type="editable-card"
-        hide-add
-        animated
-        :tab-position="mode"
-        :tabBarGutter="2"
-        destroyInactiveTabPane
-        :tabBarStyle="{
-          width: '100%',
-          position: 'sticky',
-          top: 0,
-          'padding-left': '15px',
-          margin: '0px',
-          'z-index': 50,
-          background:
-            generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
-        }"
-        @edit="onEdit"
-      >
-        <template #rightExtra>
-          <div class="p-2">
-            <a-button
-              class="tabs-extra-demo-button"
-              type="primary"
-              @click="add"
-            >
-              {{ $t("form.financy.addReport") }}
-            </a-button>
-          </div>
-        </template>
-        <a-tab-pane
-          v-for="pane in panes"
-          :key="pane.key"
-          :tab="pane.title"
-          :closable="pane.closable"
-        >
-          <template #tab>
-            hello
-            <FinancyReportForm
-              :pane="pane"
-              @onChangeTabPane="onChangeTabPane"
-            />
-          </template>
-        </a-tab-pane>
-      </a-tabs>
-    </div> -->
-
     <div class="flex-auto">
       <a-tabs
         v-model:activeKey="activeKey"
@@ -161,7 +105,7 @@ onMounted(async () => {
         }"
         @edit="onEdit"
       >
-        <template #rightExtra>
+        <template #leftExtra>
           <div class="p-2">
             <a-button
               class="tabs-extra-demo-button"
@@ -178,7 +122,7 @@ onMounted(async () => {
           :tab="pane.title"
           :closable="pane.closable"
         >
-          <FinancyReportPane :pane="pane" @onChangeTabPane="onChangeTabPane" />
+          <FinancyPane :pane="pane" @onChangeTabPane="onChangeTabPane" />
         </a-tab-pane>
       </a-tabs>
     </div>

@@ -15,6 +15,7 @@ import { Rule } from "ant-design-vue/es/form";
 import {
   useAuthStore,
   usePostStore,
+  useRoleStore,
   useTaskStatusStore,
   useTaskWorkerStore,
   useUserStore,
@@ -39,6 +40,7 @@ const taskWorkerStore = useTaskWorkerStore();
 const userStore = useUserStore();
 const taskStatusStore = useTaskStatusStore();
 const postStore = usePostStore();
+const roleStore = useRoleStore();
 
 const formState: UnwrapRef<ITaskWorkerInput> = reactive({ ...props.data });
 const formRef = ref();
@@ -157,11 +159,17 @@ const resetForm = () => {
   formRef.value.resetFields();
 };
 
+const rolesWorkers = computed(() =>
+  roleStore.items.filter((x) => ["user"].includes(x.code)).map((x) => x.id)
+);
+
 const workers = computed(() => {
   return (
     userStore.items
       // .filter((x) => x.typeWork?.includes(formState.operationId))
-      .filter((x) => !x.hidden && !x.archive)
+      .filter(
+        (x) => !x.hidden && !x.archive && rolesWorkers.value.includes(x.roleId)
+      )
       .map((x) => {
         const post = postStore.items.find((y) => y.id === x.postId);
         return {

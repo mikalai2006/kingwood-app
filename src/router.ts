@@ -24,6 +24,7 @@ import Notify from "./pages/Notify.vue";
 import Financy from "./pages/Financy.vue";
 import PayTemplate from "./pages/PayTemplate.vue";
 import FinancyOrder from "./pages/FinancyOrder.vue";
+import FinancyWorker from "./pages/FinancyWorker.vue";
 
 const routes = [
   {
@@ -132,6 +133,12 @@ const routes = [
     path: "/financy/:orderId",
     name: "financyOrder",
     component: FinancyOrder,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/financy/:workerId",
+    name: "financyWorker",
+    component: FinancyWorker,
     meta: { requiresAuth: true },
   },
 ];

@@ -126,7 +126,7 @@ const resetForm = () => {
 const operations = computed(() => {
   return (
     operationStore.items
-      .filter((x) => !x.hidden)
+      .filter((x) => !x.hidden && x.id != "000000000000000000000000")
       // .filter((x) => ["2", "3", "4"].includes(x.group))
       .map((x) => {
         return {

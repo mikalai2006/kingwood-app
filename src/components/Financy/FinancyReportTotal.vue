@@ -30,17 +30,12 @@ const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const payStore = usePayStore();
 
-const worker = computed(() =>
-  userStore.items.find((x) => x.id === props.pane.workerId)
-);
-
 const currentDate = computed(() => dayjs(dayjs(props.pane.month)));
 
 const listData = computed(() => {
   const _list = workHistoryStore.items
     .filter(
       (x) =>
-        props.pane.workerId?.includes(x.workerId) &&
         dayjs(x.to).year() > 1 &&
         dayjs(x.to)
           .utc(true)
@@ -74,7 +69,6 @@ const totalMoneyGroupOrder = computed(() => {
   const _list = workHistoryStore.items
     .filter(
       (x) =>
-        props.pane.workerId?.includes(x.workerId) &&
         dayjs(x.to).year() > 1 &&
         dayjs(x.to)
           .utc(true)
@@ -126,9 +120,7 @@ const totalMinutesHistory = computed(() =>
 const listPay = computed(() =>
   payStore.items.filter(
     (x) =>
-      x.year == currentDate.value.year() &&
-      x.month == currentDate.value.month() &&
-      x.workerId == props.pane.workerId
+      x.year == currentDate.value.year() && x.month == currentDate.value.month()
   )
 );
 
@@ -140,7 +132,7 @@ const onFindPays = () => {
   payStore.find({
     month: currentDate.value.month(),
     year: currentDate.value.year(),
-    workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
+    $limit: 10000,
   });
 };
 
@@ -208,7 +200,7 @@ onMounted(() => {
             class="border-l-2 border-g-200 dark:border-g-500 text-g-500 dark:text-g-400"
           >
             <td colspan="2">
-              <div class="bg-s-100 dark:bg-g-900 text-sm">
+              <div class="bg-s-200 dark:bg-g-900 text-sm">
                 <div
                   v-for="item in totalMoneyGroupOrder"
                   class="flex items-center"
@@ -218,7 +210,7 @@ onMounted(() => {
                     }}{{ item.order?.name }}, {{ item.object?.name }}
                   </div>
                   <div
-                    class="px-6 py-2 text-right whitespace-nowrap text-p-700 dark:text-p-400"
+                    class="px-6 py-2 whitespace-nowrap text-right font-medium text-p-700 dark:text-p-400"
                   >
                     {{ item.total.toLocaleString("ru-RU") }} ₽
                   </div>
@@ -237,6 +229,22 @@ onMounted(() => {
             </td>
           </tr>
           <tr
+            v-if="listPay.length"
+            class="border-b border-black/5 dark:bg-g-800 dark:border-g-700"
+          >
+            <th
+              scope="row"
+              class="px-4 py-2 font-normal text-g-900 dark:text-white"
+            >
+              {{ $t("table.financy.totalPayed") }}:
+            </th>
+            <td
+              class="px-6 py-2 text-base text-right font-medium text-r-500 dark:text-r-300 whitespace-nowrap"
+            >
+              {{ totalPayed.toLocaleString("ru-RU") }} ₽
+            </td>
+          </tr>
+          <!-- <tr
             v-if="listPay.length"
             v-for="pay in listPay"
             :key="pay.id"
@@ -294,19 +302,8 @@ onMounted(() => {
                 </a-button>
               </a-tooltip>
             </td>
-          </tr>
+          </tr> -->
         </tbody>
-        <!-- <tfoot>
-          <tr class="bg-white dark:bg-g-800">
-            <th
-              scope="row"
-              class="px-6 py-4 font-medium text-g-900 whitespace-nowrap dark:text-white"
-            >
-              {{ $t("table.financy.payDolg") }}
-            </th>
-            <td class="px-6 py-4">{{ totalMoney - totalPayed }}</td>
-          </tr>
-        </tfoot> -->
       </table>
     </div>
 

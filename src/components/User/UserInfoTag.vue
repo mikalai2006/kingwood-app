@@ -39,7 +39,7 @@ const post = computed(() =>
       </div>
     </template> -->
   <div class="flex flex-row items-center gap-2">
-    <div class="relative">
+    <div class="relative shrink-0">
       <VImg :image="user?.images?.[0]" class="w-10 h-10 rounded-md" />
       <div
         v-if="user?.online"

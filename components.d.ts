@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    2: typeof import('./src/components/Financy/FinancyReportPane copy 2.vue')['default']
     AAlert: typeof import('ant-design-vue/es')['Alert']
     AApp: typeof import('ant-design-vue/es')['App']
     AAutoComplete: typeof import('ant-design-vue/es')['AutoComplete']
@@ -47,6 +48,7 @@ declare module 'vue' {
     ATimePicker: typeof import('ant-design-vue/es')['TimePicker']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     AUpload: typeof import('ant-design-vue/es')['Upload']
+    copy: typeof import('./src/components/Financy/FinancyReportPane copy.vue')['default']
     FinancyDetails: typeof import('./src/components/Financy/FinancyDetails.vue')['default']
     FinancyDetailsList: typeof import('./src/components/Financy/FinancyDetailsList.vue')['default']
     FinancyOrder: typeof import('./src/components/Financy/FinancyOrder.vue')['default']
@@ -55,6 +57,13 @@ declare module 'vue' {
     FinancyPaneTable: typeof import('./src/components/Financy/FinancyPaneTable.vue')['default']
     FinancyPaneTableTotal: typeof import('./src/components/Financy/FinancyPaneTableTotal.vue')['default']
     FinancyPayChanges: typeof import('./src/components/Financy/FinancyPayChanges.vue')['default']
+    FinancyReportForm: typeof import('./src/components/Financy/FinancyReportForm.vue')['default']
+    FinancyReportPane: typeof import('./src/components/Financy/FinancyReportPane.vue')['default']
+    'FinancyReportPane copy': typeof import('./src/components/Financy/FinancyReportPane copy.vue')['default']
+    FinancyReportPaneUsers: typeof import('./src/components/Financy/FinancyReportPaneUsers.vue')['default']
+    FinancyReportPaneUsersItem: typeof import('./src/components/Financy/FinancyReportPaneUsersItem.vue')['default']
+    FinancyReportTotal: typeof import('./src/components/Financy/FinancyReportTotal.vue')['default']
+    FinancyReportUserInfo: typeof import('./src/components/Financy/FinancyReportUserInfo.vue')['default']
     FinancyTotal: typeof import('./src/components/Financy/FinancyTotal.vue')['default']
     FinancyWorkHistoryChanges: typeof import('./src/components/Financy/FinancyWorkHistoryChanges.vue')['default']
     FinancyWorkHistorys: typeof import('./src/components/Financy/FinancyWorkHistorys.vue')['default']
