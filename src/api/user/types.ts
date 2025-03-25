@@ -15,6 +15,7 @@ export interface IUser {
   online: boolean;
   hidden: number;
   archive: number;
+  blocked: boolean;
   roleObject: IRole;
   postObject: IPost;
   images: IImage[];
