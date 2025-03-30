@@ -9,6 +9,7 @@ import { useTaskWorkerStore } from "../task_worker";
 import { useObjectStore } from "../object";
 import { useTaskStore } from "../task";
 import { useOrderStore } from "../order";
+import { useWorkHistoryStore } from "../workHistory";
 
 export const useUserStore = defineStore("user", {
   state() {
@@ -46,6 +47,7 @@ export const useUserStore = defineStore("user", {
       data.data?.forEach((item) => {
         if (item.taskWorkers) {
           const taskWorkerStore = useTaskWorkerStore();
+
           item.taskWorkers.forEach((el) => {
             taskWorkerStore.onAddItemToStore(el);
 
@@ -61,6 +63,14 @@ export const useUserStore = defineStore("user", {
               const orderStore = useOrderStore();
               orderStore.onAddItemToStore(el.order);
             }
+          });
+        }
+
+        if (item.workHistorys) {
+          const workHistoryStore = useWorkHistoryStore();
+
+          item.workHistorys?.forEach((el) => {
+            workHistoryStore.onAddItemToStore(el);
           });
         }
 

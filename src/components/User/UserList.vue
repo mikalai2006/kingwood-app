@@ -6,6 +6,7 @@ import dayjs from "@/utils/dayjs";
 import sift from "sift";
 import UserTask from "./UserTask.vue";
 import { iPen, iTrashFill } from "@/utils/icons";
+import UserActiveTask from "./UserActiveTask.vue";
 
 const props = defineProps<{
   keyList: string;
@@ -116,13 +117,14 @@ onMounted(async () => {
         </div>
       </template>
       <template v-if="column.key === 'isWork'">
-        <a-tag
+        <!-- <a-tag
           v-if="!record.isWork"
           :bordered="false"
           :color="record.isWork ? '#5ea500' : ''"
         >
           {{ $t(`table.user.isWork${record.isWork}`) }}
-        </a-tag>
+        </a-tag> -->
+        <UserActiveTask :user-id="record.id" />
       </template>
       <template v-if="column.key === 'value'">
         <span

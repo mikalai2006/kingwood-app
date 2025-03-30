@@ -26,7 +26,7 @@ export interface IUser {
   typePay: number;
   oklad: number;
   lastTime: Date;
-  WorkHistorys: IWorkHistory[];
+  workHistorys: IWorkHistory[];
   isWork: number;
 
   auth: IAuthPublicData;

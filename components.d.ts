@@ -90,6 +90,7 @@ declare module 'vue' {
     TaskWorkerStatusTagDot: typeof import('./src/components/Task/TaskWorkerStatusTagDot.vue')['default']
     TimePretty: typeof import('./src/components/Time/TimePretty.vue')['default']
     UIHelp: typeof import('./src/components/UI/UIHelp.vue')['default']
+    UserActiveTask: typeof import('./src/components/User/UserActiveTask.vue')['default']
     UserAvatar: typeof import('./src/components/User/UserAvatar.vue')['default']
     UserExitButton: typeof import('./src/components/User/UserExitButton.vue')['default']
     UserInfoAside: typeof import('./src/components/User/UserInfoAside.vue')['default']

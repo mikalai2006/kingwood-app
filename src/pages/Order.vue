@@ -465,85 +465,86 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           @on-edit-item="onEditItem"
         >
           <template #header>
-            <div class="p-4 bg-s-100 dark:bg-g-950/10 border-l-4 border-p-500">
-              <!-- <a-collapse v-model:showFilter="showFilter" ghost>
+            <div class="p-4">
+              <div class="bg-s-100 dark:bg-g-900 rounded-lg p-4">
+                <!-- <a-collapse v-model:showFilter="showFilter" ghost>
                 <a-collapse-panel key="1"> -->
-              <!-- <template #header>
+                <!-- <template #header>
                   </template> -->
-              <template v-if="Object.keys(filterParams).length">
-                <div
-                  class="flex items-center gap-1 border-b border-black/10 pb-1.5 mb-1.5"
-                >
-                  <div class="">
-                    {{ t("button.filter") }}
-                  </div>
-                  <a-tag
-                    color="green"
-                    closable
-                    class="text-md"
-                    v-for="[k, v] in Object.entries(filterParams)"
-                    @close="() => onRemoveFilterKey(k as keyof IOrderFilter)"
+                <template v-if="Object.keys(filterParams).length">
+                  <div
+                    class="flex items-center gap-1 border-b border-black/10 pb-1.5 mb-1.5"
                   >
-                    <span> {{ $t(`form.order.${k}`) }} - {{ v }} </span>
+                    <div class="">
+                      {{ t("button.filter") }}
+                    </div>
+                    <a-tag
+                      color="green"
+                      closable
+                      class="text-md px-2 py-1"
+                      v-for="[k, v] in Object.entries(filterParams)"
+                      @close="() => onRemoveFilterKey(k as keyof IOrderFilter)"
+                    >
+                      <span> {{ $t(`form.order.${k}`) }} - {{ v }} </span>
 
-                    <template #closeIcon>
-                      <a-tooltip>
-                        <template #title>
-                          {{ $t("button.deleteFilter") }}
-                        </template>
-                        <VIcon
-                          :path="iTrashFill"
-                          class="inline-block text-sm text-r-500 dark:text-r-500"
-                        />
-                      </a-tooltip>
-                    </template>
-                  </a-tag>
-                  <!-- <template v-else>
+                      <template #closeIcon>
+                        <a-tooltip>
+                          <template #title>
+                            {{ $t("button.deleteFilter") }}
+                          </template>
+                          <VIcon
+                            :path="iTrashFill"
+                            class="inline-block text-sm text-r-500 dark:text-r-500"
+                          />
+                        </a-tooltip>
+                      </template>
+                    </a-tag>
+                    <!-- <template v-else>
                     <a-alert
                     class="m-0 leading-5"
                     :message="$t('info.filterOrder')"
                     banner
                     />
                   </template> -->
-                </div>
-              </template>
-              <a-form layout="inline" :model="filter">
-                <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
+                  </div>
+                </template>
+                <a-form layout="inline" :model="filter">
+                  <!-- <a-form-item ref="object" :label="$t('form.order.object')" name="object">
                   <a-input v-model:value="formState.object" />
                 </a-form-item> -->
 
-                <a-form-item :label="$t('form.order.number')" name="number">
-                  <a-input-number v-model:value="filter.number" />
-                </a-form-item>
-                <a-form-item :label="$t('form.order.name')" name="name">
-                  <a-input v-model:value="filter.name" />
-                </a-form-item>
+                  <a-form-item :label="$t('form.order.number')" name="number">
+                    <a-input-number v-model:value="filter.number" />
+                  </a-form-item>
+                  <a-form-item :label="$t('form.order.name')" name="name">
+                    <a-input v-model:value="filter.name" />
+                  </a-form-item>
 
-                <a-form-item :label="$t('form.order.year')" name="year">
-                  <a-date-picker
-                    v-model:value="year"
-                    picker="year"
-                    @change="(v:any) => {
+                  <a-form-item :label="$t('form.order.year')" name="year">
+                    <a-date-picker
+                      v-model:value="year"
+                      picker="year"
+                      @change="(v:any) => {
                         filter.year = v?.year()
                         // console.log(v);
                         
                       }"
-                  />
-                </a-form-item>
+                    />
+                  </a-form-item>
 
-                <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-                  <!-- <a-button @click="resetForm">
+                  <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
+                    <!-- <a-button @click="resetForm">
                     {{ $t("form.reset") }}
                   </a-button> -->
-                  <a-button
-                    type="primary"
-                    style="margin-left: 10px"
-                    @click="onSetFilter"
-                  >
-                    {{ $t("form.search") }}
-                  </a-button>
-                </a-form-item>
-                <!-- <div>
+                    <a-button
+                      type="primary"
+                      style="margin-left: 10px"
+                      @click="onSetFilter"
+                    >
+                      {{ $t("form.search") }}
+                    </a-button>
+                  </a-form-item>
+                  <!-- <div>
                 {{ $t("form.order.rangeSearch") }}
                 <a-range-picker
                   v-model:value="rangeSearch"
@@ -551,9 +552,10 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
                   @change="onChangeRange"
                 />
               </div> -->
-              </a-form>
-              <!-- </a-collapse-panel>
+                </a-form>
+                <!-- </a-collapse-panel>
               </a-collapse> -->
+              </div>
             </div>
           </template>
         </OrderList>

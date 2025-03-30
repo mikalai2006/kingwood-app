@@ -64,10 +64,11 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
         );
       }
 
-      if (item.worker && getObjectId(item.worker.id) != "0") {
-        const userStore = useUserStore();
-        userStore.onAddItemToStore(item.worker);
-      }
+      // TODO
+      // if (item.worker && getObjectId(item.worker.id) != "0") {
+      //   const userStore = useUserStore();
+      //   userStore.onAddItemToStore(item.worker);
+      // }
     },
     onRemoveItemFromStore(
       id: string | number,

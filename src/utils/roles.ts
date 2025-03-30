@@ -1,6 +1,7 @@
 export const roles = [
   "auth-create",
   "auth-resetpass",
+  "auth-block",
   "role-create",
   "role-patch",
   "role-delete",
