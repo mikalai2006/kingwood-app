@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { register } from "@/api/auth";
-import { patch } from "@/api/user";
+import { patch, block } from "@/api/user";
 import { IUser, IUserInput } from "@/api/user/types";
 import {
   useAuthStore,
@@ -16,6 +16,7 @@ import { randomIntFromInterval, replaceSubstringByArray } from "@/utils/utils";
 import { Rule } from "ant-design-vue/es/form";
 import {
   computed,
+  h,
   onMounted,
   reactive,
   ref,
@@ -25,7 +26,7 @@ import {
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { PlusOutlined } from "@ant-design/icons-vue";
-import { message, UploadProps } from "ant-design-vue";
+import { message, Modal, UploadProps } from "ant-design-vue";
 import VImg from "../UI/VImg.vue";
 import VFormResetPassword from "./VFormResetPassword.vue";
 import { IValidateError, useError } from "@/composable/useError";
@@ -33,6 +34,8 @@ import { dateFormat } from "@/utils/date";
 import { remove } from "@/api/image";
 import { IImageUpload } from "@/api/image/types";
 import { Colors } from "@/utils/colors";
+import VIcon from "../UI/VIcon.vue";
+import { iWraningTriangle } from "@/utils/icons";
 
 // export interface IFormStateRole {
 //   name: string;
@@ -127,6 +130,7 @@ const onSubmit = async () => {
         dataForm.append("phone", data.phone);
         dataForm.append("roleId", data.roleId);
         dataForm.append("postId", data.postId);
+        dataForm.append("blocked", data.blocked.toString() || "0");
         dataForm.append("hidden", data.hidden.toString() || "0");
         dataForm.append("typePay", data.typePay.toString());
         dataForm.append("archive", data.archive.toString());
@@ -287,12 +291,100 @@ const handlePreview = async (file: any) => {
 function getBase64(originFileObj: any): string | PromiseLike<string> {
   throw new Error("Function not implemented.");
 }
+
 const handleCancel = () => {
   previewVisible.value = false;
   previewTitle.value = "";
 };
 
 const activeKey = ref("user");
+
+const onBlockUser = () => {
+  const blocked = formState.blocked == 1 ? 0 : 1;
+
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              blocked == 1 ? t("form.user.block") : t("form.user.blockDisable")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(
+                blocked == 1
+                  ? t("message.userBlock")
+                  : t("message.userBlockDisable"),
+                [formState?.name]
+              )
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: blocked == 1 },
+    okText: blocked == 1 ? t("button.blockUser") : t("button.blockUserDisable"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise((resolve, reject) => {
+        try {
+          if (!formState.id) {
+            throw null;
+          }
+          loading.value = true;
+
+          block(formState.id, { blocked })
+            .then((r) => {
+              userStore.onAddItemToStore(r);
+              message.success(
+                blocked == 1
+                  ? t("form.message.successBlockUser")
+                  : t("form.message.successBlockUserDisable")
+              );
+              emit("callback");
+            })
+            .catch((error: any) => {
+              if (error?.errorFields) {
+                onGetValidateError(error);
+              } else {
+                throw new Error(JSON.stringify(error));
+              }
+            })
+            .finally(() => {
+              loading.value = false;
+            });
+
+          // setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          resolve("");
+        } catch (e: any) {
+          throw new Error(e);
+        }
+      }).catch((e: any) => {
+        throw new Error(e);
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
 
 onMounted(() => {
   imageList.value = formState.images?.map((x) => {
@@ -509,18 +601,34 @@ onMounted(() => {
             />
           </a-form-item>
 
+          <!-- <a-form-item
+            v-if="
+              formState.blocked &&
+              (authStore.roles.includes('user-archiv') ||
+                authStore.code === 'systemrole')
+            "
+            :label="$t('form.user.blocked')"
+            name="blocked"
+          >
+            <a-switch
+              v-model:checked="formState.blocked"
+              :checkedValue="1"
+              :unCheckedValue="0"
+            />
+          </a-form-item> -->
+
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button
               type="primary"
               :loading="loading"
-              :diasabled="loading"
+              :disabled="loading"
               @click="onSubmit"
             >
               {{ formState.id ? $t("form.save") : $t("form.create") }}
             </a-button>
             <a-button
               v-if="!formState.id"
-              :diasabled="loading"
+              :disabled="loading"
               style="margin-left: 10px"
               @click="resetForm"
             >
@@ -528,6 +636,42 @@ onMounted(() => {
             </a-button>
           </a-form-item>
         </a-form>
+      </a-tab-pane>
+      <a-tab-pane
+        v-if="
+          formState.id &&
+          (authStore.roles.includes('auth-block') ||
+            authStore.code === 'systemrole')
+        "
+        key="block"
+        :tab="$t('tabs.user.block')"
+        class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
+      >
+        <div>
+          <a-alert
+            v-if="formState.blocked"
+            type="warning"
+            show-icon
+            :message="$t('notify.info')"
+            :description="`${$t('info.blockUser')} ${dayjs(
+              formState.updatedAt
+            ).fromNow()}`"
+          />
+          <br />
+          <a-button
+            type="primary"
+            :danger="formState.blocked == 0"
+            :loading="loading"
+            :disabled="loading"
+            @click="onBlockUser"
+          >
+            {{
+              formState.blocked == 0
+                ? $t("button.blockUser")
+                : $t("button.blockUserDisable")
+            }}
+          </a-button>
+        </div>
       </a-tab-pane>
       <a-tab-pane
         v-if="

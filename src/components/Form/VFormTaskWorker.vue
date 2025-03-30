@@ -168,7 +168,11 @@ const workers = computed(() => {
     userStore.items
       // .filter((x) => x.typeWork?.includes(formState.operationId))
       .filter(
-        (x) => !x.hidden && !x.archive && rolesWorkers.value.includes(x.roleId)
+        (x) =>
+          !x.hidden &&
+          !x.archive &&
+          !x.blocked &&
+          rolesWorkers.value.includes(x.roleId)
       )
       .map((x) => {
         const post = postStore.items.find((y) => y.id === x.postId);
@@ -333,7 +337,7 @@ onMounted(() => {
         />
       </a-form-item>
 
-      <!-- <a-form-item
+      <a-form-item
         v-if="authStore.roles.includes('taskWorker-statusId')"
         :label="$t('form.taskWorker.statusId')"
         name="statusId"
@@ -345,7 +349,7 @@ onMounted(() => {
           :options="taskStatuses"
           :disabled="!authStore.roles.includes('taskWorker-statusId')"
         ></a-select>
-      </a-form-item> -->
+      </a-form-item>
 
       <!-- <a-form-item :label="$t('form.post.color')" name="color">
         <a-select

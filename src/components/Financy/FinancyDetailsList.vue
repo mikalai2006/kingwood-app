@@ -203,7 +203,7 @@ onMounted(() => {});
                     </template>
                     <button
                       type="button"
-                      class="bg-transparent leading-6 font-medium text-black dark:text-g-100 group"
+                      class="bg-transparent leading-5 font-medium text-black dark:text-g-100 group text-left"
                       @click="onViewFinancyOrder(item.order.id)"
                     >
                       <span class="no-underline group-hover:underline">

@@ -15,7 +15,7 @@ export interface IUser {
   online: boolean;
   hidden: number;
   archive: number;
-  blocked: boolean;
+  blocked: number;
   roleObject: IRole;
   postObject: IPost;
   images: IImage[];
@@ -44,6 +44,7 @@ export interface IUserFilter extends IPaginationParams<IUserInput> {
   id?: string[];
   userId?: string[];
   roleId?: string[];
+  blocked?: number;
   hidden?: number;
   archive?: number;
   taskWorkers?: any;

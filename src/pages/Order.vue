@@ -268,7 +268,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
         top: 0,
         'padding-left': '15px',
         margin: '0px',
-        'z-index': 50,
+        'z-index': 500,
         background:
           generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
       }"

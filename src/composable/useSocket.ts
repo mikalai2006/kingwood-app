@@ -189,23 +189,26 @@ export const useSocket = (props: IUseSocketProps) => {
               notifyStore.onRemoveItemFromStore(content.id);
             } else {
               notifyStore.onAddItemToStore(content);
-              props.noty.onShowNotify(
-                content.message,
-                content.title,
-                "info",
-                "bottomRight",
-                0,
-                () => {
-                  import.meta.env.VIEW_CONSOLE &&
-                    console.log("change status notify: ", content);
 
-                  if (content.id) {
-                    notifyStore.patch(content.id, { status: 1 }).then(() => {
-                      props.message.success(props.t("message.notifyReadOk"));
-                    });
+              if (data.recipient != data.sender) {
+                props.noty.onShowNotify(
+                  content.message,
+                  content.title,
+                  "info",
+                  "bottomRight",
+                  0,
+                  () => {
+                    import.meta.env.VIEW_CONSOLE &&
+                      console.log("change status notify: ", content);
+
+                    if (content.id) {
+                      notifyStore.patch(content.id, { status: 1 }).then(() => {
+                        props.message.success(props.t("message.notifyReadOk"));
+                      });
+                    }
                   }
-                }
-              );
+                );
+              }
             }
             break;
 

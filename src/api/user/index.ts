@@ -28,8 +28,14 @@ const patch = async (id: string | number, data: FormData) =>
     data,
   });
 
+const block = async (id: string | number, data: IUserInput) =>
+  $patch<IUser>({
+    url: `${URLS.path}/block/${id}`,
+    data,
+  });
+
 const remove = async (id: string | number) =>
   $delete<IUser>({
     url: `${URLS.path}/${id}`,
   });
-export { find, get, create, patch, remove };
+export { find, get, create, patch, remove, block };

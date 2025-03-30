@@ -315,8 +315,9 @@ onMounted(() => {
           :columns="columns"
           key-list="current"
           :params="{
-            archive: 0,
+            blocked: 0,
             hidden: 0,
+            // taskWorkers: { $gte: { $size: 1 } },
           }"
           @on-edit-item="onEditItem"
           @on-remove-item="onRemoveItem"
@@ -327,7 +328,7 @@ onMounted(() => {
           :columns="columns"
           key-list="notTask"
           :params="{
-            archive: 0,
+            blocked: 0,
             hidden: 0,
             taskWorkers: { $size: 0 },
             roleId: roleUser,
@@ -341,7 +342,7 @@ onMounted(() => {
           :columns="columns"
           key-list="archive"
           :params="{
-            archive: 1,
+            blocked: 1,
             hidden: 0,
           }"
           @on-edit-item="onEditItem"
@@ -373,7 +374,7 @@ onMounted(() => {
     :title="dataForm.id ? $t('form.user.edit') : $t('form.user.new')"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
-    style="margin: 0 auto"
+    style="margin: 0 auto; width: 800px"
     wrapClassName="b-scroll modal-user"
     :bodyStyle="{ margin: 0, padding: 0 }"
   >
