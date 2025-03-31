@@ -61,7 +61,7 @@ const order = computed(() =>
   <a-tag
     v-if="activeWorkHistory"
     :bordered="false"
-    class="flex items-center gap-1 leading-3 py-1 w-full"
+    class="flex items-center gap-1 leading-3 py-1"
     :style="{
       background: taskStatus?.color,
       color: taskStatus ? invertColor(taskStatus?.color, true) : '',
@@ -72,12 +72,12 @@ const order = computed(() =>
       :path="taskStatus.icon"
       :class="['text-xl', taskStatus?.animate]"
     />
-    <div class="">
-      <p>
+    <div class="w-48">
+      <p class="text-sm truncate">
         {{ order?.number ? "№" + order?.number + " - " : "" }}
         {{ order?.name }}
       </p>
-      <p v-if="taskStatus" class="text-sm">
+      <p v-if="taskStatus" class="text-sm truncate">
         {{ activeTask?.name }}: {{ taskStatus?.name }}
       </p>
       <!-- <p>

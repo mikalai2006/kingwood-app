@@ -70,6 +70,7 @@ const allColumns = computed(() => [
     fixed: false,
     filters: isWorkFilter.value,
     onFilter: (value: number, record: IUser) => record.isWork === value,
+    width: 300,
   },
   { key: "role" },
   { key: "birthday" },
@@ -95,7 +96,6 @@ const columnKeys = ref([
   "name",
   "isWork",
   "post",
-  "role",
   "lastTime",
   "action",
 ]);
@@ -112,6 +112,7 @@ const columns = computed(() =>
         filters: x?.filters,
         onFilter: x?.onFilter,
         fixed: x.fixed,
+        width: x.width,
       };
     })
 );
