@@ -91,18 +91,6 @@ onMounted(async () => {
           >
             {{ $t("button.edit") }}
           </a-button> -->
-          <a-tooltip v-if="authStore.roles.includes('user-delete')">
-            <template #title>
-              {{ $t("button.delete") }}
-            </template>
-            <a-button
-              danger
-              type="link"
-              @click="(e: Event) => {emit('onRemoveItem', record); e.preventDefault(); e.stopPropagation()}"
-            >
-              <VIcon :path="iTrashFill" />
-            </a-button>
-          </a-tooltip>
           <!-- <a-button
             v-if="authStore.roles.includes('user-delete')"
             @click="emit('onRemoveItem', record)"

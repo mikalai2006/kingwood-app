@@ -2,6 +2,7 @@
 import { computed } from "vue";
 
 import {
+  useObjectStore,
   useOrderStore,
   useTaskStatusStore,
   useTaskStore,
@@ -18,6 +19,7 @@ const props = defineProps<{
 const taskStore = useTaskStore();
 const taskWorkerStore = useTaskWorkerStore();
 const orderStore = useOrderStore();
+const objectStore = useObjectStore();
 const taskStatusStore = useTaskStatusStore();
 const workHistoryStore = useWorkHistoryStore();
 
@@ -26,6 +28,12 @@ const activeWorkHistory = computed(() =>
     (x) => x.workerId === props.userId && x.status == 0
   )
 );
+
+const activeObject = computed(() => {
+  return objectStore.items.find(
+    (x) => x.id == activeWorkHistory.value?.objectId
+  );
+});
 
 const activeTask = computed(() => {
   return taskStore.items.find((x) => x.id == activeWorkHistory.value?.taskId);
@@ -73,12 +81,16 @@ const order = computed(() =>
       :class="['text-xl', taskStatus?.animate]"
     />
     <div class="w-48">
+      <p class="text-sm">
+        {{ activeObject?.name }}
+      </p>
       <p class="text-sm truncate">
         {{ order?.number ? "№" + order?.number + " - " : "" }}
         {{ order?.name }}
       </p>
       <p v-if="taskStatus" class="text-sm truncate">
-        {{ activeTask?.name }}: {{ taskStatus?.name }}
+        {{ activeTask?.name }}
+        <!-- : {{ taskStatus?.name }} -->
       </p>
       <!-- <p>
             {{ getShortFIO(activeTaskWorker?.user?.name) }}

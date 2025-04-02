@@ -382,6 +382,7 @@ onMounted(() => {
     <VFormUser
       :data="dataForm"
       :default-data="defaultData"
+      @on-remove-item="onRemoveItem"
       @callback="
         () => {
           open = false;

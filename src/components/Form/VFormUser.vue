@@ -35,7 +35,7 @@ import { remove } from "@/api/image";
 import { IImageUpload } from "@/api/image/types";
 import { Colors } from "@/utils/colors";
 import VIcon from "../UI/VIcon.vue";
-import { iWraningTriangle } from "@/utils/icons";
+import { iTrashFill, iWraningTriangle } from "@/utils/icons";
 
 // export interface IFormStateRole {
 //   name: string;
@@ -45,7 +45,7 @@ import { iWraningTriangle } from "@/utils/icons";
 // }
 
 const props = defineProps<{ data: IUserInput; defaultData: IUserInput }>();
-const emit = defineEmits(["callback"]);
+const emit = defineEmits(["callback", "onRemoveItem"]);
 
 const { t } = useI18n();
 const roleStore = useRoleStore();
@@ -601,12 +601,8 @@ onMounted(() => {
             />
           </a-form-item>
 
-          <!-- <a-form-item
-            v-if="
-              formState.blocked &&
-              (authStore.roles.includes('user-archiv') ||
-                authStore.code === 'systemrole')
-            "
+          <a-form-item
+            v-if="authStore.code === 'systemrole'"
             :label="$t('form.user.blocked')"
             name="blocked"
           >
@@ -615,7 +611,7 @@ onMounted(() => {
               :checkedValue="1"
               :unCheckedValue="0"
             />
-          </a-form-item> -->
+          </a-form-item>
 
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button
@@ -644,7 +640,7 @@ onMounted(() => {
             authStore.code === 'systemrole')
         "
         key="block"
-        :tab="$t('tabs.user.block')"
+        :tab="$t('tabs.user.actions')"
         class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
       >
         <div>
@@ -671,6 +667,27 @@ onMounted(() => {
                 : $t("button.blockUserDisable")
             }}
           </a-button>
+
+          <br />
+          <br />
+
+          <a-tooltip
+            v-if="authStore.roles.includes('user-delete') && formState?.id"
+          >
+            <template #title>
+              {{ $t("button.delete") }}
+            </template>
+            <a-button
+              danger
+              type="primary"
+              @click="(e: Event) => {emit('onRemoveItem', formState); e.preventDefault(); e.stopPropagation()}"
+            >
+              <div class="flex items-center gap-2">
+                <VIcon :path="iTrashFill" />
+                {{ $t("button.delete") }}
+              </div>
+            </a-button>
+          </a-tooltip>
         </div>
       </a-tab-pane>
       <a-tab-pane

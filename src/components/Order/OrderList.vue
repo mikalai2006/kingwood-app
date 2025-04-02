@@ -409,20 +409,6 @@ const activeKey = ref("list");
             </a-button>
           </a-tooltip>
 
-          <a-tooltip v-if="authStore.roles.includes('order-delete')">
-            <template #title>
-              {{ $t("button.delete") }}
-            </template>
-            <a-button
-              danger
-              type="link"
-              @click="(e: Event) => {onDeleteAlert(record); e.preventDefault(); e.stopPropagation()}"
-            >
-              <!-- {{ $t("button.delete") }} -->
-              <VIcon :path="iTrashFill" />
-            </a-button>
-          </a-tooltip>
-
           <!-- <a-tooltip>
           <template #title>
             {{ $t("button.delete") }}
@@ -843,6 +829,29 @@ const activeKey = ref("list");
           :tab="$t('tabs.order.financy')"
         >
           <FinancyOrder :order-id="currentOrderInModal.id" />
+        </a-tab-pane>
+        <a-tab-pane key="actions" :tab="$t('tabs.order.actions')">
+          <div class="p-4">
+            <a-tooltip v-if="authStore.roles.includes('order-delete')">
+              <template #title>
+                {{ $t("button.delete") }}
+              </template>
+              <a-button
+                danger
+                type="primary"
+                @click="(e: Event) => {
+                if (currentOrderInModal) {
+                  onDeleteAlert(currentOrderInModal); e.preventDefault(); e.stopPropagation()
+              }}"
+              >
+                <div class="flex items-center gap-2">
+                  <VIcon :path="iTrashFill" />
+                  {{ $t("button.delete") }}
+                  <!-- {{ $t("button.delete") }} -->
+                </div>
+              </a-button>
+            </a-tooltip>
+          </div>
         </a-tab-pane>
       </a-tabs>
     </div>
