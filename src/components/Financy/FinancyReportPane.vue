@@ -200,7 +200,7 @@ onMounted(() => {
 
 <template>
   <div class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50">
-    <div class="flex flex-row items-stretch basis-3/12 shrink-0 grow-1 gap-4">
+    <div class="flex flex-row items-stretch basis-4/12 shrink-0 grow-1 gap-4">
       <div class="p-4 overflow-hidden w-full">
         <!-- {{ JSON.stringify(daysList) }} -->
         <div class="bg-s-100 dark:bg-g-800 rounded-lg">
@@ -237,7 +237,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="basis-3/12 shrink-0 grow-1 bg-white dark:bg-g-900 min-w-80">
+    <div class="basis-2/12 shrink-0 grow-1 bg-white dark:bg-g-900 min-w-80">
       <div
         class="mt-4 rounded-lg overflow-y-auto h-[calc(100vh_-_165px)] b-scroll"
       >

@@ -187,7 +187,7 @@ onMounted(() => {
         </a-space>
       </template> -->
     </a-upload>
-    <div>
+    <div class="flex-auto text-end">
       <a-button
         type="primary"
         :disabled="loading || (messageOrder === '' && !fileRef.length)"

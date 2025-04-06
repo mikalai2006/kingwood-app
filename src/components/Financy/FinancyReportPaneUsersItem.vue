@@ -88,9 +88,9 @@ const totalTime = computed(() => {
     <div class="flex-auto text-end">
       <a-button type="link">
         <div class="flex items-center">
-          <div>
+          <!-- <div>
             {{ $t("page.financy.financyViewReport") }}
-          </div>
+          </div> -->
           <div>
             <VIcon :path="iChevronRight" class="transition-all" />
             <!-- :class="[

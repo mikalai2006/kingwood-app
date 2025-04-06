@@ -23,8 +23,14 @@
     -ms-overflow-style: none;
   }
 
+  /* .table_order thead th {
+    @apply !text-g-300;
+  } */
+
   .title-drag {
     app-region: drag;
+    z-index: 99999;
+    @apply bg-s-200 dark:bg-g-951 cursor-pointer;
   }
 
   .b-scroll::-webkit-scrollbar-track,
@@ -140,6 +146,9 @@ code {
   text-align: center;
 }
 */
+#app {
+  @apply flex flex-col h-screen;
+}
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

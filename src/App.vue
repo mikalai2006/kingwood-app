@@ -306,33 +306,42 @@ onErrorCaptured((error: any, vm, info) => {
 </script>
 
 <template>
-  <div class="absolute top-0 h-8 w-full title-drag"></div>
-  <a-config-provider
-    :locale="ruRU"
-    :theme="{
-      algorithm:
-        generalStore.themeMode === 'dark'
-          ? theme.darkAlgorithm
-          : theme.defaultAlgorithm,
-
-      token: tokenTheme,
-    }"
+  <div
+    class="h-8 w-full flex flex-row items-center px-2 flex-shrink-0 flex-grow-0 title-drag"
   >
-    <a-app>
-      <div
-        class="min-h-screen flex flex-row items-stretch bg-white dark:bg-g-800"
-      >
-        <div v-if="loading" class="absolute inset-0 z-50 flex">
-          <div class="absolute inset-0 bg-s-100 dark:bg-g-900 opacity-80"></div>
-          <div class="flex-auto flex items-center justify-center flex-col z-10">
-            <a-spin size="large" />
-            <div class="text-sm text-black dark:text-g-100">
-              {{ $t(`info.loading`) }}: {{ loadingText }}...
+    <p class="text-sm text-s-900 dark:text-g-300">
+      {{ $t("nameApp") }} {{ version }}
+    </p>
+  </div>
+  <div class="flex-auto overflow-hidden">
+    <a-config-provider
+      :locale="ruRU"
+      :theme="{
+        algorithm:
+          generalStore.themeMode === 'dark'
+            ? theme.darkAlgorithm
+            : theme.defaultAlgorithm,
+
+        token: tokenTheme,
+      }"
+    >
+      <a-app class="h-full overflow-hidden">
+        <div class="h-full flex flex-row items-stretch bg-s-200 dark:bg-g-951">
+          <div v-if="loading" class="absolute inset-0 z-50 flex">
+            <div
+              class="absolute inset-0 bg-s-100 dark:bg-g-900 opacity-80"
+            ></div>
+            <div
+              class="flex-auto flex items-center justify-center flex-col z-10"
+            >
+              <a-spin size="large" />
+              <div class="text-sm text-black dark:text-g-100">
+                {{ $t(`info.loading`) }}: {{ loadingText }}...
+              </div>
             </div>
           </div>
-        </div>
-        <div v-if="errorApp" class="flex items-center mx-auto">
-          <!-- <a-result status="500" title="500" :sub-title="errorApp?.message">
+          <div v-if="errorApp" class="flex items-center mx-auto">
+            <!-- <a-result status="500" title="500" :sub-title="errorApp?.message">
             <template #extra>
 
               <a-button
@@ -347,45 +356,45 @@ onErrorCaptured((error: any, vm, info) => {
               </a-button>
             </template>
           </a-result> -->
-          <section class="bg-white dark:bg-g-800">
-            <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-              <div class="mx-auto max-w-screen-sm text-center">
-                <h1
-                  class="mb-4 text-7xl tracking-tight font-extrabold lg:text-9xl text-p-600 dark:text-p-500"
-                >
-                  {{ errorApp?.code }}
-                </h1>
-                <!-- <p
+            <section class="bg-white dark:bg-g-800">
+              <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+                <div class="mx-auto max-w-screen-sm text-center">
+                  <h1
+                    class="mb-4 text-7xl tracking-tight font-extrabold lg:text-9xl text-p-600 dark:text-p-500"
+                  >
+                    {{ errorApp?.code }}
+                  </h1>
+                  <!-- <p
                   class="mb-4 text-3xl tracking-tight font-bold text-gray-900 md:text-4xl dark:text-white"
                 >
                   {{ errorApp?.message }}
                 </p> -->
-                <p class="mb-4 text-lg font-light text-g-500 dark:text-g-300">
-                  {{ errorApp?.message }}
-                </p>
-                <!-- <a
+                  <p class="mb-4 text-lg font-light text-g-500 dark:text-g-300">
+                    {{ errorApp?.message }}
+                  </p>
+                  <!-- <a
                   href="#"
                   class="inline-flex text-white bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-primary-900 my-4"
                 >
                   Back to Homepage
                 </a> -->
-                <a-button
-                  type="primary"
-                  @click="
-                    () => {
-                      router.go(0);
-                    }
-                  "
-                >
-                  {{ $t("button.refresh") }}
-                </a-button>
+                  <a-button
+                    type="primary"
+                    @click="
+                      () => {
+                        router.go(0);
+                      }
+                    "
+                  >
+                    {{ $t("button.refresh") }}
+                  </a-button>
+                </div>
               </div>
-            </div>
-          </section>
-          <!-- {{ JSON.stringify(errorApp) }} -->
-        </div>
-        <template v-else>
-          <!-- <div class="w-screen-sm min-w-48 p-4 bg-s-700">
+            </section>
+            <!-- {{ JSON.stringify(errorApp) }} -->
+          </div>
+          <template v-else>
+            <!-- <div class="w-screen-sm min-w-48 p-4 bg-s-700">
             
             <nav class="sticky top-14 flex flex-col bg-white p-4 rounded-lg">
               <RouterLink to="/">Go to Home</RouterLink>
@@ -401,12 +410,12 @@ onErrorCaptured((error: any, vm, info) => {
               <RouterLink to="/dashboard">Go to Dashboard</RouterLink>
             </nav>
           </div> -->
-          <div class="flex-auto flex flex-col h-screen overflow-y-hidden">
-            <!-- <div class="flex items-stretch h-8">
+            <div class="flex-auto flex flex-col h-full overflow-y-hidden">
+              <!-- <div class="flex items-stretch h-8">
               <div class="bg-s-800 md:w-64 w-3/4"></div>
               <div class="flex-auto bg-s-100">App</div>
             </div> -->
-            <!-- <header
+              <!-- <header
               class="shrink-0 h-16 bg-s-50 dark:bg-g-800 z-50 shadow-md flex items-center"
             >
               <div
@@ -425,38 +434,38 @@ onErrorCaptured((error: any, vm, info) => {
                 <div class="flex-auto">{{ route.meta.title }}</div>
               </div>
             </header> -->
-            <div
-              class="flex-auto flex flex-col md:flex-row overflow-auto b-scroll"
-            >
-              <aside
-                id="sidebar"
-                class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
+              <div
+                class="flex-auto flex flex-col md:flex-row overflow-auto b-scroll"
               >
-                <div class="flex items-center justify-center">
-                  <a href="#" class="" :title="$t('nameApp')">
-                    <img src="/logo-t-white.png" class="" />
-                  </a>
-                </div>
-                <div>
-                  <!-- {{ window.require("electron").remote.app.getVersion() }} -->
-                </div>
-                <div class="flex flex-col">
-                  <VNavbar v-if="authStore.tokenData" />
-                  <div v-else class="p-4">
-                    <RouterLink
-                      to="/auth"
-                      class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
-                      :class="[
-                        route.name === 'auth'
-                          ? 'bg-white  dark:bg-g-700 text-black dark:text-white'
-                          : 'text-s-200 dark:text-g-400',
-                      ]"
-                    >
-                      <span>{{ $t("page.auth.title") }}</span>
-                    </RouterLink>
+                <aside
+                  id="sidebar"
+                  class="overflow-hidden rounded-tr-xl shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
+                >
+                  <div class="flex items-center justify-center">
+                    <a href="#" class="" :title="$t('nameApp')">
+                      <img src="/logo-t-white.png" class="" />
+                    </a>
                   </div>
-                  <!-- <VNavbarCMS v-if="authStore.tokenData" /> -->
-                  <!-- <nav data-dev-hint="main navigation">
+                  <div>
+                    <!-- {{ window.require("electron").remote.app.getVersion() }} -->
+                  </div>
+                  <div class="flex flex-col">
+                    <VNavbar v-if="authStore.tokenData" />
+                    <div v-else class="p-4">
+                      <RouterLink
+                        to="/auth"
+                        class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
+                        :class="[
+                          route.name === 'auth'
+                            ? 'bg-white  dark:bg-g-700 text-black dark:text-white'
+                            : 'text-s-200 dark:text-g-400',
+                        ]"
+                      >
+                        <span>{{ $t("page.auth.title") }}</span>
+                      </RouterLink>
+                    </div>
+                    <!-- <VNavbarCMS v-if="authStore.tokenData" /> -->
+                    <!-- <nav data-dev-hint="main navigation">
               <a
                 href="#"
                 class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-gray-700 hover:text-white"
@@ -497,62 +506,60 @@ onErrorCaptured((error: any, vm, info) => {
                 <span>Without Icon And a bit longer than usual</span>
               </a>
             </nav> -->
-                </div>
-                <div class="flex-auto"></div>
-
-                <div
-                  v-if="authStore.iam?.id"
-                  class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2 mb-4"
-                >
-                  <div class="flex-auto">
-                    <UserInfoAside />
-                  </div>
-                  <UserExitButton />
-                </div>
-
-                <div
-                  class="py-1.5 bg-black/20 w-full text-sm text-s-500 dark:text-g-500 flex items-center"
-                >
-                  <div class="flex flex-row pl-2">
-                    <VChangerMode />
-                  </div>
-                  <div class="flex-auto pr-4">
-                    {{ $t("version") }}: {{ version }}
                   </div>
                   <div class="flex-auto"></div>
-                  <div class="px-4">
-                    <UserNotify v-if="authStore.iam?.id" />
-                  </div>
-                </div>
-              </aside>
-              <div
-                class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-900"
-              >
-                <div
-                  v-if="taskStatus.items.length > 0 || !authStore.tokenData"
-                  class="flex-auto flex"
-                >
-                  <RouterView v-slot="{ Component }">
-                    <template v-if="Component">
-                      <!-- <Transition mode="out-in"> -->
-                      <!-- <KeepAlive> -->
-                      <Suspense>
-                        <!-- main content -->
-                        <component :is="Component"></component>
 
-                        <!-- loading state -->
-                        <template #fallback>
-                          <div class="p-4">
-                            <a-spin />
-                          </div>
-                        </template>
-                      </Suspense>
-                      <!-- </KeepAlive> -->
-                      <!-- </Transition> -->
-                    </template>
-                  </RouterView>
-                </div>
-                <!-- <footer
+                  <div
+                    v-if="authStore.iam?.id"
+                    class="bg-white/5 mx-4 p-2 rounded-lg flex flex-row gap-2 mb-4"
+                  >
+                    <div class="flex-auto">
+                      <UserInfoAside />
+                    </div>
+                    <UserExitButton />
+                  </div>
+
+                  <div
+                    class="py-1.5 bg-black/20 w-full text-sm text-s-500 dark:text-g-500 flex items-center"
+                  >
+                    <div class="flex flex-row pl-2">
+                      <VChangerMode />
+                    </div>
+                    <div class="flex-auto pr-4"></div>
+                    <div class="flex-auto"></div>
+                    <div class="px-4">
+                      <UserNotify v-if="authStore.iam?.id" />
+                    </div>
+                  </div>
+                </aside>
+                <div
+                  class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-900"
+                >
+                  <div
+                    v-if="taskStatus.items.length > 0 || !authStore.tokenData"
+                    class="flex-auto flex h-full"
+                  >
+                    <RouterView v-slot="{ Component }">
+                      <template v-if="Component">
+                        <!-- <Transition mode="out-in"> -->
+                        <!-- <KeepAlive> -->
+                        <Suspense>
+                          <!-- main content -->
+                          <component :is="Component"></component>
+
+                          <!-- loading state -->
+                          <template #fallback>
+                            <div class="p-4">
+                              <a-spin />
+                            </div>
+                          </template>
+                        </Suspense>
+                        <!-- </KeepAlive> -->
+                        <!-- </Transition> -->
+                      </template>
+                    </RouterView>
+                  </div>
+                  <!-- <footer
                   class="flex flex-row bg-s-50 border-t border-s-200 dark:bg-g-950"
                 >
                   <div class="flex flex-row items-center w-64 h-full">
@@ -564,11 +571,12 @@ onErrorCaptured((error: any, vm, info) => {
                     <VChangerMode />
                   </div>
                 </footer> -->
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-      </div>
-    </a-app>
-  </a-config-provider>
+          </template>
+        </div>
+      </a-app>
+    </a-config-provider>
+  </div>
 </template>

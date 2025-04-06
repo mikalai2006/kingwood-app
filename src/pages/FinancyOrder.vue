@@ -53,7 +53,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex-auto overflow-hidden max-h-screen">
+  <div class="flex-auto overflow-hidden">
     <VHeader :title="$t('page.financyOrder.title')" class="p-4"> </VHeader>
     <div class="flex-auto p-4">
       <a-table

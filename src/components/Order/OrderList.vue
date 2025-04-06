@@ -11,6 +11,7 @@ import {
   useUserStore,
 } from "@/store";
 import {
+  iCheckLg,
   iChevronRight,
   iPen,
   iSearch,
@@ -258,6 +259,11 @@ const onDeleteOrder = (input: IOrder) => {
   });
 };
 
+const onHideOrderInfo = () => {
+  openOrderInfo.value = false;
+  activeKey.value = "list";
+};
+
 const onDeleteAlert = (record: IOrder) => {
   Modal.confirm({
     // transitionName: "",
@@ -305,6 +311,7 @@ const onDeleteAlert = (record: IOrder) => {
         try {
           onDeleteOrder(record);
 
+          onHideOrderInfo();
           resolve("");
         } catch (e) {
           message.error("Error: delete order");
@@ -576,7 +583,7 @@ const activeKey = ref("list");
 
       <template v-if="column.key === 'term'">
         <div>
-          {{ dayjs().to(record.term) }}
+          {{ dayjs(record.term).year() > 1 ? dayjs().to(record.term) : "-" }}
         </div>
 
         <a-tag
@@ -589,10 +596,14 @@ const activeKey = ref("list");
       </template>
 
       <template v-if="column.key === 'dateStart'">
-        <div v-if="dayjs(record.dateStart).year() != 1">
-          <div>
+        <div
+          v-if="dayjs(record.dateStart).year() != 1"
+          class="flex flex-row gap-1"
+        >
+          <!-- <div>
             {{ $t("info.designFrom") }}
-          </div>
+          </div> -->
+          <VIcon :path="iCheckLg" class="text-xl text-green-500" />
           {{ dayjs(record.dateStart).format(dateFormat) }}
         </div>
         <div v-else>
@@ -770,12 +781,7 @@ const activeKey = ref("list");
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
     :cancel-text="$t('button.close')"
-    @cancel="
-      () => {
-        activeKey = 'list';
-        openOrderInfo = false;
-      }
-    "
+    @cancel="onHideOrderInfo"
   >
     <template #title>
       <div class="text-xl leading-6 bg-s-200 dark:bg-g-900 px-4 py-2">
@@ -791,8 +797,8 @@ const activeKey = ref("list");
         v-model:activeKey="activeKey"
         destroyInactiveTabPane
         :tabBarStyle="{
-          position: 'sticky',
-          top: 0,
+          // position: 'sticky',
+          // top: 0,
           'padding-left': '15px',
           margin: '0px',
           'z-index': 50,
@@ -862,14 +868,15 @@ const activeKey = ref("list");
 .full-modal {
   .ant-modal {
     max-width: 100%;
-    top: 0;
+    top: 2rem;
     padding-bottom: 0;
     margin: 0;
+    height: calc(100vh - 2rem);
   }
   .ant-modal-content {
     display: flex;
     flex-direction: column;
-    height: calc(100vh);
+    height: calc(100vh - 2rem);
   }
   .ant-modal-body {
     flex: 1;
@@ -902,7 +909,7 @@ const activeKey = ref("list");
 
 .table_order thead {
   position: sticky;
-  top: 0;
+  top: 35px;
   z-index: 100;
 }
 </style>

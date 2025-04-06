@@ -32,8 +32,8 @@ const activeKey = ref("new");
         destroyInactiveTabPane
         type="card"
         :tabBarStyle="{
-          position: 'sticky',
-          top: 0,
+          // position: 'sticky',
+          // top: 0,
           'padding-left': '15px',
           margin: '0px',
           'z-index': 50,

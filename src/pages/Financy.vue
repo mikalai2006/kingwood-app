@@ -87,7 +87,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex-auto overflow-hidden max-h-screen">
+  <div class="flex-auto overflow-hidden">
     <VHeader :title="$t('page.financy.title')">
       <template #back>&nbsp;</template>
     </VHeader>

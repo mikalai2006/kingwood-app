@@ -5,6 +5,7 @@ import {
   IWorkHistoryFilter,
   IWorkHistoryInput,
 } from "@/api/work_history/types";
+import { useOrderStore } from "./order";
 
 export const useWorkHistoryStore = defineStore("workHistory", {
   state() {
@@ -19,9 +20,15 @@ export const useWorkHistoryStore = defineStore("workHistory", {
   },
   actions: {
     async find(params?: IWorkHistoryFilter) {
+      const orderStore = useOrderStore();
+
       const data = await find(params || {});
       data.data?.forEach((el) => {
         this.onAddItemToStore(el);
+
+        if (el.order) {
+          orderStore.onAddItemToStore(el.order);
+        }
       });
 
       return data;

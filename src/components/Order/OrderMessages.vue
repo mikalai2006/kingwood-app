@@ -154,6 +154,6 @@ onMounted(() => {
 
 <style scoped>
 .el {
-  height: calc(100vh - 90px);
+  height: calc(100vh - 120px);
 }
 </style>
