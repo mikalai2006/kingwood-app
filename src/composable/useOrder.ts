@@ -72,6 +72,17 @@ const useOrder = () => {
         //  &&
         // x.montajComplete === 0
       ),
+      montaj: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          // x.malyarComplete === 1 &&
+          x.goComplete === 1 &&
+          x.montajComplete == 0
+        //  &&
+        // x.montajComplete === 0
+      ),
     };
   });
 
@@ -127,6 +138,18 @@ const useOrder = () => {
           // x.malyarComplete === 1 &&
           x.goComplete === 1 &&
           dayjs(x.dateOtgruzka).year() == 1 &&
+          x.objectId === params?.objectId
+        //  &&
+        // x.montajComplete === 0
+      ),
+      montaj: orderStore.items.filter(
+        (x) =>
+          x.status === 1 &&
+          // x.stolyarComplete === 1 &&
+          // x.shlifComplete === 1 &&
+          // x.malyarComplete === 1 &&
+          x.goComplete === 1 &&
+          x.montajComplete == 0 &&
           x.objectId === params?.objectId
         //  &&
         // x.montajComplete === 0
@@ -326,6 +349,7 @@ const useOrder = () => {
             title: t(`table.order.${x.key}`),
             dataIndex: x.key,
             key: x.key,
+            showSorterTooltip: false,
             sorter: x.sorter,
             onFilter: x?.onFilter,
             sortOrder: isExistSort

@@ -274,28 +274,6 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
       }"
       @change="onChangeTab"
     >
-      <a-tab-pane key="inWork">
-        <template #tab>
-          {{ $t("tabs.order.inWork") }}
-          <a-badge
-            v-if="counter.inWork.length"
-            :count="counter.inWork.length"
-            :number-style="{
-              backgroundColor:
-                generalStore.themeMode !== 'dark'
-                  ? Colors.s[100]
-                  : Colors.g[500],
-              color: Colors.black,
-            }"
-          />
-        </template>
-        <OrderList
-          keyList="inWork"
-          :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 1 }"
-          @on-edit-item="onEditItem"
-        />
-      </a-tab-pane>
       <a-tab-pane key="notWork">
         <template #tab>
           {{ $t("tabs.order.notWork") }}
@@ -315,6 +293,28 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{ status: 0 }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="inWork">
+        <template #tab>
+          {{ $t("tabs.order.inWork") }}
+          <a-badge
+            v-if="counter.inWork.length"
+            :count="counter.inWork.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[100]
+                  : Colors.g[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
+        <OrderList
+          keyList="inWork"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ status: 1 }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -434,6 +434,36 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             goComplete: 1,
             dateOtgruzka: '1',
             // montajComplete: 0,
+          }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="montaj">
+        <template #tab>
+          {{ $t("tabs.order.montaj") }}
+          <a-badge
+            v-if="counter.montaj.length"
+            :count="counter.montaj.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[100]
+                  : Colors.g[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
+        <OrderList
+          keyList="montaj"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{
+            status: 1,
+            // stolyarComplete: 1,
+            // shlifComplete: 1,
+            // malyarComplete: 1,
+            goComplete: 1,
+            // dateOtgruzka: '1',
+            montajComplete: 0,
           }"
           @on-edit-item="onEditItem"
         />
@@ -578,6 +608,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
       @callback="
         () => {
           open = false;
+          activeKey = 'notWork';
         }
       "
     />

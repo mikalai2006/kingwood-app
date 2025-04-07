@@ -588,8 +588,9 @@ onMounted(() => {
 
           <a-form-item
             v-if="
-              authStore.roles.includes('user-archiv') ||
-              authStore.code === 'systemrole'
+              (authStore.roles.includes('user-archiv') ||
+                authStore.code === 'systemrole') &&
+              formState?.id
             "
             :label="$t('form.user.archive')"
             name="archive"

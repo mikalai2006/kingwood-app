@@ -338,7 +338,7 @@ onMounted(() => {
       </a-form-item>
 
       <a-form-item
-        v-if="authStore.roles.includes('taskWorker-statusId')"
+        v-if="authStore.roles.includes('taskWorker-statusId') && formState?.id"
         :label="$t('form.taskWorker.statusId')"
         name="statusId"
       >

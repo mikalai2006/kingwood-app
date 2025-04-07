@@ -248,8 +248,8 @@ const handleTableChange: any = (
   // });
 };
 
-const onDeleteOrder = (input: IOrder) => {
-  orderStore.deleteItem(input.id).then((r) => {
+const onDeleteOrder = async (input: IOrder) => {
+  return await orderStore.deleteItem(input.id).then((r) => {
     message.success(
       replaceSubstringByArray(t("message.deleteOrderOk"), [
         `№${input.number}-${input.name}`,
@@ -307,9 +307,9 @@ const onDeleteAlert = (record: IOrder) => {
     cancelText: t("button.cancel"),
     // title: t("form.task.delete"),
     onOk() {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         try {
-          onDeleteOrder(record);
+          await onDeleteOrder(record);
 
           onHideOrderInfo();
           resolve("");
@@ -868,15 +868,15 @@ const activeKey = ref("list");
 .full-modal {
   .ant-modal {
     max-width: 100%;
-    top: 2rem;
+    top: 0;
     padding-bottom: 0;
     margin: 0;
-    height: calc(100vh - 2rem);
+    height: calc(100vh);
   }
   .ant-modal-content {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 2rem);
+    height: calc(100vh);
   }
   .ant-modal-body {
     flex: 1;

@@ -186,7 +186,7 @@ onMounted(() => {
                     'transition-transform',
                   ]"
                 />
-                {{ $t("table.financy.totalZpMonth") }}
+                {{ $t("table.financy.totalByOrders") }}
               </div>
             </td>
             <td

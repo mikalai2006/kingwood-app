@@ -511,7 +511,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
         authStore.roles?.includes('taskWorker-create') &&
         task?.status != 'finish'
       "
-      class="flex flex-row items-center gap-4 py-1 invisible group-hover:visible"
+      class="flex flex-row items-center gap-4 py-1"
     >
       <div class="flex flex-row flex-auto items-center gap-1">
         <a-tooltip>

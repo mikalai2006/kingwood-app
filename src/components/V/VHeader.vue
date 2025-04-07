@@ -7,7 +7,7 @@ defineProps<{ title: string }>();
 
 <template>
   <div
-    class="flex flex-row gap-4 items-center pb-4 pt-0 bg-s-200 dark:bg-g-951"
+    class="flex flex-row gap-4 items-center pb-4 pt-2 bg-s-200 dark:bg-g-951"
   >
     <!-- border-b border-black/5 dark:border-white/5 -->
     <slot name="back">

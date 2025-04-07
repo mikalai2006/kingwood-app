@@ -182,7 +182,7 @@ const activeKey = ref("list");
         @end="onSaveSortOrder"
       >
         <template #item="{ element }">
-          <div class="p-2 flex flex-row">
+          <div class="p-2 pt-6 flex flex-row">
             <!-- <template
                   v-if="
                     operationMontaj

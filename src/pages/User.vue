@@ -108,6 +108,7 @@ const columns = computed(() =>
         title: t(`table.user.${x.key}`),
         dataIndex: x.key,
         key: x.key,
+        showSorterTooltip: false,
         sorter: x.sorter,
         filters: x?.filters,
         onFilter: x?.onFilter,
@@ -181,6 +182,7 @@ const onRemoveItem = (item: IUser) => {
               .onRemove(item.id)
               .then(() => {
                 message.success(t("message.userRemoveOk"));
+                open.value = false;
               })
               .catch((error: any) => {
                 throw new Error(error);

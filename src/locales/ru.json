@@ -242,7 +242,8 @@
       "stolyarComplete": "Изготовление окончено",
       "goComplete": "Готово к отгрузке",
       "completed": "Выполненные",
-      "notWork": "Не в работе",
+      "montaj": "Монтаж",
+      "notWork": "Новые",
       "inWork": "В работе",
       "financy": "Финансовый отчет",
       "actions": "Действия над заказом"
@@ -367,6 +368,7 @@
       "payDolg": "К выдаче",
       "totalByMonth": "Итого за месяц",
       "totalZpMonth": "Заработано",
+      "totalByOrders": "По заказам",
       "object": "Объект",
       "order": "Заказ",
       "operation": "Задание",

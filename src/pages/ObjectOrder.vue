@@ -217,28 +217,6 @@ const onSetFilter = () => {
           generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
       }"
     >
-      <a-tab-pane key="inWork">
-        <template #tab>
-          {{ $t("tabs.order.inWork") }}
-          <a-badge
-            v-if="counterObject.inWork.length"
-            :count="counterObject.inWork.length"
-            :number-style="{
-              backgroundColor:
-                generalStore.themeMode !== 'dark'
-                  ? Colors.s[200]
-                  : Colors.p[500],
-              color: Colors.black,
-            }"
-          />
-        </template>
-        <OrderList
-          keyList="inWork"
-          :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 1, objectId: objectIds }"
-          @on-edit-item="onEditItem"
-        />
-      </a-tab-pane>
       <a-tab-pane key="notWork">
         <template #tab>
           {{ $t("tabs.order.notWork") }}
@@ -258,6 +236,28 @@ const onSetFilter = () => {
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{ status: 0, objectId: objectIds }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
+      <a-tab-pane key="inWork">
+        <template #tab>
+          {{ $t("tabs.order.inWork") }}
+          <a-badge
+            v-if="counterObject.inWork.length"
+            :count="counterObject.inWork.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[200]
+                  : Colors.p[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
+        <OrderList
+          keyList="inWork"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{ status: 1, objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -395,6 +395,37 @@ const onSetFilter = () => {
           @on-date-start="onDateStart"
         />
       </a-tab-pane> -->
+
+      <a-tab-pane key="montaj">
+        <template #tab>
+          {{ $t("tabs.order.montaj") }}
+          <a-badge
+            v-if="counterObject.montaj.length"
+            :count="counterObject.montaj.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[100]
+                  : Colors.g[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
+        <OrderList
+          keyList="montaj"
+          :keyColumns="nameKeyLocalStorageColumns"
+          :params="{
+            status: 1,
+            // stolyarComplete: 1,
+            // shlifComplete: 1,
+            // malyarComplete: 1,
+            goComplete: 1,
+            // dateOtgruzka: '1',
+            montajComplete: 0,
+          }"
+          @on-edit-item="onEditItem"
+        />
+      </a-tab-pane>
       <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
         <OrderList
           keyList="completed"
@@ -511,6 +542,7 @@ const onSetFilter = () => {
       @callback="
         () => {
           open = false;
+          activeKey = 'notWork';
         }
       "
     />

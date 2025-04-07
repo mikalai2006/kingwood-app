@@ -15,6 +15,7 @@ const props = defineProps<{
     key: string;
     title: string;
     dataIndex: string;
+    showSorterTooltip: boolean;
     customFilterDropdown?: boolean;
     onFilter?: (value: any, record: IUser) => boolean;
     sorter?: (a: IUser, b: IUser) => number;
@@ -61,7 +62,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <a-table :columns="columns" :data-source="columnsData">
+  <a-table :columns="columns" :data-source="columnsData" size="small">
     <!-- :row-class-name="(_record: any, index: number) => (
       'custom ' + (
         _record.taskWorkers.length === 0

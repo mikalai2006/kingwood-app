@@ -30,7 +30,7 @@
   .title-drag {
     app-region: drag;
     z-index: 99999;
-    @apply bg-s-200 dark:bg-g-951 cursor-pointer;
+    @apply cursor-move;
   }
 
   .b-scroll::-webkit-scrollbar-track,
@@ -147,7 +147,7 @@ code {
 }
 */
 #app {
-  @apply flex flex-col h-screen;
+  @apply flex flex-col h-screen bg-s-200 dark:bg-g-951;
 }
 @media (prefers-color-scheme: light) {
   :root {
