@@ -5,13 +5,13 @@ import dayjs from "@/utils/dayjs";
 import { useAuthStore, useNotifyStore, useUserStore } from "@/store";
 import { useI18n } from "vue-i18n";
 import sift from "sift";
-import { INotifyFilter } from "@/api/notify/types";
 import UserShortInfo from "../User/UserShortInfo.vue";
-import { replaceSubstringByArray } from "@/utils/utils";
+import { IArchiveNotify, IArchiveNotifyFilter } from "@/api/archive/types";
+import { findArchiveNotify } from "@/api/archive";
 
 const props = defineProps<{
   keyList: string;
-  params: INotifyFilter;
+  params: IArchiveNotifyFilter;
 }>();
 
 const emit = defineEmits(["onPatchNotify"]);
@@ -19,8 +19,6 @@ const emit = defineEmits(["onPatchNotify"]);
 const { t } = useI18n();
 
 const authStore = useAuthStore();
-const notifyStore = useNotifyStore();
-const userStore = useUserStore();
 
 const siftParams = computed(() => {
   const _result = Object.fromEntries(
@@ -60,44 +58,45 @@ const pagination = ref({
 const onQueryData = async () => {
   loading.value = true;
 
-  await notifyStore
-    .find({
-      ...props.params,
-      $limit: pagination.value.pageSize,
-      $skip: Math.max(
-        pagination.value.pageSize * (pagination.value.current - 1) - 1,
-        0
-      ),
-      // $sort: sort.value.map((x) => {
-      //   return {
-      //     key: x.field,
-      //     value: x.order,
-      //   };
-      // }),
-    })
+  await findArchiveNotify({
+    ...props.params,
+    $limit: pagination.value.pageSize,
+    $skip: Math.max(
+      pagination.value.pageSize * (pagination.value.current - 1) - 1,
+      0
+    ),
+    // $sort: sort.value.map((x) => {
+    //   return {
+    //     key: x.field,
+    //     value: x.order,
+    //   };
+    // }),
+  })
     .then((result) => {
       pagination.value.total = result.total;
+      result.data && listData.value.push(...result.data);
     })
     .finally(() => {
       loading.value = false;
     });
 };
 
-const listData = computed(() => {
-  return notifyStore.items
-    .filter(sift(siftParams.value))
-    .map((x) => {
-      // const object = objectStore.items.find((y) => y.id === x.objectId);
+const listData = ref<IArchiveNotify[]>([]);
+// computed(() => {
+//   return notifyStore.items
+//     .filter(sift(siftParams.value))
+//     .map((x) => {
+//       // const object = objectStore.items.find((y) => y.id === x.objectId);
 
-      return {
-        // object,
-        ...x,
-      };
-    })
-    .sort((a, b) =>
-      b.createdAt.toString().localeCompare(a.createdAt.toString())
-    );
-});
+//       return {
+//         // object,
+//         ...x,
+//       };
+//     })
+//     .sort((a, b) =>
+//       b.createdAt.toString().localeCompare(a.createdAt.toString())
+//     );
+// });
 
 onMounted(async () => {
   await onQueryData();
@@ -127,6 +126,7 @@ onMounted(async () => {
       <a-list-item>
         <template #actions>
           <a-button
+            v-if="item.status === 0"
             type="primary"
             @click="
               () => {

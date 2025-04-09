@@ -8,7 +8,7 @@ import {
   useWorkHistoryStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { computed, onMounted, ref } from "vue";
+import { computed, h, onMounted, ref } from "vue";
 import FinancyPaneTableTotal, {
   IWorkHistoryExtends,
 } from "./FinancyPaneTableTotal.vue";
@@ -20,12 +20,25 @@ import { getObjectTime } from "@/utils/time";
 import { IPaneOptionFinancy } from "@/api/types";
 import { IWorkHistory, IWorkHistoryInput } from "@/api/work_history/types";
 import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
-import { iChange, iChanged, iPen, iPlusLg } from "@/utils/icons";
+import {
+  iChange,
+  iChanged,
+  iPen,
+  iPlusLg,
+  iTrashFill,
+  iWraningTriangle,
+} from "@/utils/icons";
 import FinancyWorkHistoryChanges from "./FinancyWorkHistoryChanges.vue";
+import { replaceSubstringByArray } from "@/utils/utils";
+import VIcon from "../UI/VIcon.vue";
+import { Modal } from "ant-design-vue";
+import { findArchiveWorkHistory } from "@/api/archive";
+import { IArchiveWorkHistory } from "@/api/archive/types";
 
 const props = defineProps<{
   workHistorys: IWorkHistoryExtends[];
   date: string;
+  fullDate: string;
   pane: IPaneOptionFinancy;
   showButtonAdd?: boolean;
 }>();
@@ -118,6 +131,69 @@ const onEditItem = (item: IWorkHistory) => {
   showFormWorkHistory.value = true;
 };
 
+const onDeleteWorkHistory = (item: IWorkHistoryInput) => {
+  import.meta.env.VIEW_CONSOLE && console.log("delete WorkHistory: ", item);
+
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.workHistory.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.deleteWorkHistory"), [
+                item.order?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.ok"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          if (!item.id) {
+            throw null;
+          }
+
+          await workHistoryStore.onRemove(item.id);
+
+          resolve("");
+        } catch (e: any) {
+          throw new Error(e);
+        }
+      }).catch((e: any) => {
+        throw new Error(e);
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
+
 const onAddItem = () => {
   const userForPayload = userStore.items.find(
     (x) => x.id === props.pane.workerId
@@ -153,33 +229,30 @@ onMounted(() => {});
 </script>
 
 <template>
-  <div
-    class="p-4 ml-[39px] border-l border-b rounded-bl-lg border-g-100 dark:border-g-700 bg-white dark:bg-g-950/40"
-  >
-    <a-list item-layout="horizontal" :data-source="workHistory">
-      <template #footer>
-        <a-tooltip
-          v-if="authStore.roles.includes('workHistory-create') && showButtonAdd"
+  <a-list item-layout="horizontal" :data-source="workHistory">
+    <template #footer>
+      <a-tooltip
+        v-if="authStore.roles.includes('workHistory-create') && showButtonAdd"
+      >
+        <template #title>
+          {{ $t("button.addWorkHistory") }}
+        </template>
+        <a-button
+          @click="(e: Event) => {onAddItem(); e.preventDefault(); e.stopPropagation()}"
         >
-          <template #title>
-            {{ $t("button.addWorkHistory") }}
-          </template>
-          <a-button
-            @click="(e: Event) => {onAddItem(); e.preventDefault(); e.stopPropagation()}"
-          >
-            <div class="flex gap-2 items-center">
-              <VIcon :path="iPlusLg" class="text-g-400 dark:text-g-300" />
-              <div>
-                {{ $t("button.addWorkHistory") }}
-              </div>
+          <div class="flex gap-2 items-center">
+            <VIcon :path="iPlusLg" class="text-g-400 dark:text-g-300" />
+            <div>
+              {{ $t("button.addWorkHistory") }}
             </div>
-          </a-button>
-        </a-tooltip>
-      </template>
-      <template #renderItem="{ item }">
-        <a-list-item>
-          <a-list-item-meta>
-            <!-- <template #title>
+          </div>
+        </a-button>
+      </a-tooltip>
+    </template>
+    <template #renderItem="{ item }">
+      <a-list-item>
+        <a-list-item-meta>
+          <!-- <template #title>
               <button
                 type="button"
                 class="bg-transparent"
@@ -193,108 +266,123 @@ onMounted(() => {});
                 </span>
               </button>
             </template> -->
-            <template #description>
-              <div class="flex flex-row items-center leading-4 group">
-                <div class="flex-auto">
-                  <!-- {{ item.workerId }} -->
+          <template #description>
+            <div class="flex flex-row items-center leading-4 group">
+              <div class="flex-auto">
+                <!-- {{ item.workerId }} -->
+                <a-tooltip>
+                  <template #title>
+                    {{ $t("table.financy.viewReport") }}
+                  </template>
+                  <button
+                    type="button"
+                    class="bg-transparent leading-4 font-medium text-black dark:text-g-100 group text-left"
+                    @click="onViewFinancyOrder(item.order.id)"
+                  >
+                    <span class="no-underline group-hover:underline">
+                      {{
+                        item.order?.number
+                          ? "№" + item.order?.number + " - "
+                          : ""
+                      }}
+                      {{ item.order?.name }}
+                    </span>
+                  </button>
+                </a-tooltip>
+
+                <div>
+                  {{ $t("table.financy.operation") }}:
+                  {{ item.operation?.name }}, {{ t("table.financy.object") }}:
+                  {{ item.object?.name }}
+                </div>
+              </div>
+              <div class="flex flex-row items-center gap-4">
+                <div class="flex flex-row gap-2">
                   <a-tooltip>
                     <template #title>
-                      {{ $t("table.financy.viewReport") }}
+                      {{ $t("button.edit") }}
                     </template>
-                    <button
-                      type="button"
-                      class="bg-transparent leading-5 font-medium text-black dark:text-g-100 group text-left"
-                      @click="onViewFinancyOrder(item.order.id)"
+                    <a-button
+                      type="text"
+                      class="invisible group-hover:visible"
+                      @click="
+                        () => {
+                          onEditItem(item);
+                        }
+                      "
                     >
-                      <span class="no-underline group-hover:underline">
-                        {{
-                          item.order?.number
-                            ? "№" + item.order?.number + " - "
-                            : ""
-                        }}
-                        {{ item.order?.name }}
-                      </span>
-                    </button>
+                      <VIcon :path="iPen" />
+                    </a-button>
                   </a-tooltip>
 
-                  <div>
-                    {{ $t("table.financy.operation") }}:
-                    {{ item.operation?.name }}, {{ t("table.financy.object") }}:
-                    {{ item.object?.name }}
-                  </div>
-                </div>
-                <div class="flex flex-row items-center gap-4">
-                  <div class="flex flex-row gap-2">
-                    <a-tooltip>
-                      <template #title>
-                        {{ $t("button.edit") }}
-                      </template>
-                      <a-button
-                        type="text"
-                        class="hidden group-hover:block"
-                        @click="
-                          () => {
-                            onEditItem(item);
-                          }
-                        "
-                      >
-                        <VIcon :path="iPen" />
-                      </a-button>
-                    </a-tooltip>
-
-                    <a-tooltip>
-                      <template #title>
-                        {{ $t("modal.changedView") }}
-                      </template>
-                      <a-button
-                        v-if="
-                          item.props &&
-                          Object.values(item.props).length &&
-                          authStore.roles.includes('workHistory-view-changes')
-                        "
-                        type="text"
-                        class="p-0"
-                        @click="
-                          () => {
-                            onViewChanged(item);
-                          }
-                        "
-                      >
-                        <a-badge :count="Object.values(item.props).length">
-                          <div class="flex gap-2 px-2.5">
-                            <VIcon :path="iChange" />
-                          </div>
-                        </a-badge>
-                      </a-button>
-                    </a-tooltip>
-                  </div>
-                  <div class="text-end">
-                    <div
-                      class="text-p-700 dark:text-p-400 font-medium text-base leading-5"
+                  <a-tooltip
+                    v-if="authStore.roles.includes('workHistory-delete')"
+                  >
+                    <template #title>
+                      {{ $t("button.delete") }}
+                    </template>
+                    <a-button
+                      danger
+                      type="link"
+                      class="invisible group-hover:visible"
+                      @click="(e: Event) => {onDeleteWorkHistory(item); e.preventDefault(); e.stopPropagation()}"
                     >
-                      {{ item.total.toLocaleString("ru-RU") }} ₽
-                    </div>
-                    <!-- <FinancyPaneTableTotal
+                      <VIcon :path="iTrashFill" />
+                    </a-button>
+                  </a-tooltip>
+
+                  <a-tooltip>
+                    <template #title>
+                      {{ $t("modal.changedView") }}
+                    </template>
+                    <a-button
+                      v-if="
+                        item.props &&
+                        Object.values(item.props).length &&
+                        authStore.roles.includes('workHistory-view-changes')
+                      "
+                      type="text"
+                      class="p-0"
+                      @click="
+                        () => {
+                          onViewChanged(item);
+                        }
+                      "
+                    >
+                      <a-badge :count="Object.values(item.props).length">
+                        <div class="flex gap-2 px-2.5">
+                          <VIcon :path="iChange" />
+                        </div>
+                      </a-badge>
+                    </a-button>
+                  </a-tooltip>
+                </div>
+                <div class="text-end">
+                  <div
+                    class="text-p-700 dark:text-p-400 font-medium text-base leading-5"
+                  >
+                    {{ item.total.toLocaleString("ru-RU") }} ₽
+                  </div>
+                  <!-- <FinancyPaneTableTotal
                   v-if="workTimes"
                   :data="workTimes"
                   :pane="pane"
                 /> -->
-                    <TimePretty :time="getObjectTime(item.totalMinutes)" />
-                  </div>
+                  <TimePretty :time="getObjectTime(item.totalMinutes)" />
                 </div>
               </div>
-            </template>
-            <!-- <template #avatar>
+            </div>
+          </template>
+          <!-- <template #avatar>
               <VImage
                 class="w-10 h-10 object-cover rounded-full"
                 :image="item.order.images ? item.order.images[0] : null"
               />
             </template> -->
-          </a-list-item-meta>
-        </a-list-item>
-      </template>
-    </a-list>
-  </div>
+        </a-list-item-meta>
+      </a-list-item>
+    </template>
+  </a-list>
   <!-- <a-table
     :columns="innerColumns"
     :data-source="workHistory"

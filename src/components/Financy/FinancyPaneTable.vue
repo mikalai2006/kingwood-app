@@ -13,6 +13,7 @@ import FinancyWorkHistorys from "./FinancyWorkHistorys.vue";
 import { dateFormat } from "@/utils/date";
 import TimePretty from "../Time/TimePretty.vue";
 import FinancyDetailsList from "./FinancyDetailsList.vue";
+import FinancyDetailsListArchive from "./FinancyDetailsListArchive.vue";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -64,6 +65,7 @@ const columns = ref([
 
 const openModalWorkTime = ref(false);
 const workTimeDate = ref<string>("");
+const toggleArchive = ref(false);
 </script>
 
 <template>
@@ -147,13 +149,38 @@ const workTimeDate = ref<string>("");
 
     <template #expandedRowRender="{ record }">
       <template v-if="workHistorys[record.day]?.length">
-        <!-- record {{ workTimes[record.day][0]?.id }} -->
-        <FinancyDetailsList
-          :work-historys="workHistorys[record.day]"
-          :pane="pane"
-          :date="record.day.toString()"
-          :show-button-add="false"
-        />
+        <div
+          class="p-4 ml-[39px] border-l border-b rounded-bl-lg border-g-100 dark:border-g-700 bg-white dark:bg-g-950/40"
+        >
+          <!-- record {{ workTimes[record.day][0]?.id }} -->
+          <FinancyDetailsList
+            :work-historys="workHistorys[record.day]"
+            :pane="pane"
+            :date="record.day.toString()"
+            :fullDate="record.date"
+            :show-button-add="false"
+          />
+          <div>
+            <div
+              class="cursor-pointer"
+              @click="
+                () => {
+                  toggleArchive = !toggleArchive;
+                }
+              "
+            >
+              {{ $t("button.deletedSession") }}
+            </div>
+            <FinancyDetailsListArchive
+              v-if="toggleArchive"
+              :work-historys="workHistorys[record.day]"
+              :pane="pane"
+              :date="record.day.toString()"
+              :fullDate="record.date"
+              :show-button-add="false"
+            />
+          </div>
+        </div>
       </template>
       <template v-else>
         <p>{{ $t("info.notFoundWorkHistory") }}</p>

@@ -5,8 +5,9 @@ import { useAuthStore, useTaskWorkerStore, useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import sift from "sift";
 import UserTask from "./UserTask.vue";
-import { iPen, iTrashFill } from "@/utils/icons";
+import { iCheckLg, iPen, iTrashFill } from "@/utils/icons";
 import UserActiveTask from "./UserActiveTask.vue";
+import VIcon from "../UI/VIcon.vue";
 
 const props = defineProps<{
   keyList: string;
@@ -70,6 +71,15 @@ onMounted(async () => {
         : '')
       )" -->
     <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'pushToken'">
+        <a-tooltip v-if="record.auth.pushToken">
+          <template #title>
+            {{ record.auth.pushToken }}
+          </template>
+
+          <VIcon :path="iCheckLg" class="text-xl text-green-500" />
+        </a-tooltip>
+      </template>
       <template v-if="column.key === 'action'">
         <!-- <div>
           {{ record.auth?.pushToken }}

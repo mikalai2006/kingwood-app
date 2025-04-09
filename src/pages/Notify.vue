@@ -6,6 +6,7 @@ import { INotifyInput } from "@/api/notify/types";
 import NotifyList from "@/components/Notify/NotifyList.vue";
 import { Colors } from "@/utils/colors";
 import { message } from "ant-design-vue";
+import NotifyArchiveList from "@/components/Notify/NotifyArchiveList.vue";
 
 const { t } = useI18n();
 
@@ -14,18 +15,21 @@ const authStore = useAuthStore();
 const generalStore = useGeneralStore();
 
 const onPatchNotify = async (id: string, data: INotifyInput) => {
-  await notifyStore.patch(id, data);
+  await notifyStore.onRemove(id);
+  // patch(id, data);
   message.success(t("message.notifyReadOk"));
 };
 
 const activeKey = ref("new");
 </script>
 <template>
-  <div class="flex-auto bg-white dark:bg-g-900">
+  <div
+    class="flex-auto flex flex-col bg-white dark:bg-g-900 h-full overflow-hidden"
+  >
     <VHeader :title="$t('page.notify.title')">
       <template #back>&nbsp;</template>
     </VHeader>
-    <div class="">
+    <div class="flex-auto b-scroll overflow-y-auto">
       <a-tabs
         v-if="authStore.iam?.id"
         v-model:activeKey="activeKey"
@@ -49,7 +53,7 @@ const activeKey = ref("new");
           <div class="bg-white dark:bg-g-900 p-4">
             <NotifyList
               :params="{
-                status: 0,
+                // status: 0,
                 userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,
               }"
               key-list="new"
@@ -63,7 +67,7 @@ const activeKey = ref("new");
           class="mx-auto max-w-screen-lg"
         >
           <div class="bg-white dark:bg-g-900 p-4">
-            <NotifyList
+            <NotifyArchiveList
               :params="{
                 status: 1,
                 userTo: authStore.iam?.id ? [authStore.iam?.id] : undefined,

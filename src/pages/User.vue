@@ -74,6 +74,7 @@ const allColumns = computed(() => [
   },
   { key: "role" },
   { key: "birthday" },
+  { key: "pushToken" },
   { key: "currentTask" },
   { key: "lastTime" },
   { key: "createdAt" },

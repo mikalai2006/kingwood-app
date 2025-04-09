@@ -9,12 +9,18 @@ import {
   useWorkTimeStore,
 } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { computed, ref, useTemplateRef } from "vue";
+import { computed, h, ref, useTemplateRef } from "vue";
 import { useResizeObserver } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { getObjectTime } from "@/utils/time";
 import VIcon from "../UI/VIcon.vue";
-import { iChevronDown, iPen, iPlusLg } from "@/utils/icons";
+import {
+  iChevronDown,
+  iPen,
+  iPlusLg,
+  iTrashFill,
+  iWraningTriangle,
+} from "@/utils/icons";
 import { dateTimeFormat } from "@/utils/date";
 import VFormWorkTime from "../Form/VFormWorkTime.vue";
 import { IWorkTime, IWorkTimeInput } from "@/api/work_time/types";
@@ -25,6 +31,7 @@ import FinancyDetails from "./FinancyDetails.vue";
 import FinancyDetailsList from "./FinancyDetailsList.vue";
 import { IWorkHistoryInput } from "@/api/work_history/types";
 import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
+import { Modal } from "ant-design-vue";
 
 const COUNT_DAY_ADD_WORKTIME = 31;
 
@@ -115,6 +122,69 @@ const dataForm = ref(defaultDataForm);
 //   dataForm.value = Object.assign({}, defaultData);
 //   showModal();
 // };
+
+const onDeleteWorkHistory = (item: IWorkHistoryInput) => {
+  import.meta.env.VIEW_CONSOLE && console.log("delete WorkHistory: ", item);
+
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.workHistory.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.deleteWorkHistory"), [
+                item.order?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.ok"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          if (!item.id) {
+            throw null;
+          }
+
+          await workHistoryStore.onRemove(item.id);
+
+          resolve("");
+        } catch (e: any) {
+          throw new Error(e);
+        }
+      }).catch((e: any) => {
+        throw new Error(e);
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
 
 const onEditItem = (item: IWorkHistoryInput) => {
   import.meta.env.VIEW_CONSOLE && console.log("edit WorkHistory: ", item);
@@ -289,30 +359,33 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
         </div>
       </template>
       <template v-if="column.key === 'action'">
-        <a-tooltip v-if="authStore.roles.includes('workHistory-patch')">
-          <template #title>
-            {{ $t("button.edit") }}
-          </template>
-          <a-button
-            type="link"
-            @click="(e: Event) => {onEditItem(record); e.preventDefault(); e.stopPropagation()}"
-          >
-            <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
-          </a-button>
-        </a-tooltip>
+        <div class="group">
+          <a-tooltip v-if="authStore.roles.includes('workHistory-patch')">
+            <template #title>
+              {{ $t("button.edit") }}
+            </template>
+            <a-button
+              type="link"
+              @click="(e: Event) => {onEditItem(record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+            </a-button>
+          </a-tooltip>
 
-        <!-- <a-tooltip v-if="authStore.roles.includes('workTime-delete')">
-          <template #title>
-            {{ $t("button.delete") }}
-          </template>
-          <a-button
-            danger
-            type="link"
-            @click="(e: Event) => { e.preventDefault(); e.stopPropagation()}"
-          >
-            <VIcon :path="iTrashFill" />
-          </a-button>
-        </a-tooltip> -->
+          <a-tooltip v-if="authStore.roles.includes('workHistory-delete')">
+            <template #title>
+              {{ $t("button.delete") }}
+            </template>
+            <a-button
+              danger
+              type="link"
+              class="invisible group-hover:visible"
+              @click="(e: Event) => {onDeleteWorkHistory(record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iTrashFill" />
+            </a-button>
+          </a-tooltip>
+        </div>
       </template>
     </template>
 
