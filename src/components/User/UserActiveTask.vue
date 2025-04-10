@@ -140,6 +140,10 @@ const endWorkHistory = async () => {
     return;
   }
 
+  if (!activeTaskWorker.value) {
+    return;
+  }
+
   loading.value = true;
 
   await patch(activeTaskWorker.value?.id, {
