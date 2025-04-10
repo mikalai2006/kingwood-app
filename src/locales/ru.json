@@ -118,9 +118,11 @@
     "reload": "Перезагрузить",
     "deleteFilter": "Удалить данный критерий поиска",
     "changed": "Изменения",
-    "deletedSession": "Удаленные сессии"
+    "deletedSession": "Удаленные сессии",
+    "endWorkHistory": "Завершить сессию"
   },
   "message": {
+    "endWorkHistory": "Вы хотите завершить рабочую сессию %s?",
     "deleteWorkHistory": "Вы хотите удалить рабочую сессию: %s?",
     "notDataForSendMessage": "Нет данных для отправки!",
     "removeOrder": "Вы действительно хотите удалить изделие: %s, заказ №%s?",

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, h, ref } from "vue";
 
 import {
   useObjectStore,
@@ -7,10 +7,20 @@ import {
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
+  useUserStore,
   useWorkHistoryStore,
 } from "@/store";
 import VIcon from "../UI/VIcon.vue";
-import { getShortFIO, invertColor } from "@/utils/utils";
+import {
+  getObjectId,
+  getShortFIO,
+  invertColor,
+  replaceSubstringByArray,
+} from "@/utils/utils";
+import { patch } from "@/api/task_worker";
+import { message, Modal } from "ant-design-vue";
+import { iWraningTriangle } from "@/utils/icons";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
   userId: string;
@@ -22,6 +32,9 @@ const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const taskStatusStore = useTaskStatusStore();
 const workHistoryStore = useWorkHistoryStore();
+const userStore = useUserStore();
+
+const user = computed(() => userStore.items.find((x) => x.id == props.userId));
 
 const activeWorkHistory = computed(() =>
   workHistoryStore.items.find(
@@ -46,12 +59,101 @@ const activeTaskWorker = computed(() =>
 );
 
 const taskStatus = computed(() =>
-  taskStatusStore.items.find((x) => x.id == activeTaskWorker.value?.statusId)
+  getObjectId(activeTaskWorker.value?.id)
+    ? taskStatusStore.items.find(
+        (x) => x.id == activeTaskWorker.value?.statusId
+      )
+    : null
 );
 
 const order = computed(() =>
   orderStore.items.find((x) => x.id == activeWorkHistory.value?.orderId)
 );
+
+const loading = ref(false);
+
+const { t } = useI18n();
+
+const onEndWorkHistory = () => {
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.order.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.endWorkHistory"), [
+                user.value?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.yes"),
+    cancelText: t("button.no"),
+    // title: t("form.task.delete"),
+    onOk() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          await endWorkHistory();
+
+          resolve("");
+        } catch (e) {
+          message.error("Error: end workHistory");
+        }
+      }).catch(() => console.log("Oops errors!"));
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
+
+const endWorkHistory = async () => {
+  if (!activeWorkHistory.value?.id) {
+    return;
+  }
+
+  const _statusPause = taskStatusStore.items.find((x) => x.status == "pause");
+  if (!_statusPause) {
+    return;
+  }
+
+  loading.value = true;
+
+  await patch(activeTaskWorker.value?.id, {
+    status: _statusPause.status,
+    statusId: _statusPause.id,
+    workerId: props.userId,
+  })
+    .then((r) => {
+      return r;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 
 // const operation = computed(() => {
 //   return operationStore.items.find(
@@ -82,6 +184,7 @@ const order = computed(() =>
     />
     <div class="w-48">
       <p class="text-sm">
+        <!-- {{ activeWorkHistory.id }} -->
         {{ activeObject?.name }}
       </p>
       <p class="text-sm truncate">
@@ -92,6 +195,16 @@ const order = computed(() =>
         {{ activeTask?.name }}
         <!-- : {{ taskStatus?.name }} -->
       </p>
+      <template v-if="!order?.number">
+        <a-button
+          size="small"
+          :loading="loading"
+          :disabled="loading"
+          @click="onEndWorkHistory"
+        >
+          {{ $t("button.endWorkHistory") }}
+        </a-button>
+      </template>
       <!-- <p>
             {{ getShortFIO(activeTaskWorker?.user?.name) }}
           </p> -->
