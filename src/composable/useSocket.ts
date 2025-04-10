@@ -160,19 +160,19 @@ export const useSocket = (props: IUseSocketProps) => {
             } else {
               taskWorkerStore.onAddItemToStore(content);
 
-              if (content.status == "finish") {
-                props.noty.onShowNotify(
-                  replaceSubstringByArray(
-                    props.t(`message.taskWorkerComplete`),
-                    [
-                      content?.worker?.name || "",
-                      content?.task?.name,
-                      `№${content?.order.number} ${content?.order.name}`,
-                      content?.object.name,
-                    ]
-                  )
-                );
-              }
+              // if (content.status == "finish") {
+              //   props.noty.onShowNotify(
+              //     replaceSubstringByArray(
+              //       props.t(`message.taskWorkerComplete`),
+              //       [
+              //         content?.worker?.name || "",
+              //         content?.task?.name,
+              //         `№${content?.order.number} ${content?.order.name}`,
+              //         content?.object.name,
+              //       ]
+              //     )
+              //   );
+              // }
             }
             break;
 
