@@ -534,7 +534,10 @@
       }
     },
     "auth": {
-      "newPassword": "Новый пароль"
+      "newPassword": "Новый пароль",
+      "login": "Логин",
+      "password": "Пароль",
+      "remembe": "Запомнить меня"
     },
     "task": {
       "help": {

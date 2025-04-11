@@ -34,3 +34,9 @@ export interface IAuthPublicData {
   login: string;
   pushToken: string;
 }
+
+export interface IAuthData {
+  login: string;
+  password: string;
+  remembe: boolean;
+}

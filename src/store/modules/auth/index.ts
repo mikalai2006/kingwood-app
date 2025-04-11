@@ -6,7 +6,12 @@ import {
   refresh_token,
   register,
 } from "@/api/auth";
-import { IAmUser, ILoginData, IResResultLogin } from "@/api/auth/types";
+import {
+  IAmUser,
+  IAuthData,
+  ILoginData,
+  IResResultLogin,
+} from "@/api/auth/types";
 
 import { useCookies } from "@vueuse/integrations/useCookies";
 import { deleteAxiosHeader, setAxiosHeader } from "@/utils/http/axios";
@@ -17,12 +22,18 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     // _token: "",
     _iam: {} as IAmUser,
+    _authData: {
+      login: "",
+      password: "",
+      remembe: false,
+    } as IAuthData,
     // ti: null as ReturnType<typeof setTimeout> | null,
 
     tokenData: null as IResResultLogin | null,
   }),
   getters: {
     token: (state) => state.tokenData?.access_token,
+    authData: (state) => state._authData,
     isAuthenticated(state): boolean {
       return !!state.tokenData?.access_token;
     },
@@ -39,6 +50,9 @@ export const useAuthStore = defineStore("auth", {
     },
   },
   actions: {
+    setAuthData(data: IAuthData) {
+      this._authData = { ...data };
+    },
     isExpiredRefreshToken() {
       // console.log("isExpiredRefreshToken: ", this.tokenData);
       if (!this?.tokenData) return true;

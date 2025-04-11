@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 import { message } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
 import { IFailedFinishForm, useError } from "@/composable/useError";
+import { IAuthData } from "@/api/auth/types";
 
 const router = useRouter();
 
@@ -13,17 +14,7 @@ const { t, te } = useI18n();
 
 const authStore = useAuthStore();
 
-interface FormState {
-  login: string;
-  password: string;
-  remember: boolean;
-}
-
-const formState = reactive<FormState>({
-  login: "",
-  password: "",
-  remember: true,
-});
+const formState = reactive<IAuthData>({ ...authStore.authData });
 
 const { onGetValidateError } = useError();
 
@@ -35,6 +26,15 @@ const onFinish = async (values: any) => {
     await authStore
       .login(formState)
       .then((r) => {
+        if (formState.remembe) {
+          authStore.setAuthData({ ...formState, password: "" });
+        } else {
+          authStore.setAuthData({
+            login: "",
+            password: "",
+            remembe: false,
+          });
+        }
         router.replace("/").then(() => {
           // window.location.reload();
         });
@@ -79,7 +79,7 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
         @finishFailed="onFinishFailed"
       >
         <a-form-item
-          label="Логин (телефон)"
+          :label="$t('form.auth.login')"
           name="login"
           :rules="[{ required: true, message: 'Введите ваш логин!' }]"
         >
@@ -87,18 +87,18 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
         </a-form-item>
 
         <a-form-item
-          label="Пароль"
+          :label="$t('form.auth.password')"
           name="password"
           :rules="[{ required: true, message: 'Введите ваш пароль!' }]"
         >
           <a-input-password v-model:value="formState.password" />
         </a-form-item>
 
-        <!-- <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
-        <a-checkbox v-model:checked="formState.remember"
-          >Remember me</a-checkbox
-        >
-      </a-form-item> -->
+        <a-form-item name="remember" :wrapper-col="{ offset: 8, span: 16 }">
+          <a-checkbox v-model:checked="formState.remembe">
+            {{ $t("form.auth.remembe") }}
+          </a-checkbox>
+        </a-form-item>
 
         <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
           <a-button type="primary" :loading="loading" html-type="submit">
