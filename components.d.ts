@@ -48,7 +48,6 @@ declare module 'vue' {
     ATimePicker: typeof import('ant-design-vue/es')['TimePicker']
     ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     AUpload: typeof import('ant-design-vue/es')['Upload']
-    copy: typeof import('./src/components/Financy/FinancyReportPane copy.vue')['default']
     FinancyDetails: typeof import('./src/components/Financy/FinancyDetails.vue')['default']
     FinancyDetailsList: typeof import('./src/components/Financy/FinancyDetailsList.vue')['default']
     FinancyDetailsListArchive: typeof import('./src/components/Financy/FinancyDetailsListArchive.vue')['default']
