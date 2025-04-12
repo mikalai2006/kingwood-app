@@ -18,13 +18,15 @@ import TaskStatus from "./pages/TaskStatus.vue";
 import Object from "./pages/Object.vue";
 import Account from "./pages/Account.vue";
 import MontajList from "./pages/MontajList.vue";
-import MontajListDay from "./pages/MontajListDay.vue";
 import ObjectOrder from "./pages/ObjectOrder.vue";
 import Notify from "./pages/Notify.vue";
 import Financy from "./pages/Financy.vue";
 import PayTemplate from "./pages/PayTemplate.vue";
 import FinancyOrder from "./pages/FinancyOrder.vue";
 import FinancyWorker from "./pages/FinancyWorker.vue";
+import CmsArchiveOrder from "./pages/CMS/CmsArchiveOrder.vue";
+import CmsDashboard from "./pages/CMS/CmsDashboard.vue";
+import CmsArchiveUser from "./pages/CMS/CmsArchiveUser.vue";
 
 const routes = [
   {
@@ -121,6 +123,24 @@ const routes = [
   {
     path: "/dashboard",
     component: Dashboard,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cms-dashboard",
+    component: CmsDashboard,
+    name: "cms-dashboard",
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cms-archive-order",
+    name: "cms-archive-order",
+    component: CmsArchiveOrder,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cms-archive-user",
+    name: "cms-archive-user",
+    component: CmsArchiveUser,
     meta: { requiresAuth: true },
   },
   {

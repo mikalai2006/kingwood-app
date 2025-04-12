@@ -36,6 +36,7 @@ import UserExitButton from "./components/User/UserExitButton.vue";
 import { useI18n } from "vue-i18n";
 import useNotification from "./composable/useNotification";
 import { useError } from "./composable/useError";
+import CmsMenu from "./components/Cms/CmsMenu.vue";
 
 const generalStore = useGeneralStore();
 
@@ -450,6 +451,7 @@ onErrorCaptured((error: any, vm, info) => {
                     <!-- {{ window.require("electron").remote.app.getVersion() }} -->
                   </div>
                   <div class="flex flex-col">
+                    <CmsMenu v-if="authStore.code === 'systemrole'" />
                     <VNavbar v-if="authStore.tokenData" />
                     <div v-else class="p-4">
                       <RouterLink
@@ -533,7 +535,7 @@ onErrorCaptured((error: any, vm, info) => {
                   </div>
                 </aside>
                 <div
-                  class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-900"
+                  class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-951"
                 >
                   <div
                     v-if="taskStatus.items.length > 0 || !authStore.tokenData"

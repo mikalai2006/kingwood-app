@@ -44,7 +44,11 @@ import { iTrashFill, iWraningTriangle } from "@/utils/icons";
 //   value: string[];
 // }
 
-const props = defineProps<{ data: IUserInput; defaultData: IUserInput }>();
+const props = defineProps<{
+  data: IUserInput;
+  defaultData: IUserInput;
+  loading: boolean;
+}>();
 const emit = defineEmits(["callback", "onRemoveItem"]);
 
 const { t } = useI18n();
@@ -178,6 +182,9 @@ const onSubmit = async () => {
       loading.value = false;
     });
 };
+
+const loadingExternal = computed(() => props.loading);
+
 const resetForm = () => {
   formRef.value.resetFields();
 };
@@ -617,15 +624,15 @@ onMounted(() => {
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button
               type="primary"
-              :loading="loading"
-              :disabled="loading"
+              :loading="loading || loadingExternal"
+              :disabled="loading || loadingExternal"
               @click="onSubmit"
             >
               {{ formState.id ? $t("form.save") : $t("form.create") }}
             </a-button>
             <a-button
               v-if="!formState.id"
-              :disabled="loading"
+              :disabled="loading || loadingExternal"
               style="margin-left: 10px"
               @click="resetForm"
             >
@@ -649,17 +656,23 @@ onMounted(() => {
             v-if="formState.blocked"
             type="warning"
             show-icon
+            banner
             :message="$t('notify.info')"
-            :description="`${$t('info.blockUser')} ${dayjs(
-              formState.updatedAt
-            ).fromNow()}`"
-          />
+          >
+            <template #description>
+              {{
+                `${$t("info.blockUser")} ${dayjs(
+                  formState.updatedAt
+                ).fromNow()}`
+              }}
+            </template>
+          </a-alert>
           <br />
           <a-button
             type="primary"
             :danger="formState.blocked == 0"
-            :loading="loading"
-            :disabled="loading"
+            :loading="loading || loadingExternal"
+            :disabled="loading || loadingExternal"
             @click="onBlockUser"
           >
             {{
@@ -681,6 +694,8 @@ onMounted(() => {
             <a-button
               danger
               type="primary"
+              :loading="loading || loadingExternal"
+              :disabled="loading || loadingExternal"
               @click="(e: Event) => {emit('onRemoveItem', formState); e.preventDefault(); e.stopPropagation()}"
             >
               <div class="flex items-center gap-2">

@@ -1,0 +1,280 @@
+<script setup lang="ts">
+import { h, onMounted, ref } from "vue";
+import { useAuthStore } from "@/store";
+import dayjs from "@/utils/dayjs";
+import { iCheckLg, iWraningTriangle } from "@/utils/icons";
+import UserActiveTask from "@/components/User/UserActiveTask.vue";
+import VIcon from "@/components/UI/VIcon.vue";
+import { IArchiveUser, IArchiveUserFilter } from "@/api/archive/types";
+import { findArchiveUser, removeArchiveUser } from "@/api/archive";
+import { Modal } from "ant-design-vue";
+import { useI18n } from "vue-i18n";
+import { replaceSubstringByArray } from "@/utils/utils";
+
+const props = defineProps<{
+  keyList: string;
+  params: IArchiveUserFilter;
+  columns: {
+    key: string;
+    title: string;
+    dataIndex: string;
+    showSorterTooltip: boolean;
+    customFilterDropdown?: boolean;
+    onFilter?: (value: any, record: IArchiveUser) => boolean;
+    sorter?: (a: IArchiveUser, b: IArchiveUser) => number;
+  }[];
+}>();
+
+const { t } = useI18n();
+
+const authStore = useAuthStore();
+
+// const siftParams = computed(() => {
+//   const _result = Object.fromEntries(
+//     Object.entries(props.params)
+//       // .filter(([key, value]) => !["to"].includes(key))
+//       .map(([key, value]) => {
+//         if (typeof value === "object" && value?.length) {
+//           return [key, { $in: value }];
+//         } else {
+//           return [key, value];
+//         }
+//       })
+//   );
+//   return _result;
+// });
+const loading = ref(false);
+
+const onRemoveItem = (item: IArchiveUser) => {
+  if (!item.id) {
+    return;
+  }
+
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.task.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.userRemove"), [item?.name])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.delete"),
+    cancelText: t("button.cancel"),
+    onOk() {
+      return new Promise((resolve, reject) => {
+        try {
+          if (item.id) {
+            loading.value = true;
+
+            removeArchiveUser(item.id)
+              .then((r) => {
+                const indexUserInList = columnsData.value.findIndex(
+                  (x) => x.id == r.id
+                );
+                if (indexUserInList != -1) {
+                  columnsData.value.splice(indexUserInList, 1);
+                }
+              })
+              .finally(() => {
+                loading.value = false;
+              });
+          }
+          // setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          resolve("");
+        } catch (e: any) {
+          throw new Error(e);
+        }
+      }).catch((e: any) => {
+        throw new Error(e);
+      });
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+};
+
+const columnsData = ref<IArchiveUser[]>([]);
+// computed(() => {
+//   return userStore.items.filter(sift(siftParams.value)).map((x) => {
+//     const taskWorkers = taskWorkerStore.items.filter(
+//       (y) => y.workerId === x.id && !["finish", "autofinish"].includes(y.status)
+//     );
+//     return {
+//       ...x,
+//       key: x.id,
+//       taskWorkers,
+//     };
+//   });
+// });
+
+onMounted(async () => {
+  await findArchiveUser({ ...props.params }).then((r) => {
+    columnsData.value = r.data;
+  });
+});
+</script>
+
+<template>
+  <a-table :columns="columns" :data-source="columnsData" size="small">
+    <!-- :row-class-name="(_record: any, index: number) => (
+      'custom ' + (
+        _record.taskWorkers.length === 0
+        ? 'priority bg-red-500/20 hover:!bg-red-500/40'
+        : '')
+      )" -->
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'pushToken'">
+        <a-tooltip v-if="record.auth.pushToken">
+          <template #title>
+            {{ record.auth.pushToken }}
+          </template>
+
+          <VIcon :path="iCheckLg" class="text-xl text-green-500" />
+        </a-tooltip>
+      </template>
+      <template v-if="column.key === 'action'">
+        <!-- <div>
+          {{ record.auth?.pushToken }}
+        </div> -->
+        <div class="flex gap-0">
+          <!-- <a-tooltip v-if="authStore.roles.includes('user-patch')">
+            <template #title>
+              {{ $t("button.edit") }}
+            </template>
+            <a-button
+              type="text"
+              @click="(e: Event) => {emit('onEditItem', record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iPen" />
+            </a-button>
+          </a-tooltip> -->
+          <!-- <a-button
+            v-if="authStore.roles.includes('user-patch')"
+            @click="emit('onEditItem', record)"
+          >
+            {{ $t("button.edit") }}
+          </a-button> -->
+          <a-button
+            v-if="authStore.roles.includes('user-delete')"
+            :loading="loading"
+            :disabled="loading"
+            @click="onRemoveItem(record)"
+          >
+            {{ $t("button.delete") }}
+          </a-button>
+        </div>
+      </template>
+      <template v-if="column.key === 'name'">
+        <div>
+          {{ record.name }}
+        </div>
+      </template>
+      <template v-if="column.key === 'isWork'">
+        <!-- <a-tag
+          v-if="!record.isWork"
+          :bordered="false"
+          :color="record.isWork ? '#5ea500' : ''"
+        >
+          {{ $t(`table.user.isWork${record.isWork}`) }}
+        </a-tag> -->
+        <UserActiveTask :user-id="record.id" />
+      </template>
+      <template v-if="column.key === 'value'">
+        <span
+          v-for="item in record.role"
+          :key="item"
+          class="p-1 border border-zink-200 rounded-lg mr-1"
+        >
+          {{ item }}
+        </span>
+      </template>
+      <template v-if="column.key === 'post'">
+        <!-- :style="{
+                  background: record.postObject.color,
+                  color: invertColor(record.postObject.color, true),
+                }" -->
+        <a-tag :bordered="false">
+          {{ record.postObject?.name }}
+        </a-tag>
+      </template>
+      <template v-if="column.key === 'currentTask'">
+        <UserTask :workerId="record.id" />
+      </template>
+      <template v-if="column.key === 'role'">
+        <a-tag :bordered="false">{{ record.roleObject?.name }}</a-tag>
+      </template>
+      <template v-if="column.key === 'image'">
+        <!-- <a-avatar
+                class="bg-s-500 dark:bg-s-800"
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              /> -->
+        <div class="relative w-16 h-16">
+          <VImg :image="record.images?.[0]" class="w-16 h-16 rounded-full" />
+          <!-- :class="[{ 'border-4 border-green-500': record.online }]" -->
+          <div
+            v-if="record.online"
+            class="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-green-500 border-4 border-white dark:border-g-900"
+          ></div>
+        </div>
+      </template>
+      <template v-if="column.key === 'birthday'">
+        <p v-if="record.birthday">
+          {{ dayjs(record.birthday, "DD.MM.YYYY").format("DD MMMM YYYY") }}
+        </p>
+      </template>
+      <template v-if="column.key === 'typePay'">
+        <p>
+          {{ record.typePay ? $t(`typePay.${record.typePay}`) : "-" }}
+        </p>
+      </template>
+      <template v-if="column.key === 'oklad'">
+        <p v-if="record.oklad">{{ record.oklad }}</p>
+        <p v-else>-</p>
+      </template>
+      <template v-if="column.key === 'lastTime'">
+        <p>{{ dayjs(record.lastTime).fromNow() }}</p>
+      </template>
+    </template>
+
+    <!-- <template #expandIcon="{ onExpand, record, expanded }">
+            <DownOutlined
+              :class="['transition-transform ', expanded ? 'rotate-180' : '']"
+              @click="onExpand(record)"
+            />
+          </template>
+          <template #expandedRowRender="{ record }">
+            <p style="margin: 0">
+              {{ record.description }}
+            </p>
+          </template>
+          <template #expandColumnTitle>
+            <span style="color: red">More</span>
+          </template> -->
+  </a-table>
+</template>

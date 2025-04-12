@@ -36,7 +36,23 @@ onMounted(() => {});
             v-for="(img, index) in message.images"
             :key="index.toString()"
           >
-            <VImage :image="img" class="h-28" />
+            <VImage
+              v-if="
+                [
+                  '.jpg',
+                  '.jpeg',
+                  '.png',
+                  '.webp',
+                  '.ico',
+                  '.tif',
+                  '.bmp',
+                  '.gif',
+                ].includes(img.ext)
+              "
+              :image="img"
+              class="h-28 rounded-lg"
+            />
+            <VFile v-else :file="img" />
           </template>
         </div>
 

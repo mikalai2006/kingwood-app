@@ -11,7 +11,7 @@ import {
 import { IImageUpload } from "@/api/image/types";
 import { useI18n } from "vue-i18n";
 import VIcon from "../UI/VIcon.vue";
-import { iImage } from "@/utils/icons";
+import { iImage, iPaperClip } from "@/utils/icons";
 import { IMessageInput } from "@/api/message/types";
 import { create, patch } from "@/api/message";
 
@@ -171,7 +171,7 @@ onMounted(() => {
     >
       <div class="text-center">
         <div class="flex items-center justify-center text-2xl text-g-300">
-          <VIcon :path="iImage" />
+          <VIcon :path="iPaperClip" />
         </div>
         <div style="">
           {{ $t("form.message.image") }}

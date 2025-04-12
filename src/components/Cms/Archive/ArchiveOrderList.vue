@@ -1,0 +1,807 @@
+<script setup lang="ts">
+import { computed, h, onMounted, reactive, ref, watch } from "vue";
+import dayjs from "@/utils/dayjs";
+
+import { IOrder, IOrderFilter } from "@/api/order/types";
+import {
+  useArchiveOrderStore,
+  useAuthStore,
+  useGeneralStore,
+  useUserStore,
+} from "@/store";
+import {
+  iCheckLg,
+  iChevronRight,
+  iSearch,
+  iTrashFill,
+  iWraningTriangle,
+} from "@/utils/icons";
+import { dateFormat } from "@/utils/date";
+import {
+  getObjectId,
+  getShortFIO,
+  replaceSubstringByArray,
+} from "@/utils/utils";
+import colors from "tailwindcss/colors";
+import sift from "sift";
+import { message, Modal } from "ant-design-vue";
+import { useI18n } from "vue-i18n";
+import useOrder from "@/composable/useOrder";
+import { Colors } from "@/utils/colors";
+import VIcon from "@/components/UI/VIcon.vue";
+import ArchiveOrderTaskList from "./ArchiveOrderTaskList.vue";
+
+export interface IConfigTable {
+  sort: { field: string; order: number; key: string }[];
+  pagination: {
+    total: number;
+    current: number;
+    pageSize: number;
+  };
+}
+
+const props = defineProps<{
+  keyList: string;
+  params: IOrderFilter;
+  // columns: {
+  //   key: string;
+  //   title: string;
+  //   dataIndex: string;
+  //   customFilterDropdown?: boolean;
+  //   onFilter?: (value: string, record: IOrder) => boolean;
+  //   sorter?: (a: IOrder, b: IOrder) => number;
+  // }[];
+  keyColumns: string;
+}>();
+
+const emit = defineEmits(["onEditItem"]);
+
+const { t } = useI18n();
+
+const generalStore = useGeneralStore();
+
+const nameKeyLocalStorage = computed(
+  () => `tableConfig.order.${props.keyList}`
+);
+
+const {
+  columnKeys,
+  sort,
+  columns,
+
+  openOrderInfo,
+  currentOrderInModal,
+
+  showOrderInfo,
+} = useOrder();
+
+const authStore = useAuthStore();
+const archiveOrderStore = useArchiveOrderStore();
+const userStore = useUserStore();
+
+const siftParams = computed(() => {
+  const _result = Object.fromEntries(
+    Object.entries(props.params)
+      .filter(([key, value]) => !["to"].includes(key))
+      .map(([key, value]) => {
+        if (typeof value === "object" && value?.length) {
+          return [key, { $in: value }];
+        } else if (["dateOtgruzka"].includes(key)) {
+          return [
+            "dateOtgruzka",
+            { $lte: dayjs(0).add(value, "year").utc().format() },
+          ];
+        } else if (["name"].includes(key)) {
+          return ["name", { $regex: value, $options: "i" }];
+        } else if (["from"].includes(key)) {
+          return ["createdAt", { $gte: value, $lte: props.params.to }];
+        } else {
+          return [key, value];
+        }
+      })
+  );
+  _result.id = { $ne: "000000000000000000000000" };
+  return _result;
+});
+// console.log("siftParams: ", siftParams.value);
+
+const columnsData = computed(() => {
+  return archiveOrderStore.items.filter(sift(siftParams.value)).map((x) => {
+    return {
+      ...x,
+      key: x.id,
+    };
+  });
+});
+
+const state = reactive({
+  searchText: "",
+  searchedColumn: "",
+});
+
+const searchInput = ref();
+
+const handleSearch = (selectedKeys: any, confirm: any, dataIndex: string) => {
+  confirm();
+  state.searchText = selectedKeys[0];
+  state.searchedColumn = dataIndex;
+};
+
+const handleReset = (clearFilters: any) => {
+  clearFilters({ confirm: true });
+  state.searchText = "";
+};
+
+const loading = ref(true);
+const pagination = ref({
+  total: 10,
+  current: 1,
+  pageSize: 20,
+});
+
+const onChangePagintaion = async (_page: number, _pageSize: number) => {
+  // console.log("load ", _page, _pageSize, _pageSize * _page - 1);
+  pagination.value.current = _page;
+  pagination.value.pageSize = _pageSize;
+  // onQueryData();
+};
+
+const onQueryData = async () => {
+  loading.value = true;
+  await archiveOrderStore
+    .find({
+      ...props.params,
+      $limit: pagination.value.pageSize,
+      $skip: Math.max(
+        pagination.value.pageSize * (pagination.value.current - 1) - 1,
+        0
+      ),
+      $sort: sort.value?.length
+        ? sort.value.map((x) => {
+            return {
+              key: x.field,
+              value: x.order,
+            };
+          })
+        : undefined,
+    })
+    .then((result) => {
+      pagination.value.total = result.total;
+      localStorage.setItem(
+        nameKeyLocalStorage.value,
+        JSON.stringify(
+          Object.assign({}, { sort: sort.value, pagination: pagination.value })
+        )
+      );
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
+
+const handleTableChange: any = (
+  //TableProps["onChange"]
+  pag: { pageSize: number; current: number },
+  filters: any,
+  sorter: any
+) => {
+  // console.log("sorter", sorter);
+
+  if (Object.values(sorter).length > 0) {
+    sort.value = sorter.order
+      ? [
+          {
+            field: sorter.field === "objectId" ? "object.name" : sorter.field,
+            order: sorter.order == "ascend" ? 1 : -1,
+            key: sorter.field,
+          },
+        ]
+      : [];
+  } else {
+    sort.value = [];
+  }
+  onQueryData();
+  // console.log({
+  //   sorter,
+  //   ...filters,
+  // });
+
+  // run({
+  //   results: pag.pageSize,
+  //   page: pag?.current,
+  //   sortField: sorter.field,
+  //   sortOrder: sorter.order,
+  //   ...filters,
+  // });
+};
+
+const onDeleteOrder = async (input: IOrder) => {
+  return await archiveOrderStore.deleteItem(input.id).then((r) => {
+    message.success(
+      replaceSubstringByArray(t("message.deleteOrderOk"), [
+        `№${input.number}-${input.name}`,
+      ])
+    );
+    return r;
+  });
+};
+
+const onHideOrderInfo = () => {
+  openOrderInfo.value = false;
+  activeKey.value = "list";
+};
+
+const onDeleteAlert = (record: IOrder) => {
+  Modal.confirm({
+    // transitionName: "",
+    icon: null,
+    content: h(
+      "div",
+      {
+        class: "flex flex-row items-start gap-4",
+      },
+      [
+        h(VIcon, {
+          path: iWraningTriangle,
+          class: "flex-none text-4xl text-red-500 dark:text-red-400",
+        }),
+        h(
+          "div",
+          {
+            class: "flex-auto",
+          },
+          [
+            h(
+              "div",
+              { class: "text-lg font-bold text-red-500 dark:text-red-400" },
+              t("form.order.delete")
+            ),
+            h(
+              "div",
+              {},
+              replaceSubstringByArray(t("message.removeOrder"), [
+                record?.name,
+                record?.number,
+                record?.name,
+              ])
+            ),
+          ]
+        ),
+      ]
+    ),
+    okButtonProps: { type: "primary", danger: true },
+    okText: t("button.delete"),
+    cancelText: t("button.cancel"),
+    // title: t("form.task.delete"),
+    onOk() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          await onDeleteOrder(record);
+
+          onHideOrderInfo();
+          resolve("");
+        } catch (e) {
+          message.error("Error: delete order");
+        }
+      }).catch(() => console.log("Oops errors!"));
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onCancel() {},
+  });
+
+  // console.log("Delete task: ", item);
+  // //   await emit("onDeleteTask", item);
+  // return new Promise((resolve) => {
+  //   setTimeout(() => resolve(true), 3000);
+  // });
+};
+
+onMounted(async () => {
+  // sync columnKeys from localStorage.
+  const _columns = localStorage.getItem(props.keyColumns);
+  if (_columns) {
+    columnKeys.value = JSON.parse(_columns);
+  }
+
+  // sync columns from localStorage.
+  const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
+  if (_configTable) {
+    const _config = JSON.parse(_configTable) as IConfigTable;
+    pagination.value = _config.pagination;
+    sort.value = _config.sort;
+  }
+
+  await onQueryData();
+});
+
+// watch(
+//   () => props.params,
+//   (o, n) => {
+//     console.log(o, n);
+
+//     console.log(props.params);
+//     console.log(siftParams.value);
+
+//     onQueryData();
+//   },
+//   {
+//     immediate: false,
+//   }
+// );
+
+const activeKey = ref("list");
+</script>
+
+<template>
+  <a-table
+    :columns="columns"
+    :data-source="columnsData"
+    expandRowByClick
+    :loading="loading"
+    size="small"
+    class="table_order"
+    @change="handleTableChange"
+    :row-class-name="(_record: IOrder, index: number) => (_record.group?.includes('create_complete') ? 'custom priority cursor-pointer bg-green-500/40 hover:!bg-green-500/50' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
+    :customRow="
+            (record: IOrder) => {
+              return {
+                // xxx, // props
+                onClick: () => {
+                  showOrderInfo(record)
+                }, // click row
+                // onDblclick: (event) => {}, // double click row
+                // onContextmenu: (event) => {}  // right button click row
+                // onMouseenter: (event) => {}   // mouse enter row
+                // onMouseleave: (event) => {}   // mouse leave row
+              };
+            }
+          "
+    :pagination="{
+      ...pagination,
+      disabled: loading,
+      onChange: onChangePagintaion,
+      showSizeChanger: true,
+      position: ['bottomCenter'],
+    }"
+  >
+    <template #title>
+      <slot name="header"></slot>
+    </template>
+    <template #bodyCell="{ column, record }">
+      <!-- <template v-if="record"></template> -->
+      <template v-if="column.key === 'action'">
+        <div class="flex gap-0">
+          <!-- <a-tooltip v-if="authStore.roles.includes('order-patch')">
+            <template #title>
+              {{ $t("button.edit") }}
+            </template>
+            <a-button
+              type="text"
+              @click="(e: Event) => {emit('onEditItem',record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <VIcon :path="iPen" />
+            </a-button>
+          </a-tooltip> -->
+
+          <!-- <a-tooltip>
+          <template #title>
+            {{ $t("button.delete") }}
+          </template>
+          <a-button type="link" danger @click="">
+            <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
+          </a-button>
+        </a-tooltip> -->
+        </div>
+      </template>
+      <template v-if="column.key === 'image'">
+        <a-avatar
+          class="bg-s-500 dark:bg-s-800 border-0"
+          src="https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png"
+        />
+      </template>
+
+      <!-- <template v-if="column.key === 'name'">
+        <span class="font-medium">
+          {{ record.name }}
+        </span>
+      </template> -->
+
+      <template v-if="column.key === 'group'">
+        <a-tag
+          v-for="item in record.group"
+          :key="item"
+          :bordered="false"
+          class="text-md"
+        >
+          {{ $t(`groupOperation.${item}`) }}
+        </a-tag>
+      </template>
+
+      <template v-if="column.key === 'stolyarComplete'">
+        <OrderGroupBadge
+          :orderId="record.id"
+          group="2"
+          :status="!!record.stolyarComplete"
+        />
+      </template>
+
+      <template v-if="column.key === 'malyarComplete'">
+        <OrderGroupBadge
+          :orderId="record.id"
+          group="3"
+          :status="!!record.malyarComplete"
+        />
+      </template>
+
+      <template v-if="column.key === 'montajComplete'">
+        <OrderGroupBadge
+          :orderId="record.id"
+          group="5"
+          :status="!!record.montajComplete"
+        />
+      </template>
+
+      <template v-if="column.key === 'shlifComplete'">
+        <OrderGroupBadge
+          :orderId="record.id"
+          group="6"
+          :status="!!record.shlifComplete"
+        />
+      </template>
+
+      <template v-if="column.key === 'goComplete'">
+        <div
+          v-if="record.goComplete"
+          class="relative min-w-32 min-h-16 rounded-md bg-green-600 dark:bg-green-700 flex items-center justify-center"
+        >
+          <div
+            class="absolute w-2 h-2 top-1 left-1/2 bg-white dark:bg-g-900 rounded-full z-10"
+          ></div>
+          <div
+            class="p-2 pt-4 text-white dark:text-white text-center leading-5"
+          >
+            <template v-if="dayjs(record.dateOtgruzka).year() == 1">
+              <div>
+                {{ $t("groupOperation.4") }}
+              </div>
+            </template>
+            <template v-else>
+              {{ $t("info.otgruzkaYes") }}:<br />
+              {{ dayjs(record.dateOtgruzka).utc(true).format(dateFormat) }}
+            </template>
+            <!-- <OrderGroupBadge
+                    :orderId="record.id"
+                    group="3"
+                    :status="!!record.malyarComplete"
+                  /> -->
+          </div>
+        </div>
+        <div v-else>
+          <OrderGroupBadge
+            :orderId="record.id"
+            group="4"
+            :status="!!record.goComplete"
+          />
+        </div>
+      </template>
+
+      <template v-if="column.key === 'constructorId'">
+        <p class="text-nowrap">
+          {{
+            getObjectId(record.constructorId) != "0"
+              ? getShortFIO(
+                  userStore.items.find((x) => x.id === record.constructorId)
+                    ?.name
+                )
+              : "-"
+          }}
+        </p>
+      </template>
+
+      <template v-if="column.key === 'activeOperation'">
+        <OrderActiveTask :order-id="record.id" />
+        <!-- <OrderGroupInfo :order-id="record.id" /> -->
+      </template>
+
+      <template v-if="column.key === 'name'">
+        <div class="flex gap-2 items-center">
+          <span class="font-medium">
+            {{ record.name }}
+          </span>
+          <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
+        </div>
+        <a-tag
+          v-if="record.priority"
+          :bordered="false"
+          :color="colors.red[500]"
+        >
+          {{ $t("table.order.priority") }}
+        </a-tag>
+      </template>
+
+      <template v-if="column.key === 'objectId'">
+        <RouterLink
+          :to="{
+            name: 'objectOrderId',
+            params: {
+              objectId: record.objectId,
+            },
+          }"
+          class="flex items-center gap-2"
+        >
+          {{ record?.object?.name }}
+          <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
+        </RouterLink>
+      </template>
+
+      <template v-if="column.key === 'term'">
+        <div>
+          {{ dayjs(record.term).year() > 1 ? dayjs().to(record.term) : "-" }}
+        </div>
+
+        <a-tag
+          v-if="record.priority"
+          :bordered="false"
+          :color="colors.red[500]"
+        >
+          {{ $t("table.order.priority") }}
+        </a-tag>
+      </template>
+
+      <template v-if="column.key === 'dateStart'">
+        <div
+          v-if="dayjs(record.dateStart).year() != 1"
+          class="flex flex-row gap-1"
+        >
+          <!-- <div>
+            {{ $t("info.designFrom") }}
+          </div> -->
+          <VIcon :path="iCheckLg" class="text-xl text-green-500" />
+          {{ dayjs(record.dateStart).format(dateFormat) }}
+        </div>
+        <div v-else>
+          <!-- <a-tooltip v-if="authStore.roles.includes('order-add-design')">
+            <template #title>
+              {{ $t("info.dateStart") }}
+            </template>
+            <a-button
+              size="small"
+              @click="
+                    (e: Event) => {
+                      onDateStart(record);
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  "
+            >
+              {{ $t("button.dateStart") }}
+            </a-button>
+          </a-tooltip> -->
+        </div>
+      </template>
+
+      <template v-if="column.key === 'createdAt'">
+        {{ dayjs(record.updatedAt).format("DD MMM YYYY") }}
+        {{ dayjs(record.updatedAt).fromNow() }}
+      </template>
+
+      <template v-if="column.key === 'number'">
+        <div class="text-center">{{ record.number }}</div>
+      </template>
+    </template>
+
+    <template
+      #customFilterDropdown="{
+        setSelectedKeys,
+        selectedKeys,
+        confirm,
+        clearFilters,
+        column,
+      }"
+    >
+      <div style="padding: 8px">
+        <a-input
+          ref="searchInput"
+          :placeholder="`Search ${column.dataIndex}`"
+          :value="selectedKeys[0]"
+          style="width: 188px; margin-bottom: 8px; display: block"
+          @change="
+                  (e: any) => setSelectedKeys(e.target.value ? [e.target.value] : [])
+                "
+          @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        />
+        <a-button
+          type="primary"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
+        >
+          <template #icon>
+            <VIcon :path="iSearch" />
+          </template>
+          Search
+        </a-button>
+        <a-button
+          size="small"
+          style="width: 90px"
+          @click="handleReset(clearFilters)"
+        >
+          Reset
+        </a-button>
+      </div>
+    </template>
+    <template #customFilterIcon="{ filtered }">
+      <VIcon
+        :path="iSearch"
+        :style="{ color: filtered ? '#108ee9' : undefined }"
+      />
+    </template>
+
+    <!-- <template #expandIcon="{ onExpand, record, expanded }">
+            <DownOutlined
+              :class="['transition-transform ', expanded ? 'rotate-180' : '']"
+              @click="onExpand(record)"
+            />
+          </template>
+          <template
+            #expandedRowRender="{ record }"
+            v-slot:expandIcon="DownOutlined"
+          >
+            <div class="-mt-4 -ml-4 pl-4 py-4">
+              <OrderTaskList :order-id="record.id" @on-edit-task="onEditTask" />
+              <a-button @click="onAddNewTask(record.id)" class="mt-2">
+                {{ $t("form.task.add") }}
+              </a-button>
+            </div>
+          </template>
+          <template #expandColumnTitle>
+            <span style="color: red">More</span>
+          </template> -->
+  </a-table>
+
+  <a-modal
+    v-model:open="openOrderInfo"
+    width="50%"
+    style="margin: 0 auto"
+    :key="currentOrderInModal?.id"
+    wrapClassName="b-scroll full-modal"
+    :bodyStyle="{
+      margin: 0,
+      padding: 0,
+      background:
+        generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.s[100],
+    }"
+    :destroyOnClose="true"
+    :maskClosable="false"
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+    :cancel-text="$t('button.close')"
+    @cancel="onHideOrderInfo"
+  >
+    <template #title>
+      <div class="text-xl leading-6 bg-s-200 dark:bg-g-900 px-4 py-2">
+        <span class="bg-r-600 px-2 py-0.5 text-white rounded-lg">
+          {{ $t("cms.archive") }}
+        </span>
+        {{ currentOrderInModal?.object?.name }}, №{{
+          currentOrderInModal?.number
+        }}
+        -
+        {{ currentOrderInModal?.name }}
+      </div>
+    </template>
+    <div v-if="currentOrderInModal" class="">
+      <a-tabs
+        v-model:activeKey="activeKey"
+        destroyInactiveTabPane
+        :tabBarStyle="{
+          // position: 'sticky',
+          // top: 0,
+          'padding-left': '15px',
+          margin: '0px',
+          'z-index': 50,
+          background:
+            generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.s[200],
+        }"
+      >
+        <a-tab-pane key="list" :tab="$t('tabs.task.list')">
+          <template v-if="authStore.roles.includes('task-list')">
+            <div class="px-4">
+              <ArchiveOrderTaskList
+                v-if="currentOrderInModal.tasks"
+                :order-id="currentOrderInModal.id"
+                :tasks="currentOrderInModal.tasks"
+              />
+            </div>
+          </template>
+          <template v-else>
+            <a-alert :message="$t('info.notPermission')" banner />
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="message" :tab="$t('tabs.task.message')">
+          <OrderMessages :orderId="currentOrderInModal.id" />
+        </a-tab-pane>
+        <a-tab-pane
+          v-if="authStore.roles.includes('financy-list')"
+          key="financy"
+          :tab="$t('tabs.order.financy')"
+        >
+          <FinancyOrder :order-id="currentOrderInModal.id" />
+        </a-tab-pane>
+        <a-tab-pane key="actions" :tab="$t('tabs.order.actions')">
+          <div class="p-4">
+            <a-tooltip v-if="authStore.roles.includes('order-delete')">
+              <template #title>
+                {{ $t("button.delete") }}
+              </template>
+              <a-button
+                danger
+                type="primary"
+                @click="(e: Event) => {
+                if (currentOrderInModal) {
+                  onDeleteAlert(currentOrderInModal); e.preventDefault(); e.stopPropagation()
+              }}"
+              >
+                <div class="flex items-center gap-2">
+                  <VIcon :path="iTrashFill" />
+                  {{ $t("button.delete") }}
+                  <!-- {{ $t("button.delete") }} -->
+                </div>
+              </a-button>
+            </a-tooltip>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+    </div>
+  </a-modal>
+</template>
+
+<style>
+.full-modal {
+  .ant-modal {
+    max-width: 100%;
+    top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    height: calc(100vh);
+  }
+  .ant-modal-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh);
+  }
+  .ant-modal-body {
+    flex: 1;
+    padding: 15px;
+  }
+  .ant-modal-content {
+    padding: 0;
+    border-radius: 0 !important;
+  }
+  .ant-modal-header {
+    margin: 0;
+    padding: 15px;
+    padding-bottom: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .ant-modal-footer {
+    display: none;
+  }
+  .ant-modal-close {
+    top: 30px !important;
+  }
+
+  .ant-tabs-card .ant-tabs-tab-active,
+  .ant-tabs-card .ant-tabs-tab-active {
+    background: v-bind("Colors.s[300]") !important;
+    border-color: transparent !important;
+  }
+}
+
+.table_order thead {
+  position: sticky;
+  top: 0px;
+  z-index: 100;
+}
+</style>

@@ -14,11 +14,10 @@ import {
 } from "@/store";
 import { replaceSubstringByArray } from "@/utils/utils";
 import { useI18n } from "vue-i18n";
-import UserList from "@/components/User/UserList.vue";
 import { message, Modal } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
 import { iCog, iWraningTriangle } from "@/utils/icons";
-import { Colors } from "@/utils/colors";
+import CmsArchiveUserList from "@/components/Cms/Archive/User/CmsArchiveUserList.vue";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
@@ -229,7 +228,7 @@ const onEditItem = (item: IUser) => {
   dataForm.value = Object.assign({}, item);
   showModal();
 };
-const nameKeyLocalStorageColumns = ref("user.column");
+const nameKeyLocalStorageColumns = ref("archive.user.column");
 const onSetColumns = (value: string, key: string, data: string[]) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
@@ -250,8 +249,14 @@ onMounted(() => {
 </script>
 <template>
   <div class="flex-auto">
-    <VHeader :title="$t('page.user.title')">
-      <template #back>&nbsp;</template>
+    <VHeader :title="$t('cms.page.cms-archive-user')">
+      <template #back>
+        <div class="pl-4">
+          <span class="bg-r-600 px-2 py-0.5 text-white rounded-lg">
+            {{ $t("cms.archive") }}
+          </span>
+        </div>
+      </template>
       <template #header>
         <div class="flex flex-row items-center">
           <div class="flex-auto">
@@ -306,75 +311,17 @@ onMounted(() => {
       </template>
     </VHeader>
 
-    <a-tabs
-      v-model:activeKey="activeKey"
-      destroyInactiveTabPane
-      type="card"
-      :tabBarStyle="{
-        position: 'sticky',
-        top: 0,
-        'padding-left': '15px',
-        margin: '0px',
-        'z-index': 50,
-        background:
-          generalStore.themeMode === 'dark' ? Colors.g[951] : Colors.s[200],
+    <CmsArchiveUserList
+      :columns="columns"
+      key-list="current"
+      :params="{
+        // blocked: 0,
+        // hidden: 0,
+        // taskWorkers: { $gte: { $size: 1 } },
       }"
-    >
-      <a-tab-pane key="current" :tab="$t('tabs.user.current')">
-        <UserList
-          :columns="columns"
-          key-list="current"
-          :params="{
-            blocked: 0,
-            hidden: 0,
-            // taskWorkers: { $gte: { $size: 1 } },
-          }"
-          @on-edit-item="onEditItem"
-          @on-remove-item="onRemoveItem"
-        />
-      </a-tab-pane>
-      <a-tab-pane key="notTask" :tab="$t('tabs.user.notTask')">
-        <UserList
-          :columns="columns"
-          key-list="notTask"
-          :params="{
-            blocked: 0,
-            hidden: 0,
-            taskWorkers: { $size: 0 },
-            roleId: roleUser,
-          }"
-          @on-edit-item="onEditItem"
-          @on-remove-item="onRemoveItem"
-        />
-      </a-tab-pane>
-      <a-tab-pane key="archive" :tab="$t('tabs.user.archive')">
-        <UserList
-          :columns="columns"
-          key-list="archive"
-          :params="{
-            blocked: 1,
-            hidden: 0,
-          }"
-          @on-edit-item="onEditItem"
-          @on-remove-item="onRemoveItem"
-        />
-      </a-tab-pane>
-      <a-tab-pane
-        v-if="authStore.code === 'systemrole'"
-        key="hiddden"
-        :tab="$t('tabs.user.hidden')"
-      >
-        <UserList
-          :columns="columns"
-          key-list="hiddden"
-          :params="{
-            hidden: 1,
-          }"
-          @on-edit-item="onEditItem"
-          @on-remove-item="onRemoveItem"
-        />
-      </a-tab-pane>
-    </a-tabs>
+      @on-edit-item="onEditItem"
+      @on-remove-item="onRemoveItem"
+    />
   </div>
 
   <a-modal

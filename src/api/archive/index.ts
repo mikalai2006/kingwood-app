@@ -3,6 +3,10 @@ import { IRequestParams, IResponseData } from "@/api/types";
 import {
   IArchiveNotify,
   IArchiveNotifyFilter,
+  IArchiveOrder,
+  IArchiveOrderFilter,
+  IArchiveUser,
+  IArchiveUserFilter,
   IArchiveWorkHistory,
   IArchiveWorkHistoryFilter,
 } from "./types";
@@ -10,6 +14,8 @@ import {
 enum URLS {
   notify = "/archive_notify",
   workHistory = "/archive_work_history",
+  order = "/archive_order",
+  user = "/archive_user",
 }
 
 const findArchiveNotify = async (data: IArchiveNotifyFilter) =>
@@ -23,6 +29,17 @@ const removeArchiveNotify = async (id: string | number) =>
     url: `${URLS.notify}/${id}`,
   });
 
+const findArchiveOrder = async (data: IArchiveOrderFilter) =>
+  $post<IResponseData<IArchiveOrder>>({
+    url: `${URLS.order}/find`,
+    data,
+  });
+
+const removeArchiveOrder = async (id: string | number) =>
+  $delete<IArchiveOrder>({
+    url: `${URLS.order}/${id}`,
+  });
+
 const findArchiveWorkHistory = async (data: IArchiveWorkHistoryFilter) =>
   $post<IResponseData<IArchiveWorkHistory>>({
     url: `${URLS.workHistory}/find`,
@@ -34,9 +51,24 @@ const removeArchiveWorkHistory = async (id: string | number) =>
     url: `${URLS.workHistory}/${id}`,
   });
 
+const findArchiveUser = async (data: IArchiveUserFilter) =>
+  $post<IResponseData<IArchiveUser>>({
+    url: `${URLS.user}/find`,
+    data,
+  });
+
+const removeArchiveUser = async (id: string | number) =>
+  $delete<IArchiveUser>({
+    url: `${URLS.user}/${id}`,
+  });
+
 export {
   findArchiveNotify,
   removeArchiveNotify,
   findArchiveWorkHistory,
   removeArchiveWorkHistory,
+  findArchiveOrder,
+  removeArchiveOrder,
+  findArchiveUser,
+  removeArchiveUser,
 };

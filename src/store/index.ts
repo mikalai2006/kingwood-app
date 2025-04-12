@@ -16,6 +16,7 @@ import { usePayTemplateStore } from "./modules/pay_template";
 import { useAppErrorStore } from "./modules/appError";
 import { useWorkHistoryStore } from "./modules/workHistory";
 import { useMessageStore } from "./modules/message";
+import { useArchiveOrderStore } from "./modules/archive_order";
 
 export {
   useAuthStore,
@@ -36,4 +37,5 @@ export {
   useAppErrorStore,
   useWorkHistoryStore,
   useMessageStore,
+  useArchiveOrderStore,
 };
