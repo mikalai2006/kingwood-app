@@ -29,6 +29,7 @@ const dataForm = ref(defaultData);
     <div>
       <VFormUser
         :data="dataForm"
+        :loading="false"
         :default-data="defaultData"
         @callback="() => {}"
       ></VFormUser>

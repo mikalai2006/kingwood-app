@@ -9,6 +9,7 @@ export interface IAnalytic {
     countPay: number;
     countImage: number;
     countWorkHistory: number;
+    [key: string]: number;
   };
   archive: {
     countArchiveWorkHistory: number;
@@ -19,5 +20,6 @@ export interface IAnalytic {
     countArchiveMessage: number;
     countArchivePay: number;
     countArchiveImage: number;
+    [key: string]: number;
   };
 }
