@@ -7,11 +7,21 @@ const route = useRoute();
 
 const authStore = useAuthStore();
 
-const items = ref(["cms-dashboard", "cms-archive-order", "cms-archive-user"]);
+const items = ref([
+  "cms-dashboard",
+  "cms-apperror",
+  "cms-archive-order",
+  "cms-archive-user",
+  "cms-archive-notify",
+  "cms-notify",
+]);
 </script>
 
 <template>
-  <div v-if="authStore.code === 'systemrole'" class="p-4">
+  <div
+    v-if="authStore.code === 'systemrole'"
+    class="p-4 bg-sky-900 dark:bg-g-951"
+  >
     <div class="rounded-lg flex flex-col gap-1">
       <template v-for="item in items" :key="item">
         <RouterLink

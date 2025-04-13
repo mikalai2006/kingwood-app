@@ -27,6 +27,9 @@ import FinancyWorker from "./pages/FinancyWorker.vue";
 import CmsArchiveOrder from "./pages/CMS/CmsArchiveOrder.vue";
 import CmsDashboard from "./pages/CMS/CmsDashboard.vue";
 import CmsArchiveUser from "./pages/CMS/CmsArchiveUser.vue";
+import CmsAppError from "./pages/CMS/CmsAppError.vue";
+import CmsArchiveNotify from "./pages/CMS/CmsArchiveNotify.vue";
+import CmsNotify from "./pages/CMS/CmsNotify.vue";
 
 const routes = [
   {
@@ -138,9 +141,27 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/cms-notify",
+    name: "cms-notify",
+    component: CmsNotify,
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/cms-archive-user",
     name: "cms-archive-user",
     component: CmsArchiveUser,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cms-apperror",
+    name: "cms-apperror",
+    component: CmsAppError,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cms-archive-notify",
+    name: "cms-archive-notify",
+    component: CmsArchiveNotify,
     meta: { requiresAuth: true },
   },
   {

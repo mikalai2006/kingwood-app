@@ -77,7 +77,10 @@
     "page": {
       "cms-archive-order": "Архив изделий",
       "cms-dashboard": "Панель управления",
-      "cms-archive-user": "Архив пользователей"
+      "cms-archive-user": "Архив пользователей",
+      "cms-apperror": "Ошибки",
+      "cms-archive-notify": "Архив уведомлений",
+      "cms-notify": "Уведомления"
     }
   },
   "error": {
@@ -85,7 +88,11 @@
     "notFoundItem": "Не найдена запись для запроса!",
     "notRoles": "У вас нет прав для этого действия!",
     "notToken": "Запрос отменен по причине недействительного токена безопасности!",
-    "notNet": "Сервер недоступен! Проверьте подключение к Интернету или обратитесь к системному администратору."
+    "notNet": "Сервер недоступен! Проверьте подключение к Интернету или обратитесь к системному администратору.",
+    "status": {
+      "0": "Не просмотрено",
+      "1": "Просмотрено"
+    }
   },
   "notify": {
     "info": "Уведомление",
@@ -127,7 +134,8 @@
     "deleteFilter": "Удалить данный критерий поиска",
     "changed": "Изменения",
     "deletedSession": "Удаленные сессии",
-    "endWorkHistory": "Завершить сессию"
+    "endWorkHistory": "Завершить сессию",
+    "checkView": "Пометить прочитанной"
   },
   "message": {
     "endWorkHistory": "Вы хотите завершить рабочую сессию %s?",
@@ -146,7 +154,10 @@
     "deleteTaskOk": "Задание %s успешно удалено!",
     "deleteOrderOk": "Заказ %s успешно удален!",
     "deleteTaskWorkerOk": "%s успешно удален!",
-    "notifyReadOk": "Уведомление помечено прочитанным!"
+    "notifyReadOk": "Уведомление помечено прочитанным!",
+    "errorViewOk": "Ошибка успешно помечена прочитанной!",
+    "errorRemoveOk": "Ошибка успешно удалена!",
+    "notifyRemoveOk": "Уведомление успешно удалено!"
   },
   "info": {
     "blockUser": "Пользователь заблокирован ",
@@ -301,6 +312,16 @@
     "range": "Диапазон дат"
   },
   "table": {
+    "error": {
+      "userId": "Пользователь",
+      "error": "Ошибка",
+      "status": "Статус",
+      "createdAt": "Время ошибки",
+      "view": "Просмотр ошибки",
+      "stack": "Стек",
+      "code": "Код ошибки",
+      "action": "Действия"
+    },
     "role": {
       "name": "Название должности",
       "code": "Код должности",
@@ -391,6 +412,16 @@
       "to": "До",
       "totalPayed": "Выплачено"
     },
+    "notify": {
+      "userTo": "Получатель",
+      "userId": "Отправитель",
+      "title": "Заголовок",
+      "message": "Сообщение",
+      "createdAt": "Время создания",
+      "status": "Статус",
+      "view": "Просмотр уведомления",
+      "action": "Действия"
+    },
     "financyOrder": {
       "worker": "Сотрудник",
       "total": "Итого",
@@ -406,25 +437,29 @@
     }
   },
   "analytic": {
-    "countArchiveUser": "Архив: Кол-во пользователей",
-    "countUser": "Кол-во пользователей",
-    "countOrder": "Кол-во изделий",
-    "countTask": "Кол-во заданий",
-    "countTaskWorker": "Кол-во исполнителей",
-    "countNotify": "Кол-во уведомлений",
-    "countMessage": "Кол-во сообщений",
-    "countPay": "Кол-во платажей",
-    "countImage": "Кол-во изображений",
-    "countWorkHistory": "Кол-во рабочих сессий",
-    "countArchiveWorkHistory": "Архив: Кол-во раб.сессий",
-    "countArchiveTask": "Архив: Кол-во заданий",
-    "countArchiveTaskWorker": "Архив: Кол-во исполнителей",
-    "countArchiveOrder": "Архив: Кол-во изделий",
-    "countArchiveNotify": "Архив: Кол-во уведомлений",
-    "countArchiveMessage": "Архив: Кол-во сообщений",
-    "countArchivePay": "Архив: Кол-во платежей",
-    "countArchiveImage": "Архив: Кол-во изображений",
-    "appError": "Кол-во ошибок"
+    "title": {
+      "active": "Аналитика активных записей",
+      "archive": "Аналитика архивных записей"
+    },
+    "countArchiveUser": "Пользователи",
+    "countUser": "Пользователи",
+    "countOrder": "Изделия",
+    "countTask": "Задания",
+    "countTaskWorker": "Исполнители",
+    "countNotify": "Уведомления",
+    "countMessage": "Сообщения",
+    "countPay": "Платежи",
+    "countImage": "Изображения",
+    "countWorkHistory": "Рабочие сессии",
+    "appError": "Ошибки",
+    "countArchiveWorkHistory": "Рабочие сессии",
+    "countArchiveTask": "Задания",
+    "countArchiveTaskWorker": "Исполнители",
+    "countArchiveOrder": "Изделия",
+    "countArchiveNotify": "Уведомления",
+    "countArchiveMessage": "Сообщения",
+    "countArchivePay": "Платежи",
+    "countArchiveImage": "Изображения"
   },
   "form": {
     "search": "Поиск",

@@ -3,12 +3,10 @@ import { onMounted } from "vue";
 import dayjs from "@/utils/dayjs";
 import { useAuthStore, useGeneralStore } from "@/store";
 import { useI18n } from "vue-i18n";
-import VIcon from "@/components/UI/VIcon.vue";
-import { Dayjs } from "dayjs";
 import VHeader from "@/components/V/VHeader.vue";
-import { Colors } from "@/utils/colors";
 import { useRoute, useRouter } from "vue-router";
-import CmsAnalytic from "@/components/Cms/CmsAnalytic.vue";
+import CmsAnalyticActive from "@/components/Cms/CmsAnalyticActive.vue";
+import CmsAnalyticActiveArchive from "@/components/Cms/CmsAnalyticActiveArchive.vue";
 
 dayjs.locale("ru");
 const authStore = useAuthStore();
@@ -29,8 +27,9 @@ onMounted(() => {});
       <template #header> </template>
     </VHeader>
 
-    <div>
-      <CmsAnalytic />
+    <div class="flex flex-row flex-wrap p-4 gap-4">
+      <CmsAnalyticActive />
+      <CmsAnalyticActiveArchive />
     </div>
   </div>
 </template>

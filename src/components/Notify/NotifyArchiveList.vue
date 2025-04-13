@@ -65,6 +65,12 @@ const onQueryData = async () => {
       pagination.value.pageSize * (pagination.value.current - 1) - 1,
       0
     ),
+    // $sort: [
+    //   {
+    //     key: "readAt",
+    //     value: 1,
+    //   },
+    // ],
     // $sort: sort.value.map((x) => {
     //   return {
     //     key: x.field,
@@ -74,7 +80,9 @@ const onQueryData = async () => {
   })
     .then((result) => {
       pagination.value.total = result.total;
-      result.data && listData.value.push(...result.data);
+      if (result.data) {
+        listData.value = result.data;
+      }
     })
     .finally(() => {
       loading.value = false;
@@ -137,7 +145,7 @@ onMounted(async () => {
               }
             "
           >
-            {{ $t("button.ok") }}
+            {{ $t("button.read") }}
           </a-button>
         </template>
         <a-skeleton avatar :title="false" :loading="!!item.loading" active>
@@ -155,6 +163,7 @@ onMounted(async () => {
                 {{ item.createdAt ? dayjs(item.createdAt).fromNow() : "" }}
                 <template v-if="item.status === 1">
                   ({{ $t("button.readed") }} {{ dayjs(item.readAt).fromNow() }})
+                  {{ item.readAt }}
                 </template>
               </p>
             </template>

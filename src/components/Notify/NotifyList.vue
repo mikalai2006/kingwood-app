@@ -137,7 +137,7 @@ onMounted(async () => {
               }
             "
           >
-            {{ $t("button.ok") }}
+            {{ $t("button.readed") }}
           </a-button>
         </template>
         <a-skeleton avatar :title="false" :loading="!!item.loading" active>

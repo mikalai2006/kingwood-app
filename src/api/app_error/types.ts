@@ -1,4 +1,5 @@
 import { IPaginationParams } from "../types";
+import { IUser } from "../user/types";
 
 export interface IAppError {
   id: string;
@@ -7,6 +8,8 @@ export interface IAppError {
   code: string;
   stack: string;
   status: number;
+
+  user: IUser;
 
   createdAt: Date;
   updatedAt: Date;

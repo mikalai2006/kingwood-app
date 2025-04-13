@@ -309,6 +309,10 @@ onMounted(async () => {
     const _config = JSON.parse(_configTable) as IConfigTable;
     pagination.value = _config.pagination;
     sort.value = _config.sort;
+
+    if (Object.keys(props.params).length > 0) {
+      pagination.value.current = 1;
+    }
   }
 
   await onQueryData();

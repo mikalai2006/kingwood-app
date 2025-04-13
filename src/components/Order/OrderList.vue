@@ -109,42 +109,45 @@ const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const userStore = useUserStore();
 
-const siftParams = computed(() => {
-  const _result = Object.fromEntries(
-    Object.entries(props.params)
-      .filter(([key, value]) => !["to"].includes(key))
-      .map(([key, value]) => {
-        if (typeof value === "object" && value?.length) {
-          return [key, { $in: value }];
-        } else if (["dateOtgruzka"].includes(key)) {
-          return [
-            "dateOtgruzka",
-            { $lte: dayjs(0).add(value, "year").utc().format() },
-          ];
-        } else if (["name"].includes(key)) {
-          return ["name", { $regex: value, $options: "i" }];
-        } else if (["from"].includes(key)) {
-          return ["createdAt", { $gte: value, $lte: props.params.to }];
-        } else {
-          return [key, value];
-        }
-      })
-  );
-  _result.id = { $ne: "000000000000000000000000" };
-  return _result;
-});
+// const siftParams = computed(() => {
+//   const _result = Object.fromEntries(
+//     Object.entries(props.params)
+//       .filter(([key, value]) => !["to"].includes(key))
+//       .map(([key, value]) => {
+//         if (typeof value === "object" && value?.length) {
+//           return [key, { $in: value }];
+//         } else if (["dateOtgruzka"].includes(key)) {
+//           return [
+//             "dateOtgruzka",
+//             { $lte: dayjs(0).add(value, "year").utc().format() },
+//           ];
+//         } else if (["name"].includes(key)) {
+//           return ["name", { $regex: value, $options: "i" }];
+//         } else if (["from"].includes(key)) {
+//           return ["createdAt", { $gte: value, $lte: props.params.to }];
+//         } else {
+//           return [key, value];
+//         }
+//       })
+//   );
+//   _result.id = { $ne: "000000000000000000000000" };
+//   return _result;
+// });
 // console.log("siftParams: ", siftParams.value);
 
-const columnsData = computed(() => {
-  return orderStore.items.filter(sift(siftParams.value)).map((x) => {
-    const object = objectStore.items.find((y) => y.id === x.objectId);
+const items = ref<IOrder[]>([]);
 
-    return {
-      object,
-      ...x,
-      key: x.id,
-    };
-  });
+const columnsData = computed(() => {
+  return items.value;
+  // orderStore.items.filter(sift(siftParams.value)).map((x) => {
+  //   const object = objectStore.items.find((y) => y.id === x.objectId);
+
+  //   return {
+  //     object,
+  //     ...x,
+  //     key: x.id,
+  //   };
+  // });
 });
 
 const state = reactive({
@@ -181,6 +184,7 @@ const onChangePagintaion = async (_page: number, _pageSize: number) => {
 
 const onQueryData = async () => {
   loading.value = true;
+
   await orderStore
     .find({
       ...props.params,
@@ -199,13 +203,23 @@ const onQueryData = async () => {
         : undefined,
     })
     .then((result) => {
-      pagination.value.total = result.total;
-      localStorage.setItem(
-        nameKeyLocalStorage.value,
-        JSON.stringify(
-          Object.assign({}, { sort: sort.value, pagination: pagination.value })
-        )
-      );
+      if (result.data) {
+        const ids = result.data.map((x) => x.id);
+        const data = orderStore.items.filter((x) => ids.includes(x.id));
+        items.value = [...data];
+
+        pagination.value.total = result.total;
+
+        localStorage.setItem(
+          nameKeyLocalStorage.value,
+          JSON.stringify(
+            Object.assign(
+              {},
+              { sort: sort.value, pagination: pagination.value }
+            )
+          )
+        );
+      }
     })
     .finally(() => {
       loading.value = false;
@@ -342,6 +356,10 @@ onMounted(async () => {
     const _config = JSON.parse(_configTable) as IConfigTable;
     pagination.value = _config.pagination;
     sort.value = _config.sort;
+
+    if (Object.keys(props.params).length > 0) {
+      pagination.value.current = 1;
+    }
   }
 
   await onQueryData();
