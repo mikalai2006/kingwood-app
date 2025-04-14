@@ -138,7 +138,10 @@ const resetForm = () => {
 
 const constructors = computed(() => {
   return userStore.items
-    .filter((x) => x.postObject.name === "Конструктор")
+    .filter(
+      (x) =>
+        x.postObject.name === "Конструктор" || x.postObject.name === "Директор"
+    )
     .map((x) => {
       return {
         value: x.id,
