@@ -379,6 +379,7 @@ const showMore = ref(0);
       </a-form-item>
 
       <a-collapse
+        v-if="!formState?.id"
         v-model:activeKey="showMore"
         :bordered="false"
         :style="{

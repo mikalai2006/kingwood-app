@@ -135,11 +135,11 @@ const userStore = useUserStore();
 // });
 // console.log("siftParams: ", siftParams.value);
 
-const items = ref<IOrder[]>([]);
+const idsCurentPage = ref<string[]>([]);
 
 const columnsData = computed(() => {
-  return items.value;
-  // orderStore.items.filter(sift(siftParams.value)).map((x) => {
+  // return items.value;
+  // return orderStore.items.filter(sift(siftParams.value)).map((x) => {
   //   const object = objectStore.items.find((y) => y.id === x.objectId);
 
   //   return {
@@ -148,6 +148,17 @@ const columnsData = computed(() => {
   //     key: x.id,
   //   };
   // });
+  return orderStore.items
+    .filter((x) => idsCurentPage.value.includes(x.id))
+    .map((x) => {
+      const object = objectStore.items.find((y) => y.id === x.objectId);
+
+      return {
+        object,
+        ...x,
+        key: x.id,
+      };
+    });
 });
 
 const state = reactive({
@@ -204,9 +215,10 @@ const onQueryData = async () => {
     })
     .then((result) => {
       if (result.data) {
-        const ids = result.data.map((x) => x.id);
-        const data = orderStore.items.filter((x) => ids.includes(x.id));
-        items.value = [...data];
+        idsCurentPage.value = result.data.map((x) => x.id);
+        // const ids = result.data.map((x) => x.id);
+        // const data = orderStore.items.filter((x) => ids.includes(x.id));
+        // items.value = data;
 
         pagination.value.total = result.total;
 
@@ -219,6 +231,8 @@ const onQueryData = async () => {
             )
           )
         );
+      } else {
+        idsCurentPage.value = [];
       }
     })
     .finally(() => {
