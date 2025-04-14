@@ -37,6 +37,7 @@ import { useI18n } from "vue-i18n";
 import useNotification from "./composable/useNotification";
 import { useError } from "./composable/useError";
 import CmsMenu from "./components/Cms/CmsMenu.vue";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const generalStore = useGeneralStore();
 
@@ -54,7 +55,7 @@ const orderStore = useOrderStore();
 const taskWorkerStore = useTaskWorkerStore();
 const taskStatus = useTaskStatusStore();
 
-let socket: WebSocket;
+let socket: ReconnectingWebSocket;
 
 const router = useRouter();
 
@@ -145,18 +146,30 @@ const onInitData = async () => {
     );
 
     // setTimeout(() => {
-    const { socket: _socket } = useSocket({ router, t, noty, message });
-    socket = _socket;
+    if (!socket || socket?.readyState == WebSocket.CLOSED) {
+      const { socket: _socket, keyMessage } = useSocket({
+        router,
+        t,
+        noty,
+        message,
+      });
+      socket = _socket;
+      // check auth token.
+      socket.onopen = () => {
+        // message.destroy();
+        message.success({
+          content: t("info.connectSuccess"),
+          key: keyMessage,
+        });
+        socket.send(
+          JSON.stringify({
+            type: "jwt",
+            content: authStore.tokenData?.access_token,
+          })
+        );
+      };
+    }
 
-    // check auth token.
-    socket.onopen = () => {
-      socket.send(
-        JSON.stringify({
-          type: "jwt",
-          content: authStore.tokenData?.access_token,
-        })
-      );
-    };
     // }, 500);
   } catch (e: any) {
     onShowError(e);
@@ -194,6 +207,7 @@ onMounted(async () => {
 
   // window?.ipcRenderer.on("message", function (event, text) {
   //   // alert(text);
+
   //   noty.onShowNotify(text);
   // });
 

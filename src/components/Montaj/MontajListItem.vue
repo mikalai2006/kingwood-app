@@ -74,12 +74,12 @@ const activeStyle = computed(() => {
         {{ $t("button.editTask") }}
       </template>
       <div
-        class="flex gap-1 p-1 w-32 cursor-pointer text-xs"
+        class="flex gap-1 p-1 cursor-pointer text-xs"
         @click="emit('onEditTaskWorker', taskMW.item, objectId)"
       >
         <TaskWorkerStatusTagDot :task-worker-id="activeTaskWorker?.id" />
         <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
-        {{ getShortFIO(activeTaskWorker?.worker?.name, true) }}
+        {{ getShortFIO(activeTaskWorker?.worker?.name) }}
         - №{{ activeTaskWorker?.order.number }}
         {{ activeTaskWorker?.order.name }}
       </div>

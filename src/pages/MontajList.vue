@@ -41,8 +41,30 @@ const operationMontaj = computed(() =>
 );
 
 const idsInstallOperation = computed(() =>
-  operationStore.items.filter((x) => x.group === "install")
+  operationStore.items.filter((x) => x.group === "5").map((x) => x.id)
 );
+
+const taskWorkersForMontaj = computed(() => {
+  return taskWorkerStore.items.filter((x) =>
+    idsInstallOperation.value.includes(x.operationId)
+  );
+});
+
+const taskWorkerMontajGroup = computed(() =>
+  groupBy(taskWorkersForMontaj.value, "objectId")
+);
+
+const idsObjectMontaj = computed(() => {
+  const _ids = taskWorkersForMontaj.value.map((x) => x.objectId);
+  return [...new Set([..._ids])];
+});
+
+const objectsForMontaj = computed(() => {
+  const _montajObjectIds = idsObjectMontaj.value.map((x) => {
+    return objectStore.items.find((y) => y.id == x);
+  });
+  return _montajObjectIds;
+});
 
 const ordersForMontaj = computed(() =>
   orderStore.items
@@ -393,46 +415,54 @@ onBeforeUnmount(() => {
           <!-- <pre>
             {{ JSON.stringify(orderGroups, null, 2) }}
           </pre> -->
+          <!-- <pre>
+            {{ Object.keys(taskWorkerMontajGroup).length }}
+          </pre>
+          <pre>
+            object montaj:
+            {{ objectsForMontaj.map((x) => x?.id) }}
+          </pre> -->
         </div>
       </div>
-      <div
-        ref="tblRef"
-        class="mt-4 border-t border-r border-s-200 dark:border-g-700 w-full overflow-x-auto"
-      >
-        <div class="flex flex-row flex-nowrap">
-          <div
-            class="flex-none w-64 px-4 text-normal border-l border-b border-s-200 dark:border-g-700"
-          >
-            Объект
-          </div>
-          <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+      <div class="mt-4 p-4">
+        <div
+          ref="tblRef"
+          class="rounded-lg bg-white dark:bg-g-900 border-t border-r border-s-200 dark:border-g-700 w-full overflow-x-auto"
+        >
+          <div class="flex flex-row flex-nowrap">
+            <div
+              class="flex-none w-64 px-4 text-normal border-l border-b border-s-200 dark:border-g-700"
+            >
+              Объект
+            </div>
+            <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
               Изделия
             </td> -->
-          <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
+            <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
               Исполнитель
             </td> -->
-          <div
-            v-for="day in daysOfSelectWeek"
-            :key="day.day"
-            class="rowBody px-4 flex-auto basis-0 text-normal border-l border-b border-s-200 dark:border-g-700"
-          >
-            <div>
-              {{
-                day.dayString
-                  .split(",")
-                  .slice(0, day.dayString.split(" ").length - 3)
-                  .join(" ")
-              }}
-            </div>
-            <p class="font-normal">
-              {{
-                day.dayString
-                  .split(",")
-                  .slice(1, day.dayString.split(" ").length - 2)
-                  .join(" ")
-              }}
-            </p>
-            <!-- <RouterLink
+            <div
+              v-for="day in daysOfSelectWeek"
+              :key="day.day"
+              class="rowBody px-4 flex-auto basis-0 text-normal border-l border-b border-s-200 dark:border-g-700"
+            >
+              <div>
+                {{
+                  day.dayString
+                    .split(",")
+                    .slice(0, day.dayString.split(" ").length - 3)
+                    .join(" ")
+                }}
+              </div>
+              <p class="font-normal text-s-300 dark:text-g-400">
+                {{
+                  day.dayString
+                    .split(",")
+                    .slice(1, day.dayString.split(" ").length - 2)
+                    .join(" ")
+                }}
+              </p>
+              <!-- <RouterLink
                 :to="{
                   name: 'montajListDay',
                   params: {
@@ -442,60 +472,63 @@ onBeforeUnmount(() => {
               >
                 {{ $t("button.edit") }}
               </RouterLink> -->
+            </div>
           </div>
-        </div>
-        <div class="flex flex-col items-justify overflow-hidden">
-          <template v-for="objectMontaj in objects" :key="objectMontaj.id">
-            <div class="flex flex-row flex-nowrap items-stretch">
-              <div
-                class="w-64 p-4 border-l border-b border-s-200 dark:border-g-700"
-              >
-                <span class="text-base font-bold leading-4">
-                  {{ objectMontaj?.name }}
-                </span>
-                <MontajObjectOrders
-                  v-if="objectMontaj?.id"
-                  :object-id="objectMontaj.id"
-                />
-              </div>
-              <!-- <th class="py-4 border border-s-200 dark:border-g-700"></th> -->
-              <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
+          <div class="flex flex-col items-justify overflow-hidden">
+            <template
+              v-for="objectMontaj in objectsForMontaj"
+              :key="objectMontaj.id"
+            >
+              <div class="flex flex-row flex-nowrap items-stretch">
+                <div
+                  class="w-64 p-4 border-l border-b border-s-200 dark:border-g-700"
+                >
+                  <span class="text-base font-bold leading-4">
+                    {{ objectMontaj?.name }}
+                  </span>
+                  <MontajObjectOrders
+                    v-if="objectMontaj?.id"
+                    :object-id="objectMontaj.id"
+                  />
+                </div>
+                <!-- <th class="py-4 border border-s-200 dark:border-g-700"></th> -->
+                <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
               <span class="text-base font-normal leading-4">
                 Исполнитель 1
               </span>
             </th> -->
-              <div
-                v-if="objectMontaj?.id"
-                v-for="(day, index) in daysOfSelectWeek"
-                :key="day.dayString"
-                class="flex-auto basis-0 relative border-l border-b border-s-200 dark:border-g-700 m-0 p-0 group tdDay"
-                :style="{
-                  'min-height': newTaskMontajWorkers[objectMontaj.id]
-                    ? `${
-                        Object.values(newTaskMontajWorkers[objectMontaj.id])
-                          .length * 50
-                      }px`
-                    : 'auto',
-                }"
-              >
                 <div
-                  v-if="index === 0"
-                  :key="`${taskMW.item.id}_${sizeColumn[0]}`"
-                  v-for="(taskMW, taskMontajId, indexM) in newTaskMontajWorkers[
-                    objectMontaj.id
-                  ]"
-                  class="text-left text-sm text-nowrap"
+                  v-if="objectMontaj?.id"
+                  v-for="(day, index) in daysOfSelectWeek"
+                  :key="day.dayString"
+                  class="flex-auto basis-0 relative border-l border-b border-s-200 dark:border-g-700 m-0 p-0 group tdDay"
+                  :style="{
+                    'min-height': newTaskMontajWorkers[objectMontaj.id]
+                      ? `${
+                          Object.values(newTaskMontajWorkers[objectMontaj.id])
+                            .length * 50
+                        }px`
+                      : 'auto',
+                  }"
                 >
-                  <MontajListItem
-                    v-if="sizeColumn.length"
-                    :index="indexM"
-                    :size-column="sizeColumn[0]"
-                    :task-m-w="taskMW"
-                    :object-id="objectMontaj.id"
-                    @on-edit-task-worker="onEditTaskWorker"
-                  />
-                </div>
-                <!-- <a-tooltip>
+                  <div
+                    v-if="index === 0"
+                    :key="`${taskMW.item.id}_${sizeColumn[0]}`"
+                    v-for="(
+                      taskMW, taskMontajId, indexM
+                    ) in newTaskMontajWorkers[objectMontaj.id]"
+                    class="text-left text-sm text-nowrap"
+                  >
+                    <MontajListItem
+                      v-if="sizeColumn.length"
+                      :index="indexM"
+                      :size-column="sizeColumn[0]"
+                      :task-m-w="taskMW"
+                      :object-id="objectMontaj.id"
+                      @on-edit-task-worker="onEditTaskWorker"
+                    />
+                  </div>
+                  <!-- <a-tooltip>
                   <template #title>
                     {{ $t("button.addTask") }}
                   </template>
@@ -508,12 +541,12 @@ onBeforeUnmount(() => {
                     <VIcon :path="iPlusLg" />
                   </a-button>
                 </a-tooltip> -->
+                </div>
               </div>
-            </div>
-          </template>
+            </template>
+          </div>
         </div>
       </div>
-
       <!-- <div>
         {{ JSON.stringify(taskMontajWorkers, null, 2) }}
         <h4>Изделия готовые к монтажу</h4>

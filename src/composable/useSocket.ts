@@ -21,6 +21,7 @@ import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
 import { replaceSubstringByArray } from "@/utils/utils";
 import { MessageApi } from "ant-design-vue/es/message";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 export interface IUseSocketProps {
   router: Router;
@@ -28,6 +29,10 @@ export interface IUseSocketProps {
   noty: ReturnType<typeof composableNotification>;
   message: MessageApi;
 }
+
+let socket: ReconnectingWebSocket | null;
+
+const keyMessage = "socketMessage";
 
 export const useSocket = (props: IUseSocketProps) => {
   const authStore = useAuthStore();
@@ -46,7 +51,7 @@ export const useSocket = (props: IUseSocketProps) => {
   // console.log("router0", router.currentRoute);
 
   const connect = () => {
-    const _socket = new WebSocket(
+    let _socket: ReconnectingWebSocket | null = new ReconnectingWebSocket(
       `${import.meta.env.VITE_HOST_SOCKET}/api/v1/ws/room1`,
       [
         "Sec-WebSocket-Protocol",
@@ -57,42 +62,81 @@ export const useSocket = (props: IUseSocketProps) => {
     _socket.onclose = function (event) {
       if (authStore.tokenData) {
         // console.log("socket onclose: ", event);
-        modal.confirm({
-          title: h(
-            "span",
-            { class: "flex-auto text-g-800 dark:text-g-100" },
-            props?.t("info.disableServer")
-          ),
-          icon: h("span", { class: "anticon flex-none inline-flex " }, [
-            h(VIcon, {
-              path: iWraningTriangle,
-              class: "text-2xl text-g-700 dark:text-g-200",
-            }),
-          ]),
-          content: h(
-            "div",
-            { class: "text-g-700 dark:text-g-200" },
-            props?.t("info.disableServerDescription")
-          ),
-          cancelButtonProps: { style: { display: "none" } } as any,
-          onOk() {
-            props?.router.go(0);
+        // message.destroy();
+        props.message.loading(
+          {
+            content: props.t("info.refreshSocket"),
+            key: keyMessage,
+            duration: 0,
           },
-          okText: props?.t("button.reload"),
-          // onCancel() {
-          //   props?.router.go(0);
-          // },
-          class: "test",
-        });
-        // console.log("router1", router);
+          0
+        );
+        // .then(
+        //   () => message.success('success connect', 2.5),
+        //   // eslint-disable-next-line @typescript-eslint/no-empty-function
+        //   () => {},
+        // );
+        // const sModal = modal.confirm({
+        //   title: h(
+        //     "span",
+        //     { class: "flex-auto text-g-800 dark:text-g-100" },
+        //     props?.t("info.disableServer")
+        //   ),
+        //   icon: h("span", { class: "anticon flex-none inline-flex " }, [
+        //     h(VIcon, {
+        //       path: iWraningTriangle,
+        //       class: "text-2xl text-g-700 dark:text-g-200",
+        //     }),
+        //   ]),
+        //   content: h(
+        //     "div",
+        //     { class: "text-g-700 dark:text-g-200" },
+        //     props?.t("info.disableServerDescription")
+        //   ),
+        //   cancelButtonProps: { style: { display: "none" } } as any,
+        //   onOk() {
+        //     props?.router.go(0);
+        //   },
+        //   okText: props?.t("button.reload"),
+        //   // onCancel() {
+        //   //   props?.router.go(0);
+        //   // },
+        //   class: "test",
+        // });
+        // // console.log("router1", router);
+
+        // socket?.close();
+        // socket = null;
 
         // setTimeout(() => {
-        //   // connect();
-        //   console.log("router2", router);
+        //   // sModal?.destroy();
+        //   connect();
+        //   // console.log("refresh socket");
 
-        //   router.go(0);
-        // }, 5000);}
+        //  //router.go(0);
+        // }, 1000);
       }
+    };
+
+    _socket.onerror = function (event) {
+      // message.destroy();
+      props.message.error({
+        content: props.t("info.errorConnectionSocket"),
+        key: keyMessage,
+      });
+      setTimeout(
+        () =>
+          props.message.loading(
+            {
+              content: props.t("info.refreshSocket"),
+              key: keyMessage,
+              duration: 0,
+            },
+            0
+          ),
+        1000
+      );
+      // socket?.close();
     };
 
     _socket.onmessage = function (event) {
@@ -258,10 +302,18 @@ export const useSocket = (props: IUseSocketProps) => {
     return _socket;
   };
 
-  const socket = connect();
+  socket = connect();
+
+  window.onbeforeunload = function () {
+    // socket.onclose = function () {}; // disable onclose handler first
+
+    socket?.close();
+    console.log("Close socket");
+  };
 
   return {
     connect,
     socket,
+    keyMessage,
   };
 };
