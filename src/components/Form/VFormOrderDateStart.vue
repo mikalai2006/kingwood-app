@@ -58,7 +58,7 @@ const onSubmit = async () => {
       data.dateStart = dayjs(formState.dateStart).utc().format();
       data.id = formState.id;
       data.description = formState.description;
-      data.status = 1;
+      // data.status = 1;
       const result = await patch(data.id, data);
       orderStore.onAddItemToStore(result);
       message.success(t("form.message.successSave"));
@@ -83,6 +83,8 @@ const resetForm = () => {
 onMounted(() => {
   if (dayjs(formState.dateStart).year() == 1) {
     formState.dateStart = "";
+  } else {
+    formState.dateStart = dayjs(formState.dateStart).add(0, "day").format();
   }
 });
 

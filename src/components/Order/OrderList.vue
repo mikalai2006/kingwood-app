@@ -638,7 +638,7 @@ const activeKey = ref("list");
           <VIcon :path="iCheckLg" class="text-xl text-green-500" />
           {{ dayjs(record.dateStart).format(dateFormat) }}
         </div>
-        <div v-else>
+        <div>
           <a-tooltip v-if="authStore.roles.includes('order-add-design')">
             <template #title>
               {{ $t("info.dateStart") }}
@@ -653,7 +653,11 @@ const activeKey = ref("list");
                     }
                   "
             >
-              {{ $t("button.dateStart") }}
+              {{
+                dayjs(record.dateStart).year() == 1
+                  ? $t("button.dateStart")
+                  : $t("button.dateStartEdit")
+              }}
             </a-button>
           </a-tooltip>
         </div>
@@ -781,6 +785,7 @@ const activeKey = ref("list");
     v-model:open="openDateStart"
     :destroyOnClose="true"
     :title="$t('table.order.dateStart')"
+    :key="`dateStart_${dateFormStart?.id || '0'}`"
     :maskClosable="false"
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
