@@ -279,8 +279,9 @@ const newTaskMontajWorkers = computed(() => {
 
     for (const taskW of _allTaskWorkers) {
       if (
-        !_taskMontajWorkers[taskW.objectId] ||
-        !_taskMontajWorkers[taskW.objectId][taskW.workerId]
+        (!_taskMontajWorkers[taskW.objectId] ||
+          !_taskMontajWorkers[taskW.objectId][taskW.workerId]) &&
+        !["finish", "autofinish"].includes(taskW.status)
       ) {
         const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
         const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
