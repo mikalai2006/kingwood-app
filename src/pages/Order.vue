@@ -461,7 +461,8 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
             // stolyarComplete: 1,
             // shlifComplete: 1,
             // malyarComplete: 1,
-            goComplete: 1,
+            // goComplete: 1,
+            countTaskMontaj: 0,
             // dateOtgruzka: '1',
             montajComplete: 0,
           }"
@@ -608,7 +609,9 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
       @callback="
         () => {
           open = false;
-          activeKey = 'notWork';
+          if (!dataForm.id) {
+            activeKey = 'notWork';
+          }
         }
       "
     />

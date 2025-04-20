@@ -105,6 +105,9 @@ const onSubmit = async () => {
       if (data.term) {
         data.term = new Date(data.term).toISOString();
       }
+      if (data.dateStart) {
+        data.dateStart = new Date(data.dateStart).toISOString();
+      }
       if (data.id) {
         const result = await patch(data.id, data);
         orderStore.onAddItemToStore(result);
@@ -114,6 +117,9 @@ const onSubmit = async () => {
           data.year = year.value.year();
         }
 
+        if (data.dateStart) {
+          data.dateStart = new Date(data.dateStart).toISOString();
+        }
         const result = await create(data);
         orderStore.onAddItemToStore(result);
       }
@@ -197,6 +203,12 @@ onMounted(() => {
 
   if (formState.year) {
     year.value = dayjs().year(formState.year);
+  }
+
+  if (dayjs(formState.dateStart).year() == 1) {
+    formState.dateStart = "";
+  } else {
+    formState.dateStart = dayjs(formState.dateStart).add(0, "day").format();
   }
 });
 
@@ -361,6 +373,16 @@ const showMore = ref(0);
           value-format="YYYY-MM-DD"
           style="width: 100%"
           :placeholder="$t('form.order.selectTerm')"
+        />
+      </a-form-item>
+
+      <a-form-item :label="$t('form.order.dateStart')" name="dateStart">
+        <a-date-picker
+          v-model:value="formState.dateStart"
+          :format="dateFormat"
+          value-format="YYYY-MM-DD"
+          style="width: 100%"
+          :placeholder="$t('form.selectDate')"
         />
       </a-form-item>
       <!-- <a-form-item :label="$t('form.order.termMontaj')" name="termMontaj">

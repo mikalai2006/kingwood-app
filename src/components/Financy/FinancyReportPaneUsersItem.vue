@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
-import { usePostStore, useUserStore, useWorkHistoryStore } from "@/store";
+import { useUserStore, useWorkHistoryStore } from "@/store";
 import dayjs from "@/utils/dayjs";
-import groupBy from "lodash-es/groupBy";
 import { computed, ref } from "vue";
 import UserInfoTag from "../User/UserInfoTag.vue";
 import { iChevronRight } from "@/utils/icons";

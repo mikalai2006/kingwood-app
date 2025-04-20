@@ -109,31 +109,33 @@ const orderStore = useOrderStore();
 const objectStore = useObjectStore();
 const userStore = useUserStore();
 
-// const siftParams = computed(() => {
-//   const _result = Object.fromEntries(
-//     Object.entries(props.params)
-//       .filter(([key, value]) => !["to"].includes(key))
-//       .map(([key, value]) => {
-//         if (typeof value === "object" && value?.length) {
-//           return [key, { $in: value }];
-//         } else if (["dateOtgruzka"].includes(key)) {
-//           return [
-//             "dateOtgruzka",
-//             { $lte: dayjs(0).add(value, "year").utc().format() },
-//           ];
-//         } else if (["name"].includes(key)) {
-//           return ["name", { $regex: value, $options: "i" }];
-//         } else if (["from"].includes(key)) {
-//           return ["createdAt", { $gte: value, $lte: props.params.to }];
-//         } else {
-//           return [key, value];
-//         }
-//       })
-//   );
-//   _result.id = { $ne: "000000000000000000000000" };
-//   return _result;
-// });
-// console.log("siftParams: ", siftParams.value);
+const siftParams = computed(() => {
+  const _result = Object.fromEntries(
+    Object.entries(props.params)
+      .filter(([key, value]) => !["to"].includes(key))
+      .map(([key, value]) => {
+        if (typeof value === "object" && value?.length) {
+          return [key, { $in: value }];
+        } else if (["dateOtgruzka"].includes(key)) {
+          return [
+            "dateOtgruzka",
+            { $lte: dayjs(0).add(value, "year").utc().format() },
+          ];
+        } else if (["countTaskMontaj"].includes(key)) {
+          return ["countTaskMontaj", { $gt: value }];
+        } else if (["name"].includes(key)) {
+          return ["name", { $regex: value, $options: "i" }];
+        } else if (["from"].includes(key)) {
+          return ["createdAt", { $gte: value, $lte: props.params.to }];
+        } else {
+          return [key, value];
+        }
+      })
+  );
+  _result.id = { $ne: "000000000000000000000000" };
+  return _result;
+});
+console.log("siftParams: ", siftParams.value);
 
 const idsCurentPage = ref<string[]>([]);
 
@@ -150,6 +152,7 @@ const columnsData = computed(() => {
   // });
   return orderStore.items
     .filter((x) => idsCurentPage.value.includes(x.id))
+    .filter(sift(siftParams.value))
     .map((x) => {
       const object = objectStore.items.find((y) => y.id === x.objectId);
 
@@ -639,7 +642,12 @@ const activeKey = ref("list");
           {{ dayjs(record.dateStart).format(dateFormat) }}
         </div>
         <div>
-          <a-tooltip v-if="authStore.roles.includes('order-add-design')">
+          <a-tooltip
+            v-if="
+              authStore.roles.includes('order-add-design') &&
+              dayjs(record.dateStart).year() == 1
+            "
+          >
             <template #title>
               {{ $t("info.dateStart") }}
             </template>

@@ -155,6 +155,17 @@ const onViewChanged = (item: IPay) => {
 
 onMounted(() => {
   onFindPays();
+
+  workHistoryStore.find({
+    workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
+    from: props.pane.month
+      ? currentDate.value.startOf("month").format()
+      : undefined,
+    to: props.pane.month
+      ? currentDate.value.endOf("month").format()
+      : undefined,
+    $limit: 10000,
+  });
 });
 </script>
 

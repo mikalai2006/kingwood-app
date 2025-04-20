@@ -122,6 +122,8 @@ const { onGetValidateError } = useError();
 const loading = ref(false);
 
 const onSubmit = async () => {
+  loading.value = true;
+
   await formRef.value
     .validate()
     .then(async () => {

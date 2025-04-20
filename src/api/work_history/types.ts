@@ -31,7 +31,7 @@ export interface IWorkHistory {
   };
 
   order: IOrder;
-  worker: IUser;
+  worker?: IUser;
   object: IObject;
 
   createdAt: Date;

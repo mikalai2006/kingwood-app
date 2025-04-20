@@ -27,18 +27,29 @@ const workerId = computed<string>(() => props.pane.workerId || "");
 const currentDate = computed(() => dayjs(month.value));
 
 const workHistoryGroupWorker = computed(() => {
-  const _list = workHistoryStore.items.filter(
-    (x) =>
-      dayjs(x.to).year() > 1 &&
-      dayjs(x.to)
-        .utc(true)
-        .isBetween(
-          currentDate.value.utc(true).startOf("month"),
-          currentDate.value.utc(true).endOf("month"),
-          "day",
-          "[]"
-        )
-  );
+  const _list = workHistoryStore.items
+    .filter(
+      (x) =>
+        dayjs(x.to).year() > 1 &&
+        dayjs(x.to)
+          .utc(true)
+          .isBetween(
+            currentDate.value.utc(true).startOf("month"),
+            currentDate.value.utc(true).endOf("month"),
+            "day",
+            "[]"
+          )
+    )
+    .map((x) => {
+      const _worker = userStore.items.find((y) => y.id === x.workerId);
+      return {
+        worker: _worker,
+        ...x,
+      };
+    })
+    .filter((x) =>
+      x.worker?.name.toLowerCase().includes(name.value.toLowerCase())
+    );
   // .map((x) => {
   //   const _totalMs = dayjs(x.to).diff(x.from);
   //   return {
@@ -48,11 +59,16 @@ const workHistoryGroupWorker = computed(() => {
   // });
   return groupBy(_list, "workerId");
 });
+
+const name = ref("");
 </script>
 
 <template>
   <div class="flex-auto flex flex-row items-stretch">
     <div class="overflow-hidden w-full">
+      <div class="mb-4">
+        <a-input v-model:value="name" placeholder="Введите фИО..." />
+      </div>
       <!-- <div v-for="item in workHistoryGroupWorker">
           {{ item[0].id }}
         </div> -->
@@ -62,6 +78,14 @@ const workHistoryGroupWorker = computed(() => {
           :pane="pane"
           :worker-id="item[0].workerId"
           @onChangeTabPane="emit('onChangeTabPane', $event)"
+        />
+      </template>
+      <template v-else-if="name != ''">
+        <a-alert
+          type="info"
+          show-icon
+          :message="$t('notify.info')"
+          :description="$t('info.notFoundFinancyUsersByName')"
         />
       </template>
       <template v-else>

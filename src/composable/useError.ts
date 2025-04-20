@@ -40,7 +40,7 @@ export const useError = () => {
 
     const result = _result.join(",");
 
-    message.warning(result);
+    message.warning({ content: result, key: "validate" });
 
     return result;
   };
@@ -66,7 +66,7 @@ export const useError = () => {
       });
     }
 
-    message.error(t(err?.message || err));
+    message.error({ content: t(err?.message || err), key: "err" });
   };
 
   return {

@@ -371,7 +371,7 @@ onErrorCaptured((error: any, vm, info) => {
               </a-button>
             </template>
           </a-result> -->
-            <section class="bg-white dark:bg-g-800">
+            <section class="">
               <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
                 <div class="mx-auto max-w-screen-sm text-center">
                   <h1

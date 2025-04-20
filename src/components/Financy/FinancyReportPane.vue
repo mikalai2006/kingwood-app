@@ -237,7 +237,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="basis-2/12 shrink-0 grow-1 bg-white dark:bg-g-900 min-w-80">
+    <div class="basis-2/12 shrink-0 grow-1 min-w-80">
       <div
         class="mt-4 rounded-lg overflow-y-auto h-[calc(100vh_-_165px)] b-scroll"
       >
@@ -250,7 +250,7 @@ onMounted(() => {
 
     <div
       v-if="listData.length"
-      class="flex-auto flex flex-col items-stretch m-4 overflow-y-auto h-[calc(100vh_-_130px)] b-scroll"
+      class="flex-auto flex flex-col items-stretch m-4"
     >
       <!-- <div class="flex-auto flex flex-col">
         <div
@@ -281,9 +281,7 @@ onMounted(() => {
           </div>
         </div>
       </div> -->
-      <div
-        class="z-10 sticky top-0 flex flex-row items-center bg-white dark:bg-g-900 pb-4 px-4"
-      >
+      <div class="flex flex-row items-center pb-4 px-4">
         <div class="flex-auto">
           <FinancyReportUserInfo :pane="pane" />
         </div>
@@ -293,35 +291,40 @@ onMounted(() => {
           </a-button>
         </div>
       </div>
-
-      <div class="bg-s-50 dark:bg-g-800 rounded-lg p-4">
-        <FinancyTotal :pane="pane" @onEditPay="onEditPay" />
-      </div>
-
-      <div class="mt-4 bg-s-50 dark:bg-g-800 rounded-lg">
-        <!-- {{ pane.workerId }} -->
-
-        <div
-          class="cursor-pointer flex flex-row items-center text-s-500 dark:text-g-300 p-4"
-          @click="showTable = !showTable"
-        >
-          <div class="flex-auto">
-            {{ $t("page.financy.everyDayReport") }}
-          </div>
-          <div>
-            <VIcon
-              :path="iChevronDown"
-              :class="[showTable ? 'rotate-180' : '', 'transition-transform']"
-            />
-          </div>
+      <div class="overflow-y-auto h-[calc(100vh_-_130px)] b-scroll">
+        <div class="bg-s-50 dark:bg-g-800 rounded-lg p-4">
+          <FinancyTotal
+            :pane="pane"
+            :key="pane?.workerId"
+            @onEditPay="onEditPay"
+          />
         </div>
-        <FinancyPaneTable
-          v-if="showTable"
-          :key="pane.workerId"
-          :data="daysList"
-          :pane="pane"
-          :work-historys="listDataGroupDays"
-        />
+
+        <div class="mt-4 bg-s-50 dark:bg-g-800 rounded-lg">
+          <!-- {{ pane.workerId }} -->
+
+          <div
+            class="cursor-pointer flex flex-row items-center text-s-500 dark:text-g-300 p-4"
+            @click="showTable = !showTable"
+          >
+            <div class="flex-auto">
+              {{ $t("page.financy.everyDayReport") }}
+            </div>
+            <div>
+              <VIcon
+                :path="iChevronDown"
+                :class="[showTable ? 'rotate-180' : '', 'transition-transform']"
+              />
+            </div>
+          </div>
+          <FinancyPaneTable
+            v-if="showTable"
+            :key="pane.workerId"
+            :data="daysList"
+            :pane="pane"
+            :work-historys="listDataGroupDays"
+          />
+        </div>
       </div>
     </div>
   </div>

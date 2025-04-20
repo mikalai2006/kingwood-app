@@ -27,6 +27,7 @@ export interface IOrder {
   dateOtgruzka: string;
   montajComplete: number;
   shlifComplete: number;
+  countTaskMontaj: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -51,6 +52,7 @@ export interface IOrderFilter extends IPaginationParams<IOrderInput> {
   goComplete?: number;
   montajComplete?: number;
   dateOtgruzka?: string;
+  countTaskMontaj?: number;
 
   from?: string;
   to?: string;

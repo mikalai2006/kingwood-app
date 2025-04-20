@@ -75,11 +75,12 @@ const useOrder = () => {
       montaj: orderStore.items.filter(
         (x) =>
           x.status === 1 &&
-          // x.stolyarComplete === 1 &&
-          // x.shlifComplete === 1 &&
-          // x.malyarComplete === 1 &&
-          x.goComplete === 1 &&
-          x.montajComplete == 0
+          // // x.stolyarComplete === 1 &&
+          // // x.shlifComplete === 1 &&
+          // // x.malyarComplete === 1 &&
+          // x.goComplete === 1 &&
+          x.montajComplete == 0 &&
+          x.countTaskMontaj > 0
         //  &&
         // x.montajComplete === 0
       ),
@@ -148,8 +149,9 @@ const useOrder = () => {
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
           // x.malyarComplete === 1 &&
-          x.goComplete === 1 &&
+          // x.goComplete === 1 &&
           x.montajComplete == 0 &&
+          x.countTaskMontaj > 0 &&
           x.objectId === params?.objectId
         //  &&
         // x.montajComplete === 0
