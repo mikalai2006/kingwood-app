@@ -124,10 +124,10 @@ const siftParams = computed(() => {
       .map(([key, value]) => {
         if (typeof value === "object" && value?.length) {
           return [key, { $in: value }];
-        } else if (["dateOtgruzka"].includes(key) && typeof value == "number") {
+        } else if (["dateOtgruzka"].includes(key) && typeof value == "string") {
           return [
             "dateOtgruzka",
-            { $lte: dayjs(0).add(value, "year").utc().format() },
+            { $lte: dayjs(0).add(parseInt(value), "year").utc().format() },
           ];
         } else if (["countTaskMontaj"].includes(key)) {
           return ["countTaskMontaj", { $gt: value }];
