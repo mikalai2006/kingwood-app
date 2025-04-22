@@ -13,6 +13,7 @@ import {
 import {
   iCheckLg,
   iChevronRight,
+  iClipboardCheck,
   iPen,
   iSearch,
   iTrashFill,
@@ -36,9 +37,13 @@ import { Colors } from "@/utils/colors";
 import OrderMessages from "./OrderMessages.vue";
 import OrderTaskList from "./OrderTaskList.vue";
 import FinancyOrder from "../Financy/FinancyOrder.vue";
+import { ITaskWorker } from "@/api/task_worker/types";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
+  filterColumn: {
+    [key: string]: any;
+  };
   pagination: {
     total: number;
     current: number;
@@ -78,6 +83,7 @@ const nameKeyLocalStorage = computed(
 const {
   columnKeys,
   sort,
+  filtersColumn,
   columns,
 
   openTaskModal,
@@ -98,6 +104,8 @@ const {
   openDateStart,
   defaultDateStart,
 
+  onCheckComplete,
+
   showOrderInfo,
   onOtgruzka,
   // onEditItem,
@@ -111,7 +119,7 @@ const userStore = useUserStore();
 
 const siftParams = computed(() => {
   const _result = Object.fromEntries(
-    Object.entries(props.params)
+    Object.entries({ ...props.params, ...filtersColumn.value })
       .filter(([key, value]) => !["to"].includes(key))
       .map(([key, value]) => {
         if (typeof value === "object" && value?.length) {
@@ -135,7 +143,7 @@ const siftParams = computed(() => {
   _result.id = { $ne: "000000000000000000000000" };
   return _result;
 });
-console.log("siftParams: ", siftParams.value);
+// console.log("siftParams: ", siftParams.value);
 
 const idsCurentPage = ref<string[]>([]);
 
@@ -202,6 +210,7 @@ const onQueryData = async () => {
   await orderStore
     .find({
       ...props.params,
+      ...filtersColumn.value,
       $limit: pagination.value.pageSize,
       $skip: Math.max(
         pagination.value.pageSize * (pagination.value.current - 1) - 1,
@@ -231,6 +240,7 @@ const onQueryData = async () => {
             Object.assign(
               {},
               { sort: sort.value, pagination: pagination.value }
+              // { filtersColumn: filtersColumn.value }
             )
           )
         );
@@ -250,6 +260,7 @@ const handleTableChange: any = (
   sorter: any
 ) => {
   // console.log("sorter", sorter);
+  // console.log("filters", filters);
 
   if (Object.values(sorter).length > 0) {
     sort.value = sorter.order
@@ -264,6 +275,20 @@ const handleTableChange: any = (
   } else {
     sort.value = [];
   }
+
+  const objFilters: any = {};
+  for (const key in filters) {
+    if (filters[key]) {
+      objFilters[key] = filters[key];
+    }
+  }
+
+  if (Object.values(objFilters).length > 0) {
+    filtersColumn.value = Object.assign({}, objFilters);
+  } else {
+    filtersColumn.value = {};
+  }
+
   onQueryData();
   // console.log({
   //   sorter,
@@ -373,6 +398,7 @@ onMounted(async () => {
     const _config = JSON.parse(_configTable) as IConfigTable;
     pagination.value = _config.pagination;
     sort.value = _config.sort;
+    // filtersColumn.value = _config.filterColumn;
 
     if (Object.keys(props.params).length > 0) {
       pagination.value.current = 1;
@@ -409,7 +435,7 @@ const activeKey = ref("list");
     size="small"
     class="table_order"
     @change="handleTableChange"
-    :row-class-name="(_record: IOrder, index: number) => (_record.group?.includes('create_complete') ? 'custom priority cursor-pointer bg-green-500/40 hover:!bg-green-500/50' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
+    :row-class-name="(_record: IOrder, index: number) => (_record.status == 200 ? 'custom priority cursor-pointer !bg-green-500/60 hover:!bg-green-500/70' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
     :customRow="
             (record: IOrder) => {
               return {
@@ -438,8 +464,30 @@ const activeKey = ref("list");
     <template #bodyCell="{ column, record }">
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
-        <div class="flex gap-0">
-          <a-tooltip v-if="authStore.roles.includes('order-patch')">
+        <div v-if="record.status != 200" class="flex gap-0 items-center">
+          <a-tooltip
+            placement="topRight"
+            v-if="record.tasks?.filter((x: ITaskWorker) => !['finish', 'autofinish'].includes(x.status)).length == 0 && record.tasks.length > 0 && record.status != 200"
+          >
+            <template #title>
+              {{ $t("button.checkCompleteOrder") }}
+            </template>
+            <a-button
+              type="primary"
+              @click="(e: Event) => {onCheckComplete(record); e.preventDefault(); e.stopPropagation()}"
+            >
+              <div class="flex items-center gap-2">
+                <VIcon :path="iCheckLg" />
+                <!-- {{ $t("button.checkComplete") }} -->
+                <!-- {{ $t("button.delete") }} -->
+              </div>
+            </a-button>
+          </a-tooltip>
+
+          <a-tooltip
+            v-if="authStore.roles.includes('order-patch')"
+            placement="topRight"
+          >
             <template #title>
               {{ $t("button.edit") }}
             </template>
@@ -459,6 +507,15 @@ const activeKey = ref("list");
             <VIcon :path="iPen" class="text-s-400 dark:text-g-300" />
           </a-button>
         </a-tooltip> -->
+        </div>
+        <div v-else>
+          <!-- <a-tag
+            :color="Colors.green[500]"
+            class="text-base flex gap-1 items-center"
+          >
+            <VIcon :path="iCheckLg" color="#fff" />
+            completed
+          </a-tag> -->
         </div>
       </template>
       <template v-if="column.key === 'image'">
@@ -528,7 +585,11 @@ const activeKey = ref("list");
           <div
             class="p-2 pt-4 text-white dark:text-white text-center leading-5"
           >
-            <template v-if="dayjs(record.dateOtgruzka).year() == 1">
+            <template
+              v-if="
+                dayjs(record.dateOtgruzka).year() == 1 && record.status != 200
+              "
+            >
               <div>
                 {{ $t("groupOperation.4") }}
               </div>
@@ -645,7 +706,8 @@ const activeKey = ref("list");
           <a-tooltip
             v-if="
               authStore.roles.includes('order-add-design') &&
-              dayjs(record.dateStart).year() == 1
+              dayjs(record.dateStart).year() == 1 &&
+              record.status != 200
             "
           >
             <template #title>
@@ -681,7 +743,7 @@ const activeKey = ref("list");
       </template>
     </template>
 
-    <template
+    <!-- <template
       #customFilterDropdown="{
         setSelectedKeys,
         selectedKeys,
@@ -720,13 +782,13 @@ const activeKey = ref("list");
           Reset
         </a-button>
       </div>
-    </template>
-    <template #customFilterIcon="{ filtered }">
+    </template> -->
+    <!-- <template #customFilterIcon="{ filtered }">
       <VIcon
         :path="iSearch"
         :style="{ color: filtered ? '#108ee9' : undefined }"
       />
-    </template>
+    </template> -->
 
     <!-- <template #expandIcon="{ onExpand, record, expanded }">
             <DownOutlined
@@ -818,6 +880,8 @@ const activeKey = ref("list");
     :bodyStyle="{
       margin: 0,
       padding: 0,
+      paddingTop: 10,
+      overflow: 'hidden',
       background:
         generalStore.themeMode === 'dark' ? Colors.g[900] : Colors.s[100],
     }"
@@ -837,13 +901,13 @@ const activeKey = ref("list");
         {{ currentOrderInModal?.name }}
       </div>
     </template>
-    <div v-if="currentOrderInModal" class="">
+    <div v-if="currentOrderInModal" class="h-[95vh] overflow-auto b-scroll">
       <a-tabs
         v-model:activeKey="activeKey"
         destroyInactiveTabPane
         :tabBarStyle="{
-          // position: 'sticky',
-          // top: 0,
+          position: 'sticky',
+          top: 0,
           'padding-left': '15px',
           margin: '0px',
           'z-index': 50,
@@ -853,7 +917,7 @@ const activeKey = ref("list");
       >
         <a-tab-pane key="list" :tab="$t('tabs.task.list')">
           <template v-if="authStore.roles.includes('task-list')">
-            <div class="px-4">
+            <div class="px-4 h-full overflow-auto">
               <OrderTaskList
                 :order-id="currentOrderInModal.id"
                 @on-edit-task="onEditTask"
@@ -861,7 +925,7 @@ const activeKey = ref("list");
               <a-button
                 v-if="authStore.roles.includes('task-create')"
                 @click="onAddNewTask(currentOrderInModal)"
-                class="mt-4"
+                class="mt-4 mb-8"
               >
                 {{ $t("form.task.add") }}
               </a-button>

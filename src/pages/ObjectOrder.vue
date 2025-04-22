@@ -235,7 +235,7 @@ const onSetFilter = () => {
         <OrderList
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 0, objectId: objectIds }"
+          :params="{ status: [0], objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -257,7 +257,7 @@ const onSetFilter = () => {
         <OrderList
           keyList="inWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 1, objectId: objectIds }"
+          :params="{ status: [1, 100], objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -280,9 +280,9 @@ const onSetFilter = () => {
           keyList="stolyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
+            status: [1, 100],
             stolyarComplete: 1,
-            dateOtgruzka: '1',
+            // dateOtgruzka: '1',
             objectId: objectIds,
             // shlifComplete: 0,
             // malyarComplete: 0,
@@ -311,11 +311,11 @@ const onSetFilter = () => {
           keyList="shlifComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
-            // stolyarComplete: 1,
+            status: [1, 100],
             shlifComplete: 1,
-            dateOtgruzka: '1',
             objectId: objectIds,
+            // stolyarComplete: 1,
+            // dateOtgruzka: '1',
             // malyarComplete: 0,
             // goComplete: 0,
             // montajComplete: 0,
@@ -342,11 +342,11 @@ const onSetFilter = () => {
           keyList="malyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
-            // stolyarComplete: 1,
+            status: [1, 100],
             malyarComplete: 1,
-            dateOtgruzka: '1',
             objectId: objectIds,
+            // stolyarComplete: 1,
+            // dateOtgruzka: '1',
             // shlifComplete: 1,
             // goComplete: 0,
             // montajComplete: 0,
@@ -373,13 +373,13 @@ const onSetFilter = () => {
           keyList="goComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
-            // stolyarComplete: 1,
-            // shlifComplete: 1,
-            // malyarComplete: 1,
+            status: [1, 100],
             goComplete: 1,
             dateOtgruzka: '1',
             objectId: objectIds,
+            // stolyarComplete: 1,
+            // shlifComplete: 1,
+            // malyarComplete: 1,
             // montajComplete: 0,
           }"
           @on-edit-item="onEditItem"
@@ -415,22 +415,39 @@ const onSetFilter = () => {
           keyList="montaj"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
+            status: [1, 100],
+            countTaskMontaj: 0,
+            montajComplete: 0,
+            objectId: objectIds,
+            // goComplete: 1,
+            // montajComplete: 0,
             // stolyarComplete: 1,
             // shlifComplete: 1,
             // malyarComplete: 1,
-            goComplete: 1,
             // dateOtgruzka: '1',
-            montajComplete: 0,
           }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
-      <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
+      <a-tab-pane key="completed">
+        <template #tab>
+          {{ $t("tabs.order.completed") }}
+          <a-badge
+            v-if="counterObject.completed.length"
+            :count="counterObject.completed.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[100]
+                  : Colors.g[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="completed"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 100, objectId: objectIds }"
+          :params="{ status: [100], objectId: objectIds }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>

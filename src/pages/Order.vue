@@ -151,7 +151,7 @@ const nameKeyLocalStorageColumns = ref("order.column");
 
 const onChangeTab = (key: string) => {
   router.push({ ...route, hash: `#${key}` });
-  console.log(key);
+  // console.log(key);
 };
 
 onMounted(() => {
@@ -292,7 +292,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
         <OrderList
           keyList="notWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 0 }"
+          :params="{ status: [0] }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -314,7 +314,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
         <OrderList
           keyList="inWork"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 1 }"
+          :params="{ status: [1, 100] }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>
@@ -337,9 +337,9 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="stolyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
+            status: [1, 100],
             stolyarComplete: 1,
-            dateOtgruzka: '1',
+            // dateOtgruzka: '1',
             // shlifComplete: 0,
             // malyarComplete: 0,
             // goComplete: 0,
@@ -367,10 +367,10 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="shlifComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
-            // stolyarComplete: 1,
+            status: [1, 100],
             shlifComplete: 1,
-            dateOtgruzka: '1',
+            // stolyarComplete: 1,
+            // dateOtgruzka: '1',
             // malyarComplete: 0,
             // goComplete: 0,
             // montajComplete: 0,
@@ -397,10 +397,10 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="malyarComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
-            // stolyarComplete: 1,
+            status: [1, 100],
             malyarComplete: 1,
-            dateOtgruzka: '1',
+            // stolyarComplete: 1,
+            // dateOtgruzka: '1',
             // shlifComplete: 1,
             // goComplete: 0,
             // montajComplete: 0,
@@ -427,12 +427,12 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="goComplete"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
+            status: [1, 100],
+            goComplete: 1,
+            dateOtgruzka: '1',
             // stolyarComplete: 1,
             // shlifComplete: 1,
             // malyarComplete: 1,
-            goComplete: 1,
-            dateOtgruzka: '1',
             // montajComplete: 0,
           }"
           @on-edit-item="onEditItem"
@@ -457,14 +457,14 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           keyList="montaj"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{
-            status: 1,
+            status: [1, 100],
+            countTaskMontaj: 0,
+            montajComplete: 0,
             // stolyarComplete: 1,
             // shlifComplete: 1,
             // malyarComplete: 1,
             // goComplete: 1,
-            countTaskMontaj: 0,
             // dateOtgruzka: '1',
-            montajComplete: 0,
           }"
           @on-edit-item="onEditItem"
         />
@@ -479,11 +479,25 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
           @on-date-start="onDateStart"
         />
       </a-tab-pane> -->
-      <a-tab-pane key="completed" :tab="$t('tabs.order.completed')">
+      <a-tab-pane key="completed">
+        <template #tab>
+          {{ $t("tabs.order.completed") }}
+          <a-badge
+            v-if="counter.completed.length"
+            :count="counter.completed.length"
+            :number-style="{
+              backgroundColor:
+                generalStore.themeMode !== 'dark'
+                  ? Colors.s[100]
+                  : Colors.g[500],
+              color: Colors.black,
+            }"
+          />
+        </template>
         <OrderList
           keyList="completed"
           :keyColumns="nameKeyLocalStorageColumns"
-          :params="{ status: 100 }"
+          :params="{ status: [100] }"
           @on-edit-item="onEditItem"
         />
       </a-tab-pane>

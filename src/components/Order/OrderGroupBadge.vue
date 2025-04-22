@@ -17,6 +17,7 @@ import TaskWorkerStatusTagDot from "../Task/TaskWorkerStatusTagDot.vue";
 import { ITaskWorker } from "@/api/task_worker/types";
 import { Colors } from "@/utils/colors";
 import dayjs from "@/utils/dayjs";
+import { dateFormat, dateFormatShort } from "@/utils/date";
 
 const props = defineProps<{
   group: string;
@@ -50,12 +51,13 @@ const tasks = computed(() => {
     .map((z) => {
       const _taskWorkers = taskWorkerStore.items
         .filter(
-          (y) =>
-            y.taskId === z.id &&
-            (dayjs(new Date())
-              // .subtract(1, "day")
-              .isBetween(dayjs(y.from), dayjs(y.to), "day", "[]") ||
-              z.status === "finish")
+          (y) => y.taskId === z.id
+          // &&
+          // (
+          //   dayjs(new Date())
+          //   // .subtract(1, "day")
+          //   .isBetween(dayjs(y.from), dayjs(y.to), "day", "[]") ||
+          //   z.status === "finish")
         )
         .map((u) => {
           const _user = userStore.items.find((us) => us.id === u.workerId);
@@ -176,6 +178,20 @@ const allWorkers = computed(() =>
               >
                 {{ getShortFIO(item.user?.name) }}
               </div>
+
+              <div
+                v-if="
+                  !dayjs(new Date()).isBetween(
+                    dayjs(item.from),
+                    dayjs(item.to),
+                    'day',
+                    '[]'
+                  ) && !['finish', 'autofinish'].includes(item.status)
+                "
+                class="px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black"
+              >
+                c {{ dayjs(item.from).format(dateFormatShort) }}
+              </div>
               <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"
           :bordered="false"
@@ -226,6 +242,20 @@ const allWorkers = computed(() =>
             "
           >
             {{ getShortFIO(worker.worker?.name) }}
+          </div>
+
+          <div
+            v-if="
+              !dayjs(new Date()).isBetween(
+                dayjs(worker.from),
+                dayjs(worker.to),
+                'day',
+                '[]'
+              ) && !['finish', 'autofinish'].includes(worker.status)
+            "
+            class="whitespace-nowrap px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black"
+          >
+            {{ $t("from") }} {{ dayjs(worker.from).format(dateFormatShort) }}
           </div>
           <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"

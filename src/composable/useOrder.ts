@@ -1,12 +1,13 @@
-import { computed, reactive, ref } from "vue";
+import { computed, h, reactive, ref } from "vue";
 
-import { message } from "ant-design-vue";
+import { message, Modal } from "ant-design-vue";
 import { debounce } from "lodash-es";
 import { IOrder, IOrderInput } from "@/api/order/types";
 import { ITask, ITaskInput } from "@/api/task/types";
 import {
   useObjectStore,
   useOrderStore,
+  usePostStore,
   useTaskStatusStore,
   useUserStore,
 } from "@/store";
@@ -14,6 +15,10 @@ import dayjs from "@/utils/dayjs";
 import { useI18n } from "vue-i18n";
 import { IObject } from "@/api/object/types";
 import { useRoute } from "vue-router";
+import { patch } from "@/api/order";
+import VIcon from "@/components/UI/VIcon.vue";
+import { iWraningTriangle } from "@/utils/icons";
+import { getShortFIO, replaceSubstringByArray } from "@/utils/utils";
 
 const useOrder = () => {
   const { t } = useI18n();
@@ -22,17 +27,17 @@ const useOrder = () => {
 
   const taskStatusStore = useTaskStatusStore();
   const userStore = useUserStore();
+  const postStore = usePostStore();
   const orderStore = useOrderStore();
 
   const counter = computed(() => {
     return {
-      inWork: orderStore.items.filter((x) => x.status === 1),
+      inWork: orderStore.items.filter((x) => [1, 100].includes(x.status)),
       notWork: orderStore.items.filter((x) => x.status === 0),
       stolyarComplete: orderStore.items.filter(
-        (x) =>
-          x.status === 1 &&
-          x.stolyarComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1
+        (x) => [1, 100].includes(x.status) && x.stolyarComplete === 1
+        // &&
+        // dayjs(x.dateOtgruzka).year() == 1
         //  &&
         // x.shlifComplete === 0 &&
         // x.malyarComplete === 0 &&
@@ -41,10 +46,11 @@ const useOrder = () => {
       ),
       shlifComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
-          x.shlifComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1
+          x.shlifComplete === 1
+        //  &&
+        // dayjs(x.dateOtgruzka).year() == 1
         // &&
         // x.malyarComplete === 0 &&
         // x.goComplete === 0 &&
@@ -52,18 +58,19 @@ const useOrder = () => {
       ),
       malyarComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
-          x.malyarComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1
+          x.malyarComplete === 1
+        // &&
+        // dayjs(x.dateOtgruzka).year() == 1
         // &&
         // x.goComplete === 0 &&
         // x.montajComplete === 0
       ),
       goComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
           // x.malyarComplete === 1 &&
@@ -74,7 +81,7 @@ const useOrder = () => {
       ),
       montaj: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // // x.stolyarComplete === 1 &&
           // // x.shlifComplete === 1 &&
           // // x.malyarComplete === 1 &&
@@ -84,22 +91,23 @@ const useOrder = () => {
         //  &&
         // x.montajComplete === 0
       ),
+      completed: orderStore.items.filter((x) => x.status === 100),
     };
   });
 
   const counterObject = computed(() => {
     return {
       inWork: orderStore.items.filter(
-        (x) => x.status === 1 && x.objectId === params?.objectId
+        (x) => [1, 100].includes(x.status) && x.objectId === params?.objectId
       ),
       notWork: orderStore.items.filter(
         (x) => x.status === 0 && x.objectId === params?.objectId
       ),
       stolyarComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           x.stolyarComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1 &&
+          // dayjs(x.dateOtgruzka).year() == 1 &&
           x.objectId === params?.objectId
         //  &&
         // x.shlifComplete === 0 &&
@@ -109,10 +117,10 @@ const useOrder = () => {
       ),
       shlifComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           x.shlifComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1 &&
+          // dayjs(x.dateOtgruzka).year() == 1 &&
           x.objectId === params?.objectId
         // &&
         // x.malyarComplete === 0 &&
@@ -121,11 +129,11 @@ const useOrder = () => {
       ),
       malyarComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
           x.malyarComplete === 1 &&
-          dayjs(x.dateOtgruzka).year() == 1 &&
+          // dayjs(x.dateOtgruzka).year() == 1 &&
           x.objectId === params?.objectId
         // &&
         // x.goComplete === 0 &&
@@ -133,7 +141,7 @@ const useOrder = () => {
       ),
       goComplete: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
           // x.malyarComplete === 1 &&
@@ -145,7 +153,7 @@ const useOrder = () => {
       ),
       montaj: orderStore.items.filter(
         (x) =>
-          x.status === 1 &&
+          [1, 100].includes(x.status) &&
           // x.stolyarComplete === 1 &&
           // x.shlifComplete === 1 &&
           // x.malyarComplete === 1 &&
@@ -155,6 +163,9 @@ const useOrder = () => {
           x.objectId === params?.objectId
         //  &&
         // x.montajComplete === 0
+      ),
+      completed: orderStore.items.filter(
+        (x) => x.status === 100 && x.objectId === params?.objectId
       ),
     };
   });
@@ -175,6 +186,8 @@ const useOrder = () => {
   };
 
   const sort = ref([{ field: "number", order: 1, key: "number" }]);
+
+  const filtersColumn = ref({});
 
   // dateStart
   const openDateStart = ref<boolean>(false);
@@ -267,6 +280,87 @@ const useOrder = () => {
     showTaskModal();
   };
 
+  const onCheckComplete = async (item: IOrder) => {
+    console.log("Check order complete: ", item);
+    Modal.confirm({
+      // transitionName: "",
+      icon: null,
+      content: h(
+        "div",
+        {
+          class: "flex flex-row items-start gap-4",
+        },
+        [
+          h(VIcon, {
+            path: iWraningTriangle,
+            class: "flex-none text-4xl text-green-500 dark:text-green-400",
+          }),
+          h(
+            "div",
+            {
+              class: "flex-auto",
+            },
+            [
+              h(
+                "div",
+                {
+                  class: "text-lg font-bold text-green-500 dark:text-green-400",
+                },
+                t("form.order.complete")
+              ),
+              h(
+                "div",
+                {},
+                replaceSubstringByArray(t("message.completeOrder"), [
+                  item?.name,
+                  item?.number,
+                ])
+              ),
+            ]
+          ),
+        ]
+      ),
+      okButtonProps: { type: "primary" },
+      okText: t("button.yes"),
+      cancelText: t("button.no"),
+      // title: t("form.task.delete"),
+      onOk() {
+        return new Promise(async (resolve, reject) => {
+          try {
+            await patch(item.id, {
+              status: 200,
+            }).then((result) => {
+              orderStore.onAddItemToStore(result);
+            });
+
+            resolve("");
+          } catch (e) {
+            message.error("Error: check complete order");
+          }
+        }).catch(() => console.log("Oops errors complete order!"));
+      },
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      onCancel() {},
+    });
+  };
+
+  const idPostConstructors = computed(() => {
+    return postStore.items
+      .filter((x) => x.name == "Конструктор" || x.name == "Директор")
+      .map((x) => x.id);
+  });
+
+  const constructors = computed(() => {
+    return userStore.items
+      .filter((x) => idPostConstructors.value.includes(x.postId))
+      .map((x) => {
+        return {
+          text: getShortFIO(x.name),
+          value: x.id,
+        };
+      });
+  });
+
   const onSetColumns = (value: string, key: string, data: string[]) => {
     localStorage.setItem(key, JSON.stringify(data));
   };
@@ -296,9 +390,10 @@ const useOrder = () => {
     {
       key: "constructorId",
       // customFilterDropdown: true,
+      filters: constructors.value,
       onFilter: (value: string, record: IOrder) => {
         const user = userStore.items.find((x) => x.id === record.constructorId);
-        return user?.name.indexOf(value) === 0;
+        return user?.id == value; //.name.indexOf(value) === 0;
       },
     },
     // { key: "group" },
@@ -353,6 +448,7 @@ const useOrder = () => {
             key: x.key,
             showSorterTooltip: false,
             sorter: x.sorter,
+            filters: x?.filters,
             onFilter: x?.onFilter,
             sortOrder: isExistSort
               ? isExistSort.order === -1
@@ -462,6 +558,7 @@ const useOrder = () => {
 
   return {
     sort,
+    filtersColumn,
 
     openOtgruzka,
     dataFormOtgruzka,
@@ -478,6 +575,8 @@ const useOrder = () => {
     currentOrderObjectInModal,
     onAddNewItem,
     onEditItem,
+
+    onCheckComplete,
 
     dataTaskForm,
     defaultDataTask,

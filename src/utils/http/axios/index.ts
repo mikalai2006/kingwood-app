@@ -109,7 +109,7 @@ const request = async <T = any>(config: AxiosRequestConfig): Promise<T> => {
   if (!_tokens) {
     console.log("Error:", conf);
 
-    throw new Error("error.notToken");
+    throw new Error("Токен доступа истек!");
   }
   // const stateNet = await NetInfo.fetch();
   // console.log('onFetch:::::', stateNet);

@@ -37,5 +37,5 @@ export const showMessage = (status: number | string): string => {
     default:
       message = `Ошибка соединения(${status})!`;
   }
-  return `${message} Пожалуйста, проверьте интернет или свяжитесь с администратором！`;
+  return `${message}`; //  Пожалуйста, проверьте интернет или свяжитесь с администратором！
 };

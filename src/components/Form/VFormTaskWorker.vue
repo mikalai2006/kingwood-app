@@ -220,6 +220,13 @@ watch(taskDate, (v) => {
   formState.to = v?.toISOString();
 });
 
+const disableEdit = computed(
+  () =>
+    formState.status &&
+    ["finish", "autofinish"].includes(formState.status) &&
+    authStore.code != "systemrole"
+);
+
 onMounted(() => {
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
@@ -308,7 +315,9 @@ onMounted(() => {
           style="width: 100%"
           :placeholder="$t('form.taskWorker.selectTypeGo')"
           :options="typesGo"
-          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
+          :disabled="
+            !authStore.roles.includes('taskWorker-typeGo') || disableEdit
+          "
         ></a-select>
       </a-form-item>
 
@@ -321,7 +330,9 @@ onMounted(() => {
           v-model:value="taskRange"
           :disabledDate="disabledDate"
           :format="dateFormat"
-          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
+          :disabled="
+            !authStore.roles.includes('taskWorker-typeGo') || disableEdit
+          "
         />
         <!-- :disabled="!!formState.id" -->
       </a-form-item>
@@ -335,7 +346,9 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
-          :disabled="!authStore.roles.includes('taskWorker-typeGo')"
+          :disabled="
+            !authStore.roles.includes('taskWorker-typeGo') || disableEdit
+          "
         />
       </a-form-item>
 
@@ -349,7 +362,9 @@ onMounted(() => {
           style="width: 100%"
           :placeholder="$t('form.taskWorker.selectStatusId')"
           :options="taskStatuses"
-          :disabled="!authStore.roles.includes('taskWorker-statusId')"
+          :disabled="
+            !authStore.roles.includes('taskWorker-statusId') || disableEdit
+          "
         ></a-select>
       </a-form-item>
 
@@ -382,7 +397,7 @@ onMounted(() => {
         </a-button>
         <a-button
           type="primary"
-          :disabled="loading"
+          :disabled="loading || disableEdit"
           :loading="loading"
           style="margin-left: 10px"
           @click="onSubmit"

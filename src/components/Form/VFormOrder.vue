@@ -17,7 +17,7 @@ import {
   useOrderStore,
   useUserStore,
 } from "@/store";
-import { IOrder } from "@/api/order/types";
+import { IOrder, IOrderInput } from "@/api/order/types";
 import { dateFormat } from "@/utils/date";
 import { message } from "ant-design-vue";
 import { useError } from "@/composable/useError";
@@ -109,7 +109,22 @@ const onSubmit = async () => {
         data.dateStart = new Date(data.dateStart).toISOString();
       }
       if (data.id) {
-        const result = await patch(data.id, data);
+        const dataPatch: IOrderInput = {
+          constructorId: data.constructorId,
+          description: data.description,
+          name: data.name,
+          objectId: data.objectId,
+          priority: data.priority,
+          year: data.year,
+        };
+
+        if (data.dateStart && dayjs(data.dateStart).year() != 1) {
+          dataPatch.dateStart = new Date(data.dateStart).toISOString();
+        }
+        if (data.term && dayjs(data.term).year() != 1) {
+          dataPatch.term = new Date(data.term).toISOString();
+        }
+        const result = await patch(data.id, dataPatch);
         orderStore.onAddItemToStore(result);
       } else {
         // add year.

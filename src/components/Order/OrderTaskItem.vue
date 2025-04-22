@@ -351,7 +351,11 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       </a-popconfirm> -->
       <div class="flex flex-row items-center gap-2">
         <!-- v-if="task?.status !== 'finish'" -->
-        <a-tooltip v-if="authStore.roles?.includes('task-delete')">
+        <a-tooltip
+          v-if="
+            authStore.roles?.includes('task-delete') && order?.status != 200
+          "
+        >
           <template #title>
             {{ $t("button.deleteTask") }}
           </template>
@@ -366,7 +370,12 @@ const onEditTaskWorker = (item: ITaskWorker) => {
             </div>
           </a-button>
         </a-tooltip>
-        <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
+        <a-tooltip
+          v-if="
+            authStore.roles?.includes('taskWorker-patch') &&
+            order?.status != 200
+          "
+        >
           <template #title>
             {{ $t("button.editTask") }}
           </template>
@@ -410,8 +419,21 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           {{ dayjs(item.to).format(dateFormat) }} -->
         </template>
       </UserListItem>
-      <div class="text-g-300 dark:text-g-500 self-start">
+      <div
+        :class="[
+          ' self-start whitespace-nowrap ',
+          !dayjs(new Date()).isBetween(
+            dayjs(item.from),
+            dayjs(item.to),
+            'day',
+            '[]'
+          ) && !['finish', 'autofinish'].includes(item.status)
+            ? 'px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black'
+            : 'text-g-300 dark:text-g-500',
+        ]"
+      >
         {{ $t("from") }} {{ dayjs(item.from).format(dateFormat) }}
+        <!-- {{ $t("to") }} {{ dayjs(item.to).format(dateFormat) }} -->
         <!-- <TimePretty
           :time="getObjectTime(dayjs(new Date()).diff(item.from))"
           short
@@ -430,7 +452,12 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       </div> -->
       <div class="flex-auto">
         <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
-          <a-tooltip v-if="authStore.roles?.includes('taskWorker-patch')">
+          <a-tooltip
+            v-if="
+              authStore.roles?.includes('taskWorker-patch') &&
+              order?.status != 200
+            "
+          >
             <template #title>
               {{ $t("button.patchTaskWorker") }}
             </template>
@@ -448,7 +475,8 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           <a-tooltip
             v-if="
               authStore.roles?.includes('taskWorker-delete') &&
-              item.status === 'wait'
+              item.status === 'wait' &&
+              order?.status != 200
             "
           >
             <template #title>
