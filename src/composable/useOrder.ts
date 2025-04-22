@@ -187,7 +187,7 @@ const useOrder = () => {
 
   const sort = ref([{ field: "number", order: 1, key: "number" }]);
 
-  const filtersColumn = ref({});
+  const filtersColumn = ref<{ [key: string]: any }>({});
 
   // dateStart
   const openDateStart = ref<boolean>(false);

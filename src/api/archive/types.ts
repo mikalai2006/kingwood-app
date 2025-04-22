@@ -61,7 +61,8 @@ export interface IArchiveOrderFilter
   year?: number;
   query?: string;
   group?: string[];
-  status?: number;
+  status?: number[];
+  constructorId?: string[];
   objectId?: string[];
   stolyarComplete?: number;
   shlifComplete?: number;

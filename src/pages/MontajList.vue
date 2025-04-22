@@ -369,7 +369,7 @@ onMounted(async () => {
     // shlifComplete: 1,
     // malyarComplete: 1,
     goComplete: 1,
-    status: 1,
+    status: [1],
   });
   // taskStore.find({ $limit: 100 });
 

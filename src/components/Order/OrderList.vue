@@ -124,7 +124,7 @@ const siftParams = computed(() => {
       .map(([key, value]) => {
         if (typeof value === "object" && value?.length) {
           return [key, { $in: value }];
-        } else if (["dateOtgruzka"].includes(key)) {
+        } else if (["dateOtgruzka"].includes(key) && typeof value == "number") {
           return [
             "dateOtgruzka",
             { $lte: dayjs(0).add(value, "year").utc().format() },
