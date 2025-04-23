@@ -178,7 +178,11 @@ onMounted(async () => {
           :tab="pane.title"
           :closable="pane.closable"
         >
-          <FinancyReportPane :pane="pane" @onChangeTabPane="onChangeTabPane" />
+          <FinancyReportPane
+            :pane="pane"
+            :key="pane.month"
+            @onChangeTabPane="onChangeTabPane"
+          />
         </a-tab-pane>
       </a-tabs>
     </div>

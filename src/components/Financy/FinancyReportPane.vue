@@ -19,6 +19,8 @@ import FinancyReportTotal from "./FinancyReportTotal.vue";
 import FinancyReportForm from "./FinancyReportForm.vue";
 import { iChevronDown } from "@/utils/icons";
 import FinancyReportUserInfo from "./FinancyReportUserInfo.vue";
+import { getStatByMonth } from "@/api/work_history";
+import { IWorkHistoryStatByMonth } from "@/api/work_history/types";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -81,43 +83,72 @@ const worker = computed(() =>
   userStore.items.find((x) => x.id === workerId.value)
 );
 
-const onQuery = (isSaveOption: boolean) => {
-  const data: IPaneOptionFinancyInput = {
-    ...props.pane,
-    month: month.value?.toString(),
-    monthIndex: month.value.month(),
-    orderId: orderId.value,
-    workerId: workerId.value,
-    title: worker.value
-      ? `${getShortFIO(worker.value.name)} - ${currentDate.value.format(
-          "YYYY-MM"
-        )}`
-      : props.pane.title,
-  };
-  if (isSaveOption) {
-    emit("onChangeTabPane", data);
-  }
+// const onQuery = (isSaveOption: boolean) => {
+//   const data: IPaneOptionFinancyInput = {
+//     ...props.pane,
+//     month: month.value?.toString(),
+//     monthIndex: month.value.month(),
+//     orderId: orderId.value,
+//     workerId: workerId.value,
+//     title: worker.value
+//       ? `${getShortFIO(worker.value.name)} - ${currentDate.value.format(
+//           "YYYY-MM"
+//         )}`
+//       : props.pane.title,
+//   };
+//   if (isSaveOption) {
+//     emit("onChangeTabPane", data);
+//   }
 
-  if (!month.value) {
-    return;
-  }
-  workHistoryStore
-    .find({
-      // workerId: workerId.value ? [workerId.value] : undefined,
-      from: month.value
-        ? currentDate.value.startOf("month").format()
-        : undefined,
-      to: month.value ? currentDate.value.endOf("month").format() : undefined,
-      $limit: 10000,
-    })
-    .then((r) => {
-      // if (!r.data?.length) {
-      emit("onChangeTabPane", {
-        ...props.pane,
-        workerId: undefined,
-      });
-      // }
-    });
+//   if (!month.value) {
+//     return;
+//   }
+//   workHistoryStore
+//     .find({
+//       // workerId: workerId.value ? [workerId.value] : undefined,
+//       from: month.value
+//         ? currentDate.value.startOf("month").format()
+//         : undefined,
+//       to: month.value ? currentDate.value.endOf("month").format() : undefined,
+//       $limit: 10000,
+//     })
+//     .then((r) => {
+//       // if (!r.data?.length) {
+//       emit("onChangeTabPane", {
+//         ...props.pane,
+//         workerId: undefined,
+//       });
+//       // }
+//     });
+// };
+
+const statData = ref<IWorkHistoryStatByMonth[]>([]);
+
+const idsWorkerWithWorkHistory = computed<string[]>(() => {
+  return [
+    ...new Set(
+      statData.value?.reduce((ac, el) => {
+        el.workers.length && ac.push(...el.workers);
+        return ac;
+      }, [] as string[])
+    ),
+  ];
+});
+
+const onQuery = async () => {
+  await getStatByMonth({
+    from: props.pane.month
+      ? currentDate.value.startOf("month").format()
+      : undefined,
+    to: props.pane.month
+      ? currentDate.value.endOf("month").format()
+      : undefined,
+    $limit: 10000,
+    status: 1,
+  }).then((r) => {
+    statData.value = r ? r.sort((a, b) => a.total - b.total) : [];
+    return r;
+  });
 };
 
 const listData = computed(() => {
@@ -194,7 +225,7 @@ const showTotal = ref(false);
 const showTable = ref(false);
 
 onMounted(() => {
-  onQuery(false);
+  onQuery();
 });
 </script>
 
@@ -206,7 +237,12 @@ onMounted(() => {
         <div class="bg-s-100 dark:bg-g-800 rounded-lg">
           <FinancyReportForm
             :pane="pane"
-            @onChangeTabPane="emit('onChangeTabPane', $event)"
+            @onChangeTabPane="
+              ($event) => {
+                emit('onChangeTabPane', $event);
+                // onQuery();
+              }
+            "
           />
         </div>
 
@@ -230,6 +266,7 @@ onMounted(() => {
           <FinancyReportTotal
             v-if="showTotal"
             :pane="pane"
+            :statData="statData"
             :key="pane.month?.toString()"
             @onEditPay="onEditPay"
           />
@@ -243,13 +280,14 @@ onMounted(() => {
       >
         <FinancyReportPaneUsers
           :pane="pane"
+          :idsWorkers="idsWorkerWithWorkHistory"
           @on-change-tab-pane="emit('onChangeTabPane', $event)"
         />
       </div>
     </div>
 
     <div
-      v-if="listData.length"
+      v-if="idsWorkerWithWorkHistory.length"
       class="flex-auto flex flex-col items-stretch m-4"
     >
       <!-- <div class="flex-auto flex flex-col">

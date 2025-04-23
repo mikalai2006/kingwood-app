@@ -42,12 +42,12 @@ const onQuery = (isSaveOption: boolean) => {
   if (!month.value) {
     return;
   }
-  workHistoryStore.find({
-    // workerId: workerId.value ? [workerId.value] : undefined,
-    from: month.value ? currentDate.value.startOf("month").format() : undefined,
-    to: month.value ? currentDate.value.endOf("month").format() : undefined,
-    $limit: 10000,
-  });
+  // workHistoryStore.find({
+  //   // workerId: workerId.value ? [workerId.value] : undefined,
+  //   from: month.value ? currentDate.value.startOf("month").format() : undefined,
+  //   to: month.value ? currentDate.value.endOf("month").format() : undefined,
+  //   $limit: 10000,
+  // });
 
   payStore.find({
     month: currentDate.value.month(),

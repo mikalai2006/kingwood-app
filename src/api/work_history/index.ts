@@ -4,6 +4,7 @@ import {
   IWorkHistory,
   IWorkHistoryFilter,
   IWorkHistoryInput,
+  IWorkHistoryStatByMonth,
   IWorkHistoryStatByOrder,
 } from "./types";
 
@@ -20,6 +21,12 @@ const find = async (data: IWorkHistoryFilter) =>
 const getStatByOrder = async (data: IWorkHistoryFilter) =>
   $post<IWorkHistoryStatByOrder[]>({
     url: `${URLS.path}/statByOrder`,
+    data,
+  });
+
+const getStatByMonth = async (data: IWorkHistoryFilter) =>
+  $post<IWorkHistoryStatByMonth[]>({
+    url: `${URLS.path}/statByMonth`,
     data,
   });
 
@@ -40,4 +47,4 @@ const remove = async (id: string | number) =>
     url: `${URLS.path}/${id}`,
   });
 
-export { find, create, patch, remove, getStatByOrder };
+export { find, create, patch, remove, getStatByOrder, getStatByMonth };

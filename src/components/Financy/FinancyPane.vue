@@ -175,7 +175,7 @@ const onEditPay = (item: IPay) => {
 };
 
 onMounted(() => {
-  onQuery(false);
+  // onQuery(false);
 });
 </script>
 

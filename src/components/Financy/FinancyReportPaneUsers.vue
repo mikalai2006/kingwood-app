@@ -8,6 +8,7 @@ import FinancyReportPaneUsersItem from "./FinancyReportPaneUsersItem.vue";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
+  idsWorkers: string[];
 }>();
 
 const emit = defineEmits({
@@ -26,39 +27,43 @@ const workerId = computed<string>(() => props.pane.workerId || "");
 
 const currentDate = computed(() => dayjs(month.value));
 
-const workHistoryGroupWorker = computed(() => {
-  const _list = workHistoryStore.items
-    .filter(
-      (x) =>
-        dayjs(x.to).year() > 1 &&
-        dayjs(x.to)
-          .utc(true)
-          .isBetween(
-            currentDate.value.utc(true).startOf("month"),
-            currentDate.value.utc(true).endOf("month"),
-            "day",
-            "[]"
-          )
-    )
-    .map((x) => {
-      const _worker = userStore.items.find((y) => y.id === x.workerId);
-      return {
-        worker: _worker,
-        ...x,
-      };
-    })
-    .filter((x) =>
-      x.worker?.name.toLowerCase().includes(name.value.toLowerCase())
-    );
-  // .map((x) => {
-  //   const _totalMs = dayjs(x.to).diff(x.from);
-  //   return {
-  //     ...x,
-  //     totalMs: _totalMs,
-  //   };
-  // });
-  return groupBy(_list, "workerId");
-});
+const workers = computed(() =>
+  userStore.items.filter((x) => props.idsWorkers.includes(x.id))
+);
+
+// const workHistoryGroupWorker = computed(() => {
+//   const _list = workHistoryStore.items
+//     .filter(
+//       (x) =>
+//         dayjs(x.to).year() > 1 &&
+//         dayjs(x.to)
+//           .utc(true)
+//           .isBetween(
+//             currentDate.value.utc(true).startOf("month"),
+//             currentDate.value.utc(true).endOf("month"),
+//             "day",
+//             "[]"
+//           )
+//     )
+//     .map((x) => {
+//       const _worker = userStore.items.find((y) => y.id === x.workerId);
+//       return {
+//         worker: _worker,
+//         ...x,
+//       };
+//     })
+//     .filter((x) =>
+//       x.worker?.name.toLowerCase().includes(name.value.toLowerCase())
+//     );
+//   // .map((x) => {
+//   //   const _totalMs = dayjs(x.to).diff(x.from);
+//   //   return {
+//   //     ...x,
+//   //     totalMs: _totalMs,
+//   //   };
+//   // });
+//   return groupBy(_list, "workerId");
+// });
 
 const name = ref("");
 </script>
@@ -72,11 +77,11 @@ const name = ref("");
       <!-- <div v-for="item in workHistoryGroupWorker">
           {{ item[0].id }}
         </div> -->
-      <template v-if="!!Object.keys(workHistoryGroupWorker)?.length">
+      <template v-if="!!workers?.length">
         <FinancyReportPaneUsersItem
-          v-for="item in workHistoryGroupWorker"
+          v-for="item in workers"
           :pane="pane"
-          :worker-id="item[0].workerId"
+          :worker-id="item.id"
           @onChangeTabPane="emit('onChangeTabPane', $event)"
         />
       </template>

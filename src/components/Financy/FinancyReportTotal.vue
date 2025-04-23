@@ -16,9 +16,12 @@ import VIcon from "../UI/VIcon.vue";
 import { iChange, iChevronDown, iPen } from "@/utils/icons";
 import { IObject } from "@/api/object/types";
 import { IPay } from "@/api/pay/types";
+import { getStatByMonth } from "@/api/work_history";
+import { IWorkHistoryStatByMonth } from "@/api/work_history/types";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
+  statData: IWorkHistoryStatByMonth[];
 }>();
 
 const emit = defineEmits(["onEditPay"]);
@@ -32,90 +35,92 @@ const payStore = usePayStore();
 
 const currentDate = computed(() => dayjs(dayjs(props.pane.month)));
 
-const listData = computed(() => {
-  const _list = workHistoryStore.items
-    .filter(
-      (x) =>
-        dayjs(x.to).year() > 1 &&
-        dayjs(x.to)
-          .utc(true)
-          .isBetween(
-            dayjs(props.pane.month).utc(true).startOf("month"),
-            dayjs(props.pane.month).utc(true).endOf("month"),
-            "day",
-            "[]"
-          )
-    )
-    .map((x) => {
-      // const _totalMinutes = x.workHistory.reduce((a, b) => {
-      //   const dayTo = dayjs(b.to);
-      //   // console.log(dayTo.year(), dayTo.diff(b.from));
+// const statData = ref<IWorkHistoryStatByMonth[]>([]);
 
-      //   return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
-      // }, 0);
-      return {
-        ...x,
-        totalMinutes: dayjs(x.to).year() != 1 ? dayjs(x.to).diff(x.from) : 0,
-      };
-    });
-  return _list;
-});
+// const listData = computed(() => {
+//   const _list = workHistoryStore.items
+//     .filter(
+//       (x) =>
+//         dayjs(x.to).year() > 1 &&
+//         dayjs(x.to)
+//           .utc(true)
+//           .isBetween(
+//             dayjs(props.pane.month).utc(true).startOf("month"),
+//             dayjs(props.pane.month).utc(true).endOf("month"),
+//             "day",
+//             "[]"
+//           )
+//     )
+//     .map((x) => {
+//       // const _totalMinutes = x.workHistory.reduce((a, b) => {
+//       //   const dayTo = dayjs(b.to);
+//       //   // console.log(dayTo.year(), dayTo.diff(b.from));
+
+//       //   return a + (dayTo.year() != 1 ? dayTo.diff(b.from) : 0);
+//       // }, 0);
+//       return {
+//         ...x,
+//         totalMinutes: dayjs(x.to).year() != 1 ? dayjs(x.to).diff(x.from) : 0,
+//       };
+//     });
+//   return _list;
+// });
 
 const totalMoney = computed(() =>
-  listData.value.reduce((a, b) => a + b.total, 0)
+  props.statData?.reduce((a, b) => a + b.total, 0)
 );
 
-const totalMoneyGroupOrder = computed(() => {
-  const _list = workHistoryStore.items
-    .filter(
-      (x) =>
-        dayjs(x.to).year() > 1 &&
-        dayjs(x.to)
-          .utc(true)
-          .isBetween(
-            dayjs(props.pane.month).utc(true).startOf("month"),
-            dayjs(props.pane.month).utc(true).endOf("month"),
-            "day",
-            "[]"
-          )
-    )
-    .map((x) => {
-      return {
-        ...x,
-      };
-    });
+// const totalMoneyGroupOrder = computed(() => {
+//   const _list = workHistoryStore.items
+//     .filter(
+//       (x) =>
+//         dayjs(x.to).year() > 1 &&
+//         dayjs(x.to)
+//           .utc(true)
+//           .isBetween(
+//             dayjs(props.pane.month).utc(true).startOf("month"),
+//             dayjs(props.pane.month).utc(true).endOf("month"),
+//             "day",
+//             "[]"
+//           )
+//     )
+//     .map((x) => {
+//       return {
+//         ...x,
+//       };
+//     });
 
-  const _group = groupBy(_list, "orderId");
-  const _result: {
-    [key: string]: {
-      total: number;
-      order: IOrder | undefined;
-      object: IObject | undefined;
-    };
-  } = {};
+//   const _group = groupBy(_list, "orderId");
+//   const _result: {
+//     [key: string]: {
+//       total: number;
+//       order: IOrder | undefined;
+//       object: IObject | undefined;
+//     };
+//   } = {};
 
-  for (const key in _group) {
-    const _order = orderStore.items.find((x) => x.id === key);
-    _result[key] = {
-      total: _group[key].reduce((a, e) => a + e.total, 0),
-      order: _order,
-      object: objectStore.items.find((x) => x.id === _order?.objectId),
-    };
-  }
+//   for (const key in _group) {
+//     const _order = orderStore.items.find((x) => x.id === key);
+//     _result[key] = {
+//       total: _group[key].reduce((a, e) => a + e.total, 0),
+//       order: _order,
+//       object: objectStore.items.find((x) => x.id === _order?.objectId),
+//     };
+//   }
 
-  return _result;
-});
+//   return _result;
+// });
 
-const totalByOrders = computed(() => {
-  return Object.values(totalMoneyGroupOrder.value).reduce(
-    (a, e) => a + e.total,
-    0
-  );
-});
+// const totalByOrders = computed(() => {
+//   return Object.values(totalMoneyGroupOrder.value).reduce(
+//     (a, e) => a + e.total,
+//     0
+//   );
+// });
 
-const totalMinutesHistory = computed(() =>
-  listData.value.reduce((a, b) => a + b.totalMinutes, 0)
-);
+// const totalMinutesHistory = computed(() =>
+//   listData.value.reduce((a, b) => a + b.totalMinutes, 0)
+// );
 
 const listPay = computed(() =>
   payStore.items.filter(
@@ -148,16 +153,16 @@ const onViewChanged = (item: IPay) => {
 onMounted(() => {
   onFindPays();
 
-  workHistoryStore.find({
-    workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
-    from: props.pane.month
-      ? currentDate.value.startOf("month").format()
-      : undefined,
-    to: props.pane.month
-      ? currentDate.value.endOf("month").format()
-      : undefined,
-    $limit: 10000,
-  });
+  // workHistoryStore.find({
+  //   workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
+  //   from: props.pane.month
+  //     ? currentDate.value.startOf("month").format()
+  //     : undefined,
+  //   to: props.pane.month
+  //     ? currentDate.value.endOf("month").format()
+  //     : undefined,
+  //   $limit: 10000,
+  // });
 });
 </script>
 
@@ -212,13 +217,10 @@ onMounted(() => {
           >
             <td colspan="2">
               <div class="bg-s-200 dark:bg-g-900 text-sm">
-                <div
-                  v-for="item in totalMoneyGroupOrder"
-                  class="flex items-center"
-                >
+                <div v-for="item in statData" class="flex items-center">
                   <div class="flex-auto px-4 py-2 font-normal">
                     {{ item.order?.number ? "№" + item.order?.number + " " : ""
-                    }}{{ item.order?.name }}, {{ item.object?.name }}
+                    }}{{ item.order?.name }}, {{ item?.order.object?.name }}
                   </div>
                   <div
                     class="px-6 py-2 whitespace-nowrap text-right font-medium text-p-700 dark:text-p-400"

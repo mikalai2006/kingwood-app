@@ -52,6 +52,15 @@ export interface IWorkHistoryStatByOrder {
   operations: IWorkHistoryStatByOrderOperation[];
 }
 
+export interface IWorkHistoryStatByMonth {
+  orderId: string;
+  count: number;
+  total: number;
+  totalTime: number;
+  order: IOrder;
+  workers: string[];
+}
+
 export type IWorkHistoryInput = {
   [Property in keyof IWorkHistory]?: IWorkHistory[Property];
 };
