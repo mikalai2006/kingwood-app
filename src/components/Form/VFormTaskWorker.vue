@@ -78,14 +78,6 @@ const rules = computed(() => {
       },
       // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
     ],
-    // from: [
-    //   {
-    //     required: true,
-    //     message: t("form.taskWorker.rule.dateStart"),
-    //     trigger: "change",
-    //   },
-    //   // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
-    // ],
     // operationId: [
     //   {
     //     required: true,
@@ -328,7 +320,7 @@ onMounted(() => {
         </a-select>
       </a-form-item>
 
-      <!-- <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
+      <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
         <a-select
           v-model:value="formState.typeGo"
           style="width: 100%"
@@ -368,9 +360,9 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-      </a-form-item> -->
+      </a-form-item>
 
-      <a-form-item :label="$t('form.taskWorker.dateStart')" name="date">
+      <!-- <a-form-item :label="$t('form.taskWorker.dateStart')" name="date">
         <a-date-picker
           v-model:value="taskStartDate"
           :disabledDate="disabledDate"
@@ -379,7 +371,7 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-      </a-form-item>
+      </a-form-item> -->
 
       <a-form-item
         v-if="authStore.roles.includes('taskWorker-statusId') && formState?.id"
