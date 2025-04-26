@@ -219,8 +219,14 @@ onMounted(() => {
               <div class="bg-s-200 dark:bg-g-900 text-sm">
                 <div v-for="item in statData" class="flex items-center">
                   <div class="flex-auto px-4 py-2 font-normal">
-                    {{ item.order?.number ? "№" + item.order?.number + " " : ""
-                    }}{{ item.order?.name }}, {{ item?.order.object?.name }}
+                    <template v-if="item.order.name">
+                      {{
+                        item.order?.number
+                          ? "№" + item.order?.number + " "
+                          : ""
+                      }}{{ item.order?.name }}, {{ item?.order.object?.name }}
+                    </template>
+                    <template v-else> Хоз. работы, Цех </template>
                   </div>
                   <div
                     class="px-6 py-2 whitespace-nowrap text-right font-medium text-p-700 dark:text-p-400"

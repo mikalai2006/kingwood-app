@@ -272,7 +272,7 @@ onMounted(() => {
         ></a-select> -->
       </a-form-item>
 
-      <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
+      <!-- <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
         <a-select
           v-model:value="formState.typeGo"
           style="width: 100%"
@@ -280,7 +280,7 @@ onMounted(() => {
           :options="typesGo"
           :disabled="!!formState.id"
         ></a-select>
-      </a-form-item>
+      </a-form-item> -->
 
       <a-form-item
         v-if="formState.typeGo === 'range'"

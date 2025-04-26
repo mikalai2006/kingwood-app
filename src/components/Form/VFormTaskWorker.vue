@@ -46,12 +46,18 @@ const formState: UnwrapRef<ITaskWorkerInput> = reactive({ ...props.data });
 const formRef = ref();
 
 const taskStatuses = computed(() =>
-  taskStatusStore.items.map((x) => {
-    return {
-      value: x.id,
-      label: x.name,
-    };
-  })
+  taskStatusStore.items
+    .filter(
+      (x) =>
+        !["Автозавершено", "Выполняется"].includes(x.name) ||
+        authStore.code == "systemrole"
+    )
+    .map((x) => {
+      return {
+        value: x.id,
+        label: x.name,
+      };
+    })
 );
 
 const rules = computed(() => {
@@ -72,6 +78,14 @@ const rules = computed(() => {
       },
       // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
     ],
+    // from: [
+    //   {
+    //     required: true,
+    //     message: t("form.taskWorker.rule.dateStart"),
+    //     trigger: "change",
+    //   },
+    //   // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
+    // ],
     // operationId: [
     //   {
     //     required: true,
@@ -196,6 +210,7 @@ const filterOption = (input: string, option: Option) => {
 
 const taskRange = ref<[Dayjs, Dayjs]>([dayjs(new Date()), dayjs(new Date())]);
 const taskDate = ref<Dayjs>(dayjs(new Date()));
+const taskStartDate = ref<Dayjs>(dayjs(new Date()));
 
 const typesGo = computed(() =>
   ["default", "date", "range"].map((x) => {
@@ -220,6 +235,10 @@ watch(taskDate, (v) => {
   formState.to = v?.toISOString();
 });
 
+watch(taskStartDate, (v) => {
+  formState.from = v?.toISOString();
+  formState.to = v.add(1, "year")?.toISOString();
+});
 const disableEdit = computed(
   () =>
     formState.status &&
@@ -309,7 +328,7 @@ onMounted(() => {
         </a-select>
       </a-form-item>
 
-      <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
+      <!-- <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
         <a-select
           v-model:value="formState.typeGo"
           style="width: 100%"
@@ -334,16 +353,26 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-        <!-- :disabled="!!formState.id" -->
       </a-form-item>
 
       <a-form-item
         v-else-if="formState.typeGo === 'date'"
         :label="$t('form.taskWorker.date')"
-        name="to"
+        name="date"
       >
         <a-date-picker
           v-model:value="taskDate"
+          :disabledDate="disabledDate"
+          :format="dateFormat"
+          :disabled="
+            !authStore.roles.includes('taskWorker-typeGo') || disableEdit
+          "
+        />
+      </a-form-item> -->
+
+      <a-form-item :label="$t('form.taskWorker.dateStart')" name="date">
+        <a-date-picker
+          v-model:value="taskStartDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
           :disabled="
