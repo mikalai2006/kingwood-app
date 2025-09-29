@@ -1,6 +1,6 @@
 {
   "name": "kingwood-app",
-  "version": "1.0.50",
+  "version": "1.0.55",
   "main": "dist-electron/main/index.js",
   "description": "Kingwood app",
   "homepage": ".",
