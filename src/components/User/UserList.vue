@@ -143,6 +143,18 @@ onMounted(async () => {
           {{ record.postObject?.name }}
         </a-tag>
       </template>
+      <template v-if="column.key === 'appInfo'">
+        <a-tag
+          :bordered="false"
+          v-if="record.auth.appInfo?.versionApp != ''"
+          class="mb-2"
+        >
+          app: {{ record.auth.appInfo.versionApp }} </a-tag
+        ><br />
+        <a-tag :bordered="false" v-if="record.auth.appInfo?.versionApp != ''"
+          >build: {{ record.auth.appInfo.versionBuild }}
+        </a-tag>
+      </template>
       <template v-if="column.key === 'currentTask'">
         <UserTask :workerId="record.id" />
       </template>

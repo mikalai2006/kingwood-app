@@ -65,4 +65,5 @@ export const roles = [
 
   "pay-patch",
   "pay-view-changes",
+  "maxTime-edit",
 ];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, Transition, watch } from "vue";
 import { useAppErrorStore, useAuthStore, useNotifyStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { iCheckLg } from "@/utils/icons";
@@ -28,7 +28,12 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const emit = defineEmits(["onRemoveItem", "onViewItem", "onSetItems"]);
+const emit = defineEmits([
+  "onRemoveItem",
+  "onViewItem",
+  "onSetItems",
+  "onRemoveList",
+]);
 
 const appErrorStore = useAppErrorStore();
 
@@ -157,6 +162,50 @@ const handleTableChange: any = (
   // });
 };
 
+// const selectedIds = ref<(string | number)[]>([]);
+const rowSelection = ref({
+  checkStrictly: false,
+  selectedRowKeys: [] as (string | number)[],
+  onChange: (selectedRowKeys: (string | number)[], selectedRows: INotify[]) => {
+    // console.log(
+    //   `selectedRowKeys: ${selectedRowKeys}`,
+    //   "selectedRows: ",
+    //   selectedRows
+    // );
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+  },
+  onSelect: (record: INotify, selected: boolean, selectedRows: INotify[]) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(record, selected, selectedRows);
+  },
+  onSelectAll: (
+    selected: boolean,
+    selectedRows: INotify[],
+    changeRows: INotify[]
+  ) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(selected, selectedRows, changeRows);
+  },
+});
+
+const OnRemoveSelected = () => {
+  // console.log(`Remove ${selectedIds.value}`);
+  emit("onRemoveList", {
+    id: rowSelection.value.selectedRowKeys,
+  });
+  pagination.value.current = pagination.value.current - 1;
+  rowSelection.value.selectedRowKeys = [];
+};
+
+watch(
+  () => columnsData.value,
+  () => {
+    if (columnsData.value.length == 0) {
+      onQueryData();
+    }
+  }
+);
+
 onMounted(async () => {
   // sync columns from localStorage.
   const _configTable = localStorage.getItem(nameKeyLocalStorage.value);
@@ -171,9 +220,32 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Transition name="height">
+    <div
+      v-show="rowSelection.selectedRowKeys.length"
+      class="mb-4 absolute top-0 bg-s-200 dark:bg-g-951 p-4"
+    >
+      <a-button
+        type="primary"
+        :disabled="!rowSelection.selectedRowKeys.length"
+        :loading="loading"
+        @click="OnRemoveSelected"
+      >
+        {{ $t("button.delete") }}
+      </a-button>
+      <span style="margin-left: 8px">
+        <template v-if="rowSelection.selectedRowKeys.length">
+          {{ `Selected ${rowSelection.selectedRowKeys.length} items` }}
+        </template>
+      </span>
+    </div>
+  </Transition>
   <a-table
     :columns="columns"
     :data-source="columnsData"
+    :row-selection="rowSelection"
+    :loading="loading"
+    rowKey="id"
     size="small"
     :customRow="
             (record: INotify) => {

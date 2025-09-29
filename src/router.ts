@@ -30,6 +30,7 @@ import CmsArchiveUser from "./pages/CMS/CmsArchiveUser.vue";
 import CmsAppError from "./pages/CMS/CmsAppError.vue";
 import CmsArchiveNotify from "./pages/CMS/CmsArchiveNotify.vue";
 import CmsNotify from "./pages/CMS/CmsNotify.vue";
+import ReAuth from "./pages/ReAuth.vue";
 
 const routes = [
   {
@@ -42,6 +43,12 @@ const routes = [
     path: "/auth",
     name: "auth",
     component: Auth,
+    meta: {},
+  },
+  {
+    path: "/reauth",
+    name: "reauth",
+    component: ReAuth,
     meta: {},
   },
   {

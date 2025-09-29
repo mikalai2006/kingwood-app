@@ -154,6 +154,8 @@ const onChangeTab = (key: string) => {
   // console.log(key);
 };
 
+const mounted = ref(true);
+
 onMounted(() => {
   // rangeSearch.value = [
   //   dayjs(`01.01.${new Date().getFullYear()}`, dateFormat),
@@ -165,6 +167,8 @@ onMounted(() => {
   if (_columns) {
     columnKeys.value = JSON.parse(_columns);
   }
+
+  mounted.value = false;
 
   // sync range from localStorage.
   const _filter = localStorage.getItem(nameKeyLocalFilterAll.value);
@@ -259,6 +263,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
     </VHeader>
 
     <a-tabs
+      v-if="!mounted"
       v-model:activeKey="activeKey"
       :key="columnKeys.length"
       destroyInactiveTabPane

@@ -13,9 +13,7 @@ import {
 import {
   iCheckLg,
   iChevronRight,
-  iClipboardCheck,
   iPen,
-  iSearch,
   iTrashFill,
   iWraningTriangle,
 } from "@/utils/icons";
@@ -607,7 +605,7 @@ const activeKey = ref("list");
                 {{ $t("button.otgruzka") }}
               </a-button>
             </template>
-            <template v-else>
+            <template v-else-if="dayjs(record.dateOtgruzka).year() != 1">
               {{ $t("info.otgruzkaYes") }}:<br />
               {{ dayjs(record.dateOtgruzka).utc(true).format(dateFormat) }}
             </template>

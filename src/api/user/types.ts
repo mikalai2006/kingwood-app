@@ -3,7 +3,7 @@ import { IImage } from "../image/types";
 import { IPost } from "../post/types";
 import { IRole } from "../role/types";
 import { ITaskWorker } from "../task_worker/types";
-import { IPaginationParams } from "../types";
+import { IDoplata, IPaginationParams } from "../types";
 import { IWorkHistory } from "../work_history/types";
 
 export interface IUser {
@@ -16,15 +16,18 @@ export interface IUser {
   hidden: number;
   archive: number;
   blocked: number;
-  roleObject: IRole;
   postObject: IPost;
   images: IImage[];
   birthday: string;
   roleId: string;
+  roleObject: IRole;
+  // roles: IRole[];
   postId: string;
   typeWork: string[];
   typePay: number;
   oklad: number;
+  maxTime: number;
+  dops: IDoplata[];
   lastTime: Date;
   workHistorys: IWorkHistory[];
   isWork: number;

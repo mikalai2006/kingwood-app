@@ -1,19 +1,23 @@
 <script setup lang="ts" async>
 import { computed, ref, onMounted, h } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useNotifyStore } from "@/store";
+import { useNotifyStore, useUserStore } from "@/store";
 import { useI18n } from "vue-i18n";
 import { message } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
 import { iCog } from "@/utils/icons";
-import { INotify } from "@/api/notify/types";
+import { INotify, INotifyListQuery } from "@/api/notify/types";
 import CmsNotifyActive from "@/components/Cms/Archive/CmsNotifyActive.vue";
 import CmsNotifyList from "@/components/Cms/Archive/CmsNotifyList .vue";
+import { replaceSubstringByArray } from "@/utils/utils";
+import { storeToRefs } from "pinia";
 
 dayjs.locale("ru");
 
 const { t } = useI18n();
 
+const userStore = useUserStore();
+const { getUserById } = storeToRefs(userStore);
 const notifyStore = useNotifyStore();
 const notifys = ref<INotify[]>([]);
 const onSetItems = (data: INotify[]) => {
@@ -22,9 +26,20 @@ const onSetItems = (data: INotify[]) => {
 
 const userFilter = computed(() => {
   return notifyStore.items.map((x) => {
+    const user = getUserById.value(x.userId);
     return {
-      text: x.user.name,
-      value: x.user.name,
+      text: user?.name,
+      value: user?.id,
+    };
+  });
+});
+
+const userRecepientFilter = computed(() => {
+  return notifyStore.items.map((x) => {
+    const user = getUserById.value(x.userTo);
+    return {
+      text: user?.name,
+      value: user?.id,
     };
   });
 });
@@ -43,13 +58,13 @@ const allColumns = computed(() => [
     key: "userId",
     filters: userFilter.value,
     width: 200,
-    onFilter: (value: string, record: INotify) => record.user.name === value,
+    onFilter: (value: string, record: INotify) => record.userId === value,
   },
   {
     key: "userTo",
     width: 200,
-    filters: userFilter.value,
-    onFilter: (value: string, record: INotify) => record.user.name === value,
+    filters: userRecepientFilter.value,
+    onFilter: (value: string, record: INotify) => record.userTo === value,
   },
   {
     key: "title",
@@ -101,6 +116,7 @@ const columns = computed(() =>
         onFilter: x?.onFilter,
         // fixed: x?.fixed,
         width: x?.width,
+        children: [],
       };
     })
 );
@@ -157,7 +173,7 @@ const onRemoveItem = (item: INotify) => {
         const removeIndex = notifys.value.findIndex((x) => x.id == item.id);
 
         if (removeIndex != -1) {
-          notifys.value.splice(removeIndex, 1);
+          notifys.value = notifys.value.splice(removeIndex, 1);
         }
         message.success(t("message.notifyRemoveOk"));
       })
@@ -170,6 +186,34 @@ const onRemoveItem = (item: INotify) => {
         open.value = false;
       });
   }
+};
+
+const OnRemoveList = async (items: INotifyListQuery) => {
+  await notifyStore
+    .onRemoveList(items)
+    .then(() => {
+      // for (let i = 0; i < items.id.length; i++) {
+      //   const removeIndex = notifys.value.findIndex((x) => x.id == items.id[i]);
+
+      //   if (removeIndex != -1) {
+      //     notifys.value = notifys.value.splice(removeIndex, 1);
+      //   }
+      // }
+      notifys.value = notifys.value.filter((x) => !items.id.includes(x.id));
+      message.success(
+        replaceSubstringByArray(t("message.notifyRemoveListOk"), [
+          items.id?.length,
+        ])
+      );
+    })
+    .catch((error: any) => {
+      message.error(error);
+      throw new Error(error);
+    })
+    .finally(() => {
+      loading.value = false;
+      open.value = false;
+    });
 };
 
 const nameKeyLocalStorageColumns = ref("archiveNotify.column");
@@ -186,7 +230,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex-auto">
+  <div class="flex-auto relative">
     <VHeader :title="$t('cms.page.cms-notify')">
       <template #back> &nbsp; </template>
       <template #header>
@@ -247,6 +291,7 @@ onMounted(() => {
       @on-remove-item="onRemoveItem"
       @on-view-item="onViewItem"
       @on-set-items="onSetItems"
+      @on-remove-list="OnRemoveList"
     />
   </div>
 

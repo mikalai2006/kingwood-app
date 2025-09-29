@@ -69,3 +69,13 @@ export type TimerData = {
   seconds0: string;
   date: Dayjs;
 };
+
+export interface IDoplata {
+  days: string[];
+  minHours: number;
+  doplata: number;
+  id: number;
+}
+export type IDoplataInput = {
+  [Property in keyof IDoplata]?: IDoplata[Property];
+};

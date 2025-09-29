@@ -3,6 +3,7 @@ import VIcon from "@/components/UI/VIcon.vue";
 import {
   useAppErrorStore,
   useAuthStore,
+  useGeneralStore,
   useMessageStore,
   useNotifyStore,
   useObjectStore,
@@ -19,9 +20,10 @@ import modal from "ant-design-vue/es/modal";
 import { h } from "vue";
 import { Router } from "vue-router";
 import composableNotification from "@/composable/useNotification";
-import { replaceSubstringByArray } from "@/utils/utils";
+import { isExpiredTime, replaceSubstringByArray } from "@/utils/utils";
 import { MessageApi } from "ant-design-vue/es/message";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { CustomError } from "@/utils/customError";
 
 export interface IUseSocketProps {
   router: Router;
@@ -47,6 +49,7 @@ export const useSocket = (props: IUseSocketProps) => {
   const objectStore = useObjectStore();
   const workHistoryStore = useWorkHistoryStore();
   const notifyStore = useNotifyStore();
+  const generalStore = useGeneralStore();
 
   // console.log("router0", router.currentRoute);
 
@@ -61,16 +64,22 @@ export const useSocket = (props: IUseSocketProps) => {
     );
     _socket.onclose = function (event) {
       if (authStore.tokenData) {
-        // console.log("socket onclose: ", event);
         // message.destroy();
-        props.message.loading(
-          {
-            content: props.t("info.refreshSocket"),
-            key: keyMessage,
-            duration: 0,
-          },
-          0
-        );
+        if (
+          authStore.tokenData &&
+          !isExpiredTime(authStore.tokenData.expires_in)
+        ) {
+          props.message.loading(
+            {
+              content: props.t("info.refreshSocket"),
+              key: keyMessage,
+              duration: 0,
+            },
+            0
+          );
+        } else {
+          generalStore.setError(new CustomError(props.t("error.401"), "401"));
+        }
         // .then(
         //   () => message.success('success connect', 2.5),
         //   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -124,19 +133,26 @@ export const useSocket = (props: IUseSocketProps) => {
         content: props.t("info.errorConnectionSocket"),
         key: keyMessage,
       });
-      setTimeout(
-        () =>
-          props.message.loading(
-            {
-              content: props.t("info.refreshSocket"),
-              key: keyMessage,
-              duration: 0,
-            },
-            0
-          ),
-        1000
-      );
-      // socket?.close();
+
+      if (
+        authStore.tokenData &&
+        !isExpiredTime(authStore.tokenData.expires_in)
+      ) {
+        setTimeout(
+          () =>
+            props.message.loading(
+              {
+                content: props.t("info.refreshSocket"),
+                key: keyMessage,
+                duration: 0,
+              },
+              0
+            ),
+          1000
+        );
+      } else {
+        _socket?.close();
+      }
     };
 
     _socket.onmessage = function (event) {

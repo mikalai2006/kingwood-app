@@ -1,6 +1,11 @@
 import { $delete, $patch, $post } from "@/utils/http/axios";
 import { IResponseData } from "@/api/types";
-import { IAppError, IAppErrorFilter, IAppErrorInput } from "./types";
+import {
+  IAppError,
+  IAppErrorFilter,
+  IAppErrorInput,
+  IAppErrorListQuery,
+} from "./types";
 
 enum URLS {
   path = "/app_error",
@@ -29,4 +34,10 @@ const remove = async (id: string | number) =>
     url: `${URLS.path}/${id}`,
   });
 
-export { create, patch, remove, findPopulate };
+const removeList = async (data: IAppErrorListQuery) =>
+  $post<IAppError[]>({
+    url: `${URLS.path}/remove_list`,
+    data,
+  });
+
+export { create, patch, remove, findPopulate, removeList };

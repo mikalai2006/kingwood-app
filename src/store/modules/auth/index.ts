@@ -17,25 +17,28 @@ import { useCookies } from "@vueuse/integrations/useCookies";
 import { deleteAxiosHeader, setAxiosHeader } from "@/utils/http/axios";
 import { IUser } from "@/api/user/types";
 import { useRoleStore } from "../role";
+import { isExpiredTime } from "@/utils/utils";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     // _token: "",
     _iam: {} as IAmUser,
+    _refreshTokenLoading: false,
+    pageBeforeRefreshToken: "",
     _authData: {
       login: "",
       password: "",
       remembe: false,
     } as IAuthData,
     // ti: null as ReturnType<typeof setTimeout> | null,
-
+    _serviceAccessToken: null as string | null,
     tokenData: null as IResResultLogin | null,
   }),
   getters: {
     token: (state) => state.tokenData?.access_token,
     authData: (state) => state._authData,
     isAuthenticated(state): boolean {
-      return !!state.tokenData?.access_token;
+      return !!state._serviceAccessToken; //!!state.tokenData?.access_token;
     },
     iam: (state) => state._iam,
     code: (state) => {
@@ -53,33 +56,33 @@ export const useAuthStore = defineStore("auth", {
     setAuthData(data: IAuthData) {
       this._authData = { ...data };
     },
-    isExpiredRefreshToken() {
-      // console.log("isExpiredRefreshToken: ", this.tokenData);
-      if (!this?.tokenData) return true;
+    // isExpiredRefreshToken() {
+    //   // console.log("isExpiredRefreshToken: ", this.tokenData);
+    //   if (!this?.tokenData) return true;
 
-      const time = new Date().getTime();
-      const timeExp = new Date(this.tokenData.expires_in_r).getTime();
-      const diff = timeExp - time - 5000;
-      // console.log("diff refresh=", diff);
+    //   const time = new Date().getTime();
+    //   const timeExp = new Date(this.tokenData.expires_in_r).getTime();
+    //   const diff = timeExp - time - 5000;
+    //   // console.log("diff refresh=", diff);
 
-      const isExp = diff <= 0;
+    //   const isExp = diff <= 0;
 
-      return isExp;
-    },
-    isExpiredAccessToken() {
-      // console.log("isExpiredAccessToken: ", this.tokenData);
+    //   return isExp;
+    // },
+    // isExpiredAccessToken() {
+    //   // console.log("isExpiredAccessToken: ", this.tokenData);
 
-      if (!this?.tokenData) return true;
+    //   if (!this?.tokenData) return true;
 
-      const time = new Date().getTime();
-      const timeExp = new Date(this.tokenData.expires_in).getTime();
-      const diff = timeExp - time - 5000;
-      // console.log("diff=", diff);
+    //   const time = new Date().getTime();
+    //   const timeExp = new Date(this.tokenData.expires_in).getTime();
+    //   const diff = timeExp - time - 5000;
+    //   // console.log("diff=", diff);
 
-      const isExp = diff <= 0;
+    //   const isExp = diff <= 0;
 
-      return isExp;
-    },
+    //   return isExp;
+    // },
     setTokenData(data: IResResultLogin | null) {
       this.tokenData = data;
     },
@@ -90,31 +93,49 @@ export const useAuthStore = defineStore("auth", {
           return r;
         })
         .catch((e) => {
-          this.tokenData = null;
-          this._iam = {};
-
           const cookies = useCookies(["jwt"]);
           cookies.remove("jwt");
 
-          localStorage.removeItem("tokens");
+          if (this.tokenData && isExpiredTime(this.tokenData.expires_in_r)) {
+            this.tokenData = null;
+            this._iam = {};
+
+            localStorage.removeItem("tokens");
+          }
+
+          console.log("eeeeeeeeeeeeeeeee=", e);
+
+          if (e.code == 401) {
+          }
 
           setAxiosHeader("Authorization", `Bearer ${this.token}`);
           deleteAxiosHeader("Authorization");
           throw e;
         });
     },
+    setAuthOptions(_data: IResResultLogin) {
+      this._serviceAccessToken = _data?.access_token;
+      setAxiosHeader("Authorization", `Bearer ${_data.access_token}`);
+      this.setTokenData(_data);
+
+      const cookies = useCookies(["jwt"]);
+      cookies.set("jwt", this.token);
+
+      localStorage.setItem("tokens", JSON.stringify(_data));
+    },
     async login(body: ILoginData) {
       try {
         const data = await login(body);
         if (data?.access_token) {
-          this.setTokenData(data);
-          setAxiosHeader("Authorization", `Bearer ${this.token}`);
+          // this.setTokenData(data);
+          // setAxiosHeader("Authorization", `Bearer ${this.token}`);
 
-          const cookies = useCookies(["jwt"]);
-          cookies.set("jwt", data.access_token);
+          // const cookies = useCookies(["jwt"]);
+          // cookies.set("jwt", data.access_token);
 
-          localStorage.setItem("tokens", JSON.stringify(data));
+          // localStorage.setItem("tokens", JSON.stringify(data));
 
+          this.setAuthOptions(data);
           // and get iam.
           await this.getIAm();
         } else {
@@ -146,16 +167,36 @@ export const useAuthStore = defineStore("auth", {
           ? JSON.parse(_tokens)
           : null;
         if (tokens?.access_token) {
-          // console.log("init tokens: ", tokens, this.isExpiredAccessToken());
-          this.setTokenData(tokens);
+          this._serviceAccessToken = tokens?.access_token;
+          //  console.log(
+          //   "init tokens: ",
+          //   tokens,
+          //   isExpiredTime(tokens.expires_in_r)
+          // );
 
           // if (!this.isExpiredAccessToken) {
           //   setAxiosHeader("Authorization", `Bearer ${tokens?.access_token}`);
-          // } else if (this.isExpiredAccessToken) {
-          //   this.refreshToken();
-          // }
+          // } else if (this.isExpiredAccessToken() && !this.isExpiredRefreshToken()) {
 
-          return this.getIAm();
+          //}
+          let userData = null;
+          if (!isExpiredTime(tokens.expires_in_r)) {
+            await this.refreshToken(tokens);
+            userData = this.getIAm();
+            // this.setTokenData(tokens);
+          } else {
+            const cookies = useCookies(["jwt"]);
+            cookies.remove("jwt");
+
+            localStorage.removeItem("tokens");
+          }
+
+          return userData;
+        }
+        const remembe = localStorage.getItem("remembe");
+        if (remembe) {
+          const _remembe = JSON.parse(remembe);
+          this.setAuthData(_remembe);
         }
       } catch (e) {
         throw e;
@@ -164,21 +205,25 @@ export const useAuthStore = defineStore("auth", {
     },
     async onSyncToken(): Promise<IResResultLogin | null> {
       try {
-        const { access_token, refresh_token } = this.tokenData || {};
+        const { access_token, refresh_token, expires_in, expires_in_r } =
+          this.tokenData || {};
 
         const isAuthActually =
-          access_token && access_token !== "" && !this.isExpiredAccessToken();
+          access_token && access_token !== "" && !isExpiredTime(expires_in);
         const mayByRefresh =
-          refresh_token !== "" && !this.isExpiredRefreshToken();
+          refresh_token !== "" && !isExpiredTime(expires_in_r);
 
         // console.log(
+        //   this.tokenData,
         //   "isAuthActually=",
         //   isAuthActually,
         //   "mayByRefresh=",
         //   mayByRefresh,
         //   "isExpiredAccessToken=",
-        //   this.isExpiredAccessToken()
+        //   // this.isExpiredAccessToken(),
 
+        //   "isExpiredRefreshToken="
+        //   // this.isExpiredRefreshToken()
         //   // "isAccessTokenExpired()=",
         //   // isAccessTokenExpired(),
         //   // "isRefreshTokenExpired()=",
@@ -186,11 +231,19 @@ export const useAuthStore = defineStore("auth", {
         // );
         if (!isAuthActually) {
           if (mayByRefresh) {
-            const refreshTokens = await this.refreshToken();
-            // if (!refreshTokens) {
-            //     navigation.navigate(ScreenKeys.AuthScreen);
+            // // если токен уже пытается обновиться, последующие проверки прерываем.
+            // if (this._refreshTokenLoading) {
+            //   return null;
             // }
+
+            // this._refreshTokenLoading = true;
+            const refreshTokens = await this.refreshToken(this.tokenData);
+            // this?.router.replace("/reauth");
+
+            // this.pageBeforeRefreshToken = this.router.currentRoute.value.name;
+            // this._refreshTokenLoading = false;
             return refreshTokens;
+            // return null;
           } else {
             // throw new Error('Not auth');
             // navigation.navigate(ScreenKeys.AuthScreen);
@@ -227,20 +280,28 @@ export const useAuthStore = defineStore("auth", {
     //     throw e
     //   }
     // },
-    async refreshToken() {
+    async refreshToken(tokens: IResResultLogin) {
       try {
         // Not read cookie because cookie httpOnly.
         // const token: string = cookie.get('jwt-handmade')
-        if (!this.tokenData) return null;
+        if (!tokens) return null;
 
         const data = await refresh_token({
-          token: this.tokenData.refresh_token,
+          token: tokens.refresh_token,
         });
-        console.log("refresh token result: ", data);
+        // console.log("refresh token result: ", data);
 
-        this.setTokenData(data.access_token ? data : null);
+        if (data?.access_token != "") {
+          // this.setTokenData(data.access_token ? data : null);
+          // localStorage.setItem("tokens", JSON.stringify(data));
 
-        localStorage.setItem("tokens", JSON.stringify(data));
+          this.setAuthOptions(data);
+        } else {
+          this.tokenData = null;
+          this._iam = {};
+
+          localStorage.removeItem("tokens");
+        }
 
         // if (data.access_token) {
         // } else {
@@ -284,23 +345,23 @@ export const useAuthStore = defineStore("auth", {
       setAxiosHeader("Authorization", `Bearer ${this.token}`);
       deleteAxiosHeader("Authorization");
     },
-    async initAuth() {
-      try {
-        const localTokens =
-          // check param token.
-          // await this.getToken()
-          // refresh token.
-          await this.refreshToken();
-        // if exists token, set header auth.
-        if (this.token) {
-          setAxiosHeader("Authorization", `Bearer ${this.token}`);
-          // and get iam.
-          await this.getIAm();
-        }
-      } catch (e) {
-        console.error(e);
-        throw e;
-      }
-    },
+    // async initAuth() {
+    //   try {
+    //     const localTokens =
+    //       // check param token.
+    //       // await this.getToken()
+    //       // refresh token.
+    //       await this.refreshToken(this.tokenData);
+    //     // if exists token, set header auth.
+    //     if (this.token) {
+    //       setAxiosHeader("Authorization", `Bearer ${this.token}`);
+    //       // and get iam.
+    //       await this.getIAm();
+    //     }
+    //   } catch (e) {
+    //     console.error(e);
+    //     throw e;
+    //   }
+    // },
   },
 });

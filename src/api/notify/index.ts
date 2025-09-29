@@ -1,6 +1,11 @@
 import { $delete, $patch, $post } from "@/utils/http/axios";
 import { IResponseData } from "@/api/types";
-import { INotify, INotifyFilter, INotifyInput } from "./types";
+import {
+  INotify,
+  INotifyFilter,
+  INotifyInput,
+  INotifyListQuery,
+} from "./types";
 
 enum URLS {
   path = "/notify",
@@ -29,4 +34,10 @@ const remove = async (id: string | number) =>
     url: `${URLS.path}/${id}`,
   });
 
-export { create, patch, remove, findPopulate };
+const removeList = async (data: INotifyListQuery) =>
+  $post<INotify[]>({
+    url: `${URLS.path}/remove_list`,
+    data,
+  });
+
+export { create, patch, remove, findPopulate, removeList };

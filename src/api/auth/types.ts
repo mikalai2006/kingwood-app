@@ -33,6 +33,12 @@ export interface IAuthInput {
 export interface IAuthPublicData {
   login: string;
   pushToken: string;
+  appInfo: IAppInfo;
+}
+
+export interface IAppInfo {
+  versionApp: string;
+  versionBuild: string;
 }
 
 export interface IAuthData {

@@ -21,6 +21,9 @@ export const useUserStore = defineStore("user", {
     items(state) {
       return state._items;
     },
+    getUserById: (state) => {
+      return (id: string) => state._items.find((x) => x.id == id);
+    },
     person: (state) => {
       const authStore = useAuthStore();
       return authStore.iam

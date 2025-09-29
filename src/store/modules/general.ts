@@ -1,17 +1,25 @@
+import { CustomError } from "@/utils/customError";
 import { defineStore } from "pinia";
 
 export const useGeneralStore = defineStore("general", {
   state() {
     return {
       _themeMode: "ligth",
+      _error: null as CustomError | null,
     };
   },
   getters: {
     themeMode(state) {
       return state._themeMode;
     },
+    error(state) {
+      return state._error;
+    },
   },
   actions: {
+    setError(error: CustomError | null) {
+      this._error = error;
+    },
     onSetMode(mode: string) {
       if (this.themeMode) {
         document.documentElement.classList.remove(this.themeMode);

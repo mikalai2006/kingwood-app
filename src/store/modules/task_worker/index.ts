@@ -8,6 +8,7 @@ import {
 } from "@/api/task_worker/types";
 import { getObjectId } from "@/utils/utils";
 import { useUserStore } from "../user";
+import { useObjectStore } from "../object";
 // import sift from 'sift'
 
 export const useTaskWorkerStore = defineStore("taskWorker", {
@@ -69,6 +70,10 @@ export const useTaskWorkerStore = defineStore("taskWorker", {
       //   const userStore = useUserStore();
       //   userStore.onAddItemToStore(item.worker);
       // }
+      if (item.object && getObjectId(item.object.id) != "0") {
+        const objectStore = useObjectStore();
+        objectStore.onAddItemToStore(item.object);
+      }
     },
     onRemoveItemFromStore(
       id: string | number,

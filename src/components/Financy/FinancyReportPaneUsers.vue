@@ -5,6 +5,7 @@ import dayjs from "@/utils/dayjs";
 import groupBy from "lodash-es/groupBy";
 import { computed, ref } from "vue";
 import FinancyReportPaneUsersItem from "./FinancyReportPaneUsersItem.vue";
+import { IUser } from "@/api/user/types";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -27,9 +28,19 @@ const workerId = computed<string>(() => props.pane.workerId || "");
 
 const currentDate = computed(() => dayjs(month.value));
 
-const workers = computed(() =>
-  userStore.items.filter((x) => props.idsWorkers.includes(x.id))
-);
+const workers = computed(() => {
+  let result: IUser[] = [];
+  result = userStore.items.filter((x) => props.idsWorkers.includes(x.id));
+
+  const _name = name.value.trim();
+  if (_name != "") {
+    result = result.filter(
+      (x) => x.name.toLowerCase().indexOf(_name.toLowerCase()) !== -1
+    );
+  }
+
+  return result;
+});
 
 // const workHistoryGroupWorker = computed(() => {
 //   const _list = workHistoryStore.items
@@ -72,7 +83,7 @@ const name = ref("");
   <div class="flex-auto flex flex-row items-stretch">
     <div class="overflow-hidden w-full">
       <div class="mb-4">
-        <a-input v-model:value="name" placeholder="Введите фИО..." />
+        <a-input v-model:value="name" placeholder="Поиск сотрудника..." />
       </div>
       <!-- <div v-for="item in workHistoryGroupWorker">
           {{ item[0].id }}

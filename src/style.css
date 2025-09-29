@@ -73,6 +73,10 @@
   }
 }
 
+/* .ant-modal-root .ant-modal-wrap {
+  z-index: 99999 !important;
+} */
+
 header {
   -webkit-app-region: drag;
 }
@@ -192,4 +196,27 @@ code {
   > tr.row-small
   > td {
   padding: 5px !important;
+}
+
+/** transition effects **/
+/* we will explain what these classes do next! */
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+/* we will explain what these classes do next! */
+.height-enter-active,
+.height-leave-active {
+  transition: all 0.2s ease;
+}
+
+.height-enter-from,
+.height-leave-to {
+  transform: translateY(20px);
+  opacity: 0;
 }

@@ -181,6 +181,8 @@ const onChangeWeek = (date: Dayjs, dateString: string) => {
   const startDay = date.startOf("week"); //.format(weekFormat);
 
   onCreateWeekDays(startDay);
+
+  onQuery();
   // const result = [];
 
   // for (let i = 0; i< 7; i++) {
@@ -229,6 +231,124 @@ const customWeekStartEndFormat = (value: Dayjs) => {
 //   }
 //   return _taskMontajWorkers; //groupBy(_taskMontajWorkers, "from");
 // });
+
+const mapTasksByDates = computed(() => {
+  // console.log(
+  //   'week.value.startOf("week")=',
+  //   week.value.startOf("week"),
+  //   week.value,
+  //   dayjs("2025-01-01T21:00:00Z").diff(week.value.startOf("week"), "day")
+  // );
+  const firstDay = dayjs(week.value).startOf("week").startOf("day");
+  const dateWithTaskWorker: {
+    [key: string]: ITaskWorker[];
+  } = {};
+
+  for (let i = 0; i < daysOfSelectWeek.value.length; i++) {
+    const diff = daysOfSelectWeek.value.length - i;
+    const d = daysOfSelectWeek.value[i];
+    const _allTaskWorkers = taskWorkerStore.items
+      .filter(
+        (x) =>
+          // dayjs(x.from).diff(d.day, "day") <= 0 &&
+          // dayjs(x.to).diff(d.day, "day") <= 0
+          // dayjs(x.order.dateOtgruzka).year() != 1 &&
+          operationMontaj.value.map((xx) => xx.id).includes(x.operationId) &&
+          dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
+      )
+      .map((y) => {
+        // console.group("isBetween: ", y.from, y.to);
+        // console.log(d.day, dayjs(d.day).isBetween(y.from, y.to, "day", "[]"));
+        // console.groupEnd();
+
+        const user = userStore.items.find((u) => u.id === y.workerId);
+        const taskStatus = taskStatusStore.items.find(
+          (x) => x.id === y?.statusId
+        );
+        return {
+          ...y,
+          user,
+          taskStatus,
+        };
+      });
+
+    dateWithTaskWorker[d.day] = _allTaskWorkers.map((x) => {
+      return {
+        name: x.worker.name,
+        from: x.from,
+        to: x.to,
+      };
+    });
+
+    // for (const taskW of _allTaskWorkers) {
+    //   if (
+    //     (!_taskMontajWorkers[taskW.objectId] ||
+    //       !_taskMontajWorkers[taskW.objectId][taskW.workerId]) &&
+    //     !["finish", "autofinish"].includes(taskW.status)
+    //   ) {
+    //     const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+    //     const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+    //     _taskMontajWorkers[taskW.objectId] = Object.assign(
+    //       _taskMontajWorkers[taskW.objectId] || {},
+    //       {
+    //         [taskW.workerId]: {
+    //           item: taskW,
+    //           stat: {
+    //             startCol: diffFrom > 0 ? diffFrom : 0,
+    //             length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+    //             diffFrom,
+    //             diffTo,
+    //           },
+    //         },
+    //       }
+    //     );
+    //   }
+    // }
+  }
+
+  // for (const objectKey in _taskMontajWorkers) {
+  //   for (const taskKey in _taskMontajWorkers[objectKey]) {
+  //     if (
+  //       !_taskMontajWorkers[objectKey] ||
+  //       !_taskMontajWorkers[taskW.objectId][taskW.id]
+  //     ) {
+  //       const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+  //       const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+  //       _taskMontajWorkers[taskW.objectId] = Object.assign(
+  //         _taskMontajWorkers[taskW.objectId] || {},
+  //         {
+  //           [taskW.id]: {
+  //             item: taskW,
+  //             stat: {
+  //               startCol: diffFrom > 0 ? diffFrom : 0,
+  //               length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+  //               diffFrom,
+  //               diffTo,
+  //             },
+  //           },
+  //         }
+  //       );
+  //     }
+  //   }
+  // }
+
+  // console.log(mapTasksByDates);
+
+  return dateWithTaskWorker;
+  // Object.entries(_taskMontajWorkers).map(([key, el]) => {
+  //   const diff = dayjs(el.from).startOf("day").diff(dayjs(firstDay), "day");
+  //   return {
+  //     id: key,
+  //     objectId: el.objectId,
+  //     from: el.from,
+  //     to: el.to,
+  //     name: el.user.name,
+  //     diff,
+  //     length: dayjs(dayjs(firstDay)).endOf("day").diff(el.to, "day"),
+  //   };
+  // }); //groupBy(_taskMontajWorkers, "from");
+});
+// console.log("mapTasksByDates: ", mapTasksByDates.value);
 
 const newTaskMontajWorkers = computed(() => {
   // console.log(
@@ -361,22 +481,33 @@ const onSetSizeColumn = () => {
   }
 };
 
+const loading = ref(false);
+
+const onQuery = async () => {
+  loading.value = true;
+  await taskWorkerStore
+    .find({
+      date: week.value.startOf("week").utc().format(),
+      operationId: operationMontaj.value.map((x) => x.id),
+      $limit: 100,
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
+
 onMounted(async () => {
   onCreateWeekDays(week.value.startOf("week"));
 
-  await orderStore.find({
-    // stolyarComplete: 1,
-    // shlifComplete: 1,
-    // malyarComplete: 1,
-    goComplete: 1,
-    status: [1],
-  });
+  onQuery();
+  // await orderStore.find({
+  //   // stolyarComplete: 1,
+  //   // shlifComplete: 1,
+  //   // malyarComplete: 1,
+  //   goComplete: 1,
+  //   status: [1],
+  // });
   // taskStore.find({ $limit: 100 });
-
-  await taskWorkerStore.find({
-    date: week.value.startOf("week").utc().format(),
-    operationId: operationMontaj.value.map((x) => x.id),
-  });
 
   // setTimeout(() => {
   // }, 100);
@@ -426,6 +557,9 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div class="mt-4 p-4">
+        <pre>
+          {{ mapTasksByDates }}
+        </pre>
         <div
           ref="tblRef"
           class="rounded-lg bg-white dark:bg-g-900 border-t border-r border-s-200 dark:border-g-700 w-full overflow-x-auto"

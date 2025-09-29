@@ -19,6 +19,10 @@ export type IAppErrorInput = {
   [Property in keyof IAppError]?: IAppError[Property];
 };
 
+export type IAppErrorListQuery = {
+  id: (string | number)[];
+};
+
 export interface IAppErrorFilter extends IPaginationParams<IAppErrorInput> {
   id?: string[];
   userId?: string[];

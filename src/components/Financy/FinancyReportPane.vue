@@ -329,7 +329,7 @@ onMounted(() => {
           </a-button>
         </div>
       </div>
-      <div class="overflow-y-auto h-[calc(100vh_-_130px)] b-scroll">
+      <div class="overflow-y-scroll h-[calc(100vh_-_170px)] b-scroll">
         <div class="bg-s-50 dark:bg-g-800 rounded-lg p-4">
           <FinancyTotal
             :pane="pane"

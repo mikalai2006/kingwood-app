@@ -3,8 +3,15 @@ import {
   IAppError,
   IAppErrorFilter,
   IAppErrorInput,
+  IAppErrorListQuery,
 } from "@/api/app_error/types";
-import { findPopulate, patch, remove, create } from "@/api/app_error";
+import {
+  findPopulate,
+  patch,
+  remove,
+  create,
+  removeList,
+} from "@/api/app_error";
 // import sift from 'sift'
 
 export const useAppErrorStore = defineStore("appError", {
@@ -104,6 +111,19 @@ export const useAppErrorStore = defineStore("appError", {
       });
 
       return data;
+    },
+    async onRemoveList(data: IAppErrorListQuery) {
+      if (!data.id?.length) {
+        return;
+      }
+
+      const result = await removeList(data).then(() => {
+        for (let i = 0; i < data.id.length; i++) {
+          this.onRemoveItemFromStore(data.id[i]);
+        }
+      });
+
+      return result;
     },
   },
 });

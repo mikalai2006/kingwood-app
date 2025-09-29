@@ -49,7 +49,7 @@ const taskStatuses = computed(() =>
   taskStatusStore.items
     .filter(
       (x) =>
-        !["Автозавершено", "Выполняется"].includes(x.name) ||
+        !["autofinish"].includes(x.status) || //, "process"
         authStore.code == "systemrole"
     )
     .map((x) => {
@@ -67,6 +67,14 @@ const rules = computed(() => {
         required: true,
         message: t("form.taskWorker.rule.typeGo"),
         trigger: "change",
+      },
+      // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
+    ],
+    from: [
+      {
+        required: true,
+        message: t("form.taskWorker.rule.from"),
+        trigger: ["blur", "change"],
       },
       // { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
     ],
@@ -202,10 +210,13 @@ const filterOption = (input: string, option: Option) => {
 
 const taskRange = ref<[Dayjs, Dayjs]>([dayjs(new Date()), dayjs(new Date())]);
 const taskDate = ref<Dayjs>(dayjs(new Date()));
-const taskStartDate = ref<Dayjs>(dayjs(new Date()));
+const taskFromDate = ref<Dayjs>(dayjs(new Date()));
 
 const typesGo = computed(() =>
-  ["default", "date", "range"].map((x) => {
+  [
+    "default",
+    // "date", "range",
+  ].map((x) => {
     return {
       value: x,
       label: t(`typeGo.${x}`),
@@ -227,20 +238,28 @@ watch(taskDate, (v) => {
   formState.to = v?.toISOString();
 });
 
-watch(taskStartDate, (v) => {
+watch(taskFromDate, (v) => {
   formState.from = v?.toISOString();
-  formState.to = v.add(1, "year")?.toISOString();
+  const from = v ? v : dayjs();
+  formState.to = from.add(1, "year")?.toISOString();
 });
 const disableEdit = computed(
   () =>
     formState.status &&
-    ["finish", "autofinish"].includes(formState.status) &&
+    !["finish", "autofinish", "wait"].includes(
+      // "pause",, "process"
+      formState.status
+    ) &&
     authStore.code != "systemrole"
 );
 
+const disableEditDate = computed(
+  () => formState.status != "wait" && authStore.code != "systemrole"
+);
 onMounted(() => {
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
+    taskFromDate.value = dayjs();
 
     const waitStatus = taskStatusStore.items.find((x) => x.status === "wait");
     if (waitStatus) {
@@ -320,7 +339,7 @@ onMounted(() => {
         </a-select>
       </a-form-item>
 
-      <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
+      <!-- <a-form-item :label="$t('form.taskWorker.typeGo')" name="typeGo">
         <a-select
           v-model:value="formState.typeGo"
           style="width: 100%"
@@ -330,9 +349,9 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         ></a-select>
-      </a-form-item>
+      </a-form-item> -->
 
-      <a-form-item
+      <!-- <a-form-item
         v-if="formState.typeGo === 'range'"
         :label="$t('form.taskWorker.range')"
         name="to"
@@ -345,9 +364,9 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-      </a-form-item>
+      </a-form-item> -->
 
-      <a-form-item
+      <!-- <a-form-item
         v-else-if="formState.typeGo === 'date'"
         :label="$t('form.taskWorker.date')"
         name="date"
@@ -360,18 +379,18 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-      </a-form-item>
+      </a-form-item> -->
 
-      <!-- <a-form-item :label="$t('form.taskWorker.dateStart')" name="date">
+      <a-form-item :label="$t('form.taskWorker.from')" name="from">
         <a-date-picker
-          v-model:value="taskStartDate"
+          v-model:value="taskFromDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
           :disabled="
-            !authStore.roles.includes('taskWorker-typeGo') || disableEdit
+            !authStore.roles.includes('taskWorker-typeGo') || disableEditDate
           "
         />
-      </a-form-item> -->
+      </a-form-item>
 
       <a-form-item
         v-if="authStore.roles.includes('taskWorker-statusId') && formState?.id"

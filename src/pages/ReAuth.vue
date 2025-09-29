@@ -7,7 +7,6 @@ import { message } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
 import { IFailedFinishForm, useError } from "@/composable/useError";
 import { IAuthData } from "@/api/auth/types";
-import { CustomError } from "@/utils/customError";
 
 const router = useRouter();
 
@@ -41,20 +40,18 @@ const onFinish = async (values: any) => {
           authStore.setAuthData(_data);
           localStorage.setItem("remembe", JSON.stringify(_data));
         }
-        router.replace("/order").then(() => {
-          console.log("Go to order");
-
+        router.replace("/").then(() => {
           // window.location.reload();
         });
         return r;
       })
       .catch((error: any) => {
         if (error?.message == "Failed to fetch") {
-          throw new CustomError("error.notNet", "0");
+          throw new Error("error.notNet");
         } else if (error?.errorFields) {
           onGetValidateError(error);
         } else {
-          throw new CustomError(JSON.stringify(error.message), "100");
+          throw new Error(JSON.stringify(error.message));
         }
       });
   } catch (e: any) {
@@ -71,24 +68,29 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
   onGetValidateError(errorInfo);
 };
 
-onMounted(() => {
-  const remembe = localStorage.getItem("remembe");
-  if (remembe) {
-    const _remembe = JSON.parse(remembe);
-    authStore.setAuthData(_remembe);
-    formState.login = _remembe.login;
-    formState.password = _remembe.password;
-    formState.remembe = _remembe.remembe;
+onMounted(async () => {
+  const tokens = await authStore.refreshToken();
+
+  if (tokens?.access_token) {
+    setTimeout(OnReturnToLastPage, 1500);
   }
 });
+
+function OnReturnToLastPage() {
+  router.replace(authStore.pageBeforeRefreshToken);
+}
 </script>
 
 <template>
   <div class="flex-auto flex flex-col items-center">
     <div class="p-4 rounded-lg mt-32">
       <!-- {{ authStore.tokenData?.refresh_token }} -->
-      <div class="text-center mb-4"><VTitle text="Авторизация" /></div>
-      <a-form
+      <div class="text-center mb-4">
+        <VTitle text="Обновление токена доступа!" />
+      </div>
+      dsd
+      <a-spin size="small" />
+      <!-- <a-form
         :model="formState"
         name="basic"
         :label-col="{ span: 12 }"
@@ -124,7 +126,7 @@ onMounted(() => {
             Войти
           </a-button>
         </a-form-item>
-      </a-form>
+      </a-form> -->
     </div>
   </div>
 </template>

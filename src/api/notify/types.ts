@@ -23,6 +23,10 @@ export type INotifyInput = {
   [Property in keyof INotify]?: INotify[Property];
 };
 
+export type INotifyListQuery = {
+  id: (string | number)[];
+};
+
 export interface INotifyFilter extends IPaginationParams<INotifyInput> {
   id?: string[];
   userId?: string[];

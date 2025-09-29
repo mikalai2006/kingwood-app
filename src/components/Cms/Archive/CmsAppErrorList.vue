@@ -26,7 +26,12 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const emit = defineEmits(["onRemoveItem", "onPatchItem", "onViewItem"]);
+const emit = defineEmits([
+  "onRemoveItem",
+  "onPatchItem",
+  "onViewItem",
+  "onRemoveList",
+]);
 
 const appErrorStore = useAppErrorStore();
 
@@ -57,15 +62,77 @@ const columnsData = computed(() => {
   });
 });
 
+const rowSelection = ref({
+  checkStrictly: false,
+  selectedRowKeys: [] as (string | number)[],
+  onChange: (
+    selectedRowKeys: (string | number)[],
+    selectedRows: IAppError[]
+  ) => {
+    // console.log(
+    //   `selectedRowKeys: ${selectedRowKeys}`,
+    //   "selectedRows: ",
+    //   selectedRows
+    // );
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+  },
+  onSelect: (
+    record: IAppError,
+    selected: boolean,
+    selectedRows: IAppError[]
+  ) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(record, selected, selectedRows);
+  },
+  onSelectAll: (
+    selected: boolean,
+    selectedRows: IAppError[],
+    changeRows: IAppError[]
+  ) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(selected, selectedRows, changeRows);
+  },
+});
+
+const OnRemoveSelected = () => {
+  // console.log(`Remove ${selectedIds.value}`);
+  emit("onRemoveList", {
+    id: rowSelection.value.selectedRowKeys,
+  });
+  rowSelection.value.selectedRowKeys = [];
+};
+
 onMounted(async () => {
   await appErrorStore.find({ ...props.params });
 });
 </script>
 
 <template>
+  <Transition name="height">
+    <div
+      v-show="rowSelection.selectedRowKeys.length"
+      class="mb-4 absolute top-0 bg-s-200 dark:bg-g-951 p-4"
+    >
+      <a-button
+        type="primary"
+        :disabled="!rowSelection.selectedRowKeys.length"
+        :loading="loading"
+        @click="OnRemoveSelected"
+      >
+        {{ $t("button.delete") }}
+      </a-button>
+      <span style="margin-left: 8px">
+        <template v-if="rowSelection.selectedRowKeys.length">
+          {{ `Selected ${rowSelection.selectedRowKeys.length} items` }}
+        </template>
+      </span>
+    </div>
+  </Transition>
+
   <a-table
     :columns="columns"
     :data-source="columnsData"
+    :row-selection="rowSelection"
     size="small"
     :customRow="
             (record: IAppError) => {

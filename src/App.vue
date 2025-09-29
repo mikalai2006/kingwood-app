@@ -38,6 +38,7 @@ import useNotification from "./composable/useNotification";
 import { useError } from "./composable/useError";
 import CmsMenu from "./components/Cms/CmsMenu.vue";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { isExpiredTime } from "./utils/utils";
 
 const generalStore = useGeneralStore();
 
@@ -180,7 +181,7 @@ const onInitData = async () => {
 };
 
 watch(
-  () => authStore.tokenData,
+  () => authStore.tokenData?.refresh_token,
   (val, oldVal) => {
     if (authStore.tokenData) {
       onInitData();
@@ -190,6 +191,18 @@ watch(
   },
   {
     immediate: true,
+  }
+);
+
+watch(
+  () => authStore.tokenData?.access_token,
+  () => {
+    if (
+      authStore.tokenData?.access_token &&
+      isExpiredTime(authStore.tokenData.expires_in)
+    ) {
+      socket?.close();
+    }
   }
 );
 
@@ -240,7 +253,7 @@ onMounted(async () => {
   } catch (e: any) {
     onShowError(e);
 
-    errorApp.value = e;
+    generalStore.setError(e);
   }
 });
 
@@ -276,14 +289,15 @@ const tokenTheme = computed(() => {
   return result;
 });
 
-const errorApp = ref<any>(null);
+// const errorApp = ref<any>(null);
 
 onErrorCaptured((error: any, vm, info) => {
   // this.error = error;
   // this.errorMessage = info;
   console.error("Error onErrorCaptured: ", error, vm, info);
-  if (error?.code == 500) {
-    errorApp.value = error;
+  if (error?.code?.toString() == "401") {
+    error.message = t("error.401");
+    generalStore.setError(error);
   }
 
   //  else {
@@ -355,7 +369,7 @@ onErrorCaptured((error: any, vm, info) => {
               </div>
             </div>
           </div>
-          <div v-if="errorApp" class="flex items-center mx-auto">
+          <div v-if="!!generalStore.error" class="flex items-center mx-auto">
             <!-- <a-result status="500" title="500" :sub-title="errorApp?.message">
             <template #extra>
 
@@ -377,7 +391,7 @@ onErrorCaptured((error: any, vm, info) => {
                   <h1
                     class="mb-4 text-7xl tracking-tight font-extrabold lg:text-9xl text-p-600 dark:text-p-500"
                   >
-                    {{ errorApp?.code }}
+                    {{ generalStore.error?.code }}
                   </h1>
                   <!-- <p
                   class="mb-4 text-3xl tracking-tight font-bold text-gray-900 md:text-4xl dark:text-white"
@@ -385,7 +399,7 @@ onErrorCaptured((error: any, vm, info) => {
                   {{ errorApp?.message }}
                 </p> -->
                   <p class="mb-4 text-lg font-light text-g-500 dark:text-g-300">
-                    {{ errorApp?.message }}
+                    {{ generalStore.error?.message }}
                   </p>
                   <!-- <a
                   href="#"
@@ -397,6 +411,7 @@ onErrorCaptured((error: any, vm, info) => {
                     type="primary"
                     @click="
                       () => {
+                        generalStore.setError(null);
                         router.go(0);
                       }
                     "
@@ -552,7 +567,11 @@ onErrorCaptured((error: any, vm, info) => {
                   class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-951"
                 >
                   <div
-                    v-if="taskStatus.items.length > 0 || !authStore.tokenData"
+                    v-if="
+                      taskStatus.items.length > 0 ||
+                      authStore.tokenData ||
+                      route.name == 'auth'
+                    "
                     class="flex-auto flex h-full"
                   >
                     <RouterView v-slot="{ Component }">

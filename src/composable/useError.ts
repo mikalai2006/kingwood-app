@@ -56,7 +56,7 @@ export const useError = () => {
 
   const onShowError = (err: any) => {
     // code: string = "", stack: string = ""
-    console.log("onShowError: ", err, typeof err);
+    // console.log("onShowError: ", err, typeof err);
 
     if (authStore.iam?.id) {
       appErrorStore.create({
@@ -66,7 +66,10 @@ export const useError = () => {
       });
     }
 
-    message.error({ content: t(err?.message || err), key: "err" });
+    message.error({
+      content: err.code == "0" ? t(err?.message || err) : err?.message || err,
+      key: "err",
+    });
   };
 
   return {

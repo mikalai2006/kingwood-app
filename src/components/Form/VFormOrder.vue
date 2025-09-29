@@ -18,7 +18,7 @@ import {
   useUserStore,
 } from "@/store";
 import { IOrder, IOrderInput } from "@/api/order/types";
-import { dateFormat } from "@/utils/date";
+import { dateFormat, dateTimeFormat, dateTimeFullFormat } from "@/utils/date";
 import { message } from "ant-design-vue";
 import { useError } from "@/composable/useError";
 import { Dayjs } from "dayjs";
@@ -216,6 +216,10 @@ onMounted(() => {
   // const object = objectStore.items.find((x) => x.id === formState.objectId);
   // object?.name && onFetchObjects(object?.name);
 
+  if (formState.term && dayjs(formState.term).year() == 1) {
+    formState.term = dayjs().utc().format();
+  }
+
   if (formState.year) {
     year.value = dayjs().year(formState.year);
   }
@@ -223,7 +227,7 @@ onMounted(() => {
   if (dayjs(formState.dateStart).year() == 1) {
     formState.dateStart = "";
   } else {
-    formState.dateStart = dayjs(formState.dateStart).add(0, "day").format();
+    //formState.dateStart = dayjs(formState.dateStart).add(0, "day").format();
   }
 });
 

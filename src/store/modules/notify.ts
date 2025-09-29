@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
-import { findPopulate, patch, remove } from "@/api/notify";
-import { INotify, INotifyFilter, INotifyInput } from "@/api/notify/types";
+import { findPopulate, patch, remove, removeList } from "@/api/notify";
+import {
+  INotify,
+  INotifyFilter,
+  INotifyInput,
+  INotifyListQuery,
+} from "@/api/notify/types";
 import { useUserStore } from "..";
 // import sift from 'sift'
 
@@ -113,6 +118,19 @@ export const useNotifyStore = defineStore("notify", {
       });
 
       return data;
+    },
+    async onRemoveList(data: INotifyListQuery) {
+      if (!data.id?.length) {
+        return;
+      }
+
+      const result = await removeList(data).then(() => {
+        for (let i = 0; i < data.id.length; i++) {
+          this.onRemoveItemFromStore(data.id[i]);
+        }
+      });
+
+      return result;
     },
   },
 });

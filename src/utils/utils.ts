@@ -111,6 +111,18 @@ export const colorWorkTimeProgress = [
   "bg-s-600 dark:bg-g-900 hover:bg-s-500 dark:hover:bg-g-500",
 ];
 
+export const isExpiredTime = (time: number | undefined) => {
+  if (!time) return true;
+
+  const _time = new Date().getTime();
+  const timeExp = new Date(time).getTime();
+  const diff = timeExp - _time - 5000;
+
+  const isExp = diff <= 0;
+
+  return isExp;
+};
+
 // var randomRgb = function () {
 //   var r = Math.floor(Math.random() * 256);
 //   var g = Math.floor(Math.random() * 256);

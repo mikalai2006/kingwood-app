@@ -6,9 +6,14 @@ import { useI18n } from "vue-i18n";
 import { message } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
 import { iCog } from "@/utils/icons";
-import { IAppError, IAppErrorInput } from "@/api/app_error/types";
+import {
+  IAppError,
+  IAppErrorInput,
+  IAppErrorListQuery,
+} from "@/api/app_error/types";
 import CmsAppErrorList from "@/components/Cms/Archive/CmsAppErrorList.vue";
 import CmsAppErrorActive from "@/components/Cms/Archive/CmsAppErrorActive.vue";
+import { replaceSubstringByArray } from "@/utils/utils";
 
 dayjs.locale("ru");
 
@@ -125,6 +130,33 @@ const onPatchItem = ({
     });
 };
 
+const OnRemoveList = async (items: IAppErrorListQuery) => {
+  await appErrorStore
+    .onRemoveList(items)
+    .then(() => {
+      // for (let i = 0; i < items.id.length; i++) {
+      //   const removeIndex = notifys.value.findIndex((x) => x.id == items.id[i]);
+
+      //   if (removeIndex != -1) {
+      //     notifys.value = notifys.value.splice(removeIndex, 1);
+      //   }
+      // }
+      message.success(
+        replaceSubstringByArray(t("message.appErrorRemoveListOk"), [
+          items.id?.length,
+        ])
+      );
+    })
+    .catch((error: any) => {
+      message.error(error);
+      throw new Error(error);
+    })
+    .finally(() => {
+      loading.value = false;
+      open.value = false;
+    });
+};
+
 const onRemoveItem = (item: IAppError) => {
   if (item.id) {
     appErrorStore
@@ -159,7 +191,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex-auto">
+  <div class="flex-auto relative">
     <VHeader :title="$t('cms.page.cms-apperror')">
       <template #back> &nbsp; </template>
       <template #header>
@@ -223,6 +255,7 @@ onMounted(() => {
       @on-remove-item="onRemoveItem"
       @on-view-item="onViewItem"
       @on-patch-item="onPatchItem"
+      @on-remove-list="OnRemoveList"
     />
   </div>
 

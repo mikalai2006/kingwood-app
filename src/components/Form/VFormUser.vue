@@ -36,6 +36,8 @@ import { IImageUpload } from "@/api/image/types";
 import { Colors } from "@/utils/colors";
 import VIcon from "../UI/VIcon.vue";
 import { iTrashFill, iWraningTriangle } from "@/utils/icons";
+import VDop from "../VDop.vue";
+import VDops from "../VDops.vue";
 
 // export interface IFormStateRole {
 //   name: string;
@@ -134,12 +136,13 @@ const onSubmit = async () => {
         dataForm.append("phone", data.phone);
         dataForm.append("roleId", data.roleId);
         dataForm.append("postId", data.postId);
-        dataForm.append("blocked", data.blocked.toString() || "0");
-        dataForm.append("hidden", data.hidden.toString() || "0");
-        dataForm.append("typePay", data.typePay.toString());
-        dataForm.append("archive", data.archive.toString());
+        dataForm.append("maxTime", (data.maxTime || 0).toString());
+        dataForm.append("blocked", data.blocked?.toString() || "0");
+        dataForm.append("hidden", data.hidden?.toString() || "0");
+        dataForm.append("typePay", data.typePay?.toString());
+        dataForm.append("archive", data.archive?.toString());
         if (data.typePay === 1) {
-          dataForm.append("oklad", data.oklad.toString());
+          dataForm.append("oklad", (data.oklad || 0).toString());
         } else {
           dataForm.append("oklad", "");
         }
@@ -149,7 +152,7 @@ const onSubmit = async () => {
         for (const el of data.typeWork) {
           dataForm.append("typeWork", el);
         }
-        if (data.birthday) {
+        if (dayjs(data.birthday).isValid()) {
           dataForm.append("birthday", dayjs(data.birthday).format(dateFormat));
         } else {
           dataForm.append("birthday", "");
@@ -172,6 +175,7 @@ const onSubmit = async () => {
       // formRef.value?.resetFields();
     })
     .catch((error: any) => {
+      console.error("eeeeeeeeeeeeeeeeeeeeeee", error);
       if (error?.errorFields) {
         onGetValidateError(error);
       } else {
@@ -191,7 +195,7 @@ const resetForm = () => {
 
 const rolesList = computed(() =>
   roleStore.items
-    .filter((x) => !x.hidden)
+    .filter((x) => !x.hidden || authStore.code === "systemrole")
     .map((x) => {
       return {
         label: x.name,
@@ -237,13 +241,13 @@ watch(
   (newValue) => {
     if (!newValue) return;
 
-    if (newValue.length < 7) {
-      const fragmentName =
-        transliterate(newValue).slice(0, 5) + randomIntFromInterval(0, 1000);
-      // console.log(newValue, fragmentName);
+    // if (newValue.length < 7) {
+    const fragmentName =
+      transliterate(newValue).slice(0, 5) + randomIntFromInterval(0, 1000);
+    // console.log(newValue, fragmentName);
 
-      formState.login = fragmentName;
-    }
+    formState.login = fragmentName;
+    // }
   }
 );
 const fileRef = ref<File | null>(null);
@@ -394,6 +398,13 @@ const onBlockUser = () => {
 };
 
 onMounted(() => {
+  if (!formState.dops) {
+    formState.dops = [];
+  }
+
+  if (!dayjs(formState.birthday).isValid()) {
+    formState.birthday = "";
+  }
   imageList.value = formState.images?.map((x) => {
     return {
       image: x,
@@ -415,7 +426,7 @@ onMounted(() => {
       destroyInactiveTabPane
       type="card"
       :tabBarStyle="{
-        position: 'sticky',
+        // position: 'sticky',
         top: 0,
         'padding-left': '15px',
         margin: '0px',
@@ -429,7 +440,6 @@ onMounted(() => {
         :tab="$t('tabs.user.user')"
         class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
       >
-        <!-- {{ JSON.stringify(formState) }} -->
         <a-form
           ref="formRef"
           layout="horizontal"
@@ -437,9 +447,9 @@ onMounted(() => {
           :model="formState"
           :rules="rules"
         >
-          <!-- <a-form-item ref="name" :label="$t('form.user.login')" name="login">
-        <a-input v-model:value="formState.login" disabled />
-      </a-form-item> -->
+          <a-form-item ref="name" :label="$t('form.user.login')" name="login">
+            <a-input v-model:value="formState.login" disabled />
+          </a-form-item>
           <a-form-item :label="$t('form.user.name')" name="name">
             <a-input v-model:value="formState.name" />
           </a-form-item>
@@ -621,6 +631,14 @@ onMounted(() => {
             />
           </a-form-item>
 
+          <a-form-item :label="$t('form.user.maxTime')" name="maxTime">
+            <a-input-number
+              v-model:value="formState.maxTime"
+              :min="0"
+              :max="24"
+            />
+          </a-form-item>
+
           <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
             <a-button
               type="primary"
@@ -720,6 +738,17 @@ onMounted(() => {
           {{ $t("form.user.login") }}: {{ formState.auth?.login }}
         </div>
         <VFormResetPassword :auth-id="formState.userId" />
+      </a-tab-pane>
+      <a-tab-pane
+        key="dop"
+        :tab="$t('tabs.user.dop')"
+        class="bg-white dark:bg-g-900/60 p-4 mx-auto max-w-screen-md"
+      >
+        <!-- <pre>
+        {{ JSON.stringify(formState.dops, null, 2) }}
+      </pre
+        > -->
+        <VDops v-model="formState.dops" :user-id="formState.id" />
       </a-tab-pane>
     </a-tabs>
   </div>
