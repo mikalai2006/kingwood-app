@@ -272,13 +272,13 @@ const mapTasksByDates = computed(() => {
         };
       });
 
-    dateWithTaskWorker[d.day] = _allTaskWorkers.map((x) => {
-      return {
-        name: x.worker.name,
-        from: x.from,
-        to: x.to,
-      };
-    });
+    // dateWithTaskWorker[d.day] = _allTaskWorkers.map((x) => {
+    //   return {
+    //     name: x.worker.name,
+    //     from: x.from,
+    //     to: x.to,
+    //   };
+    // });
 
     // for (const taskW of _allTaskWorkers) {
     //   if (

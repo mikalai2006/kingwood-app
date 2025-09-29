@@ -237,7 +237,9 @@ export const useAuthStore = defineStore("auth", {
             // }
 
             // this._refreshTokenLoading = true;
-            const refreshTokens = await this.refreshToken(this.tokenData);
+            const refreshTokens = await this.refreshToken(
+              this.tokenData as IResResultLogin
+            );
             // this?.router.replace("/reauth");
 
             // this.pageBeforeRefreshToken = this.router.currentRoute.value.name;

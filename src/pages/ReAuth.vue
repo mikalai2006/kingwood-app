@@ -68,13 +68,13 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
   onGetValidateError(errorInfo);
 };
 
-onMounted(async () => {
-  const tokens = await authStore.refreshToken();
+// onMounted(async () => {
+//   const tokens = await authStore.refreshToken();
 
-  if (tokens?.access_token) {
-    setTimeout(OnReturnToLastPage, 1500);
-  }
-});
+//   if (tokens?.access_token) {
+//     setTimeout(OnReturnToLastPage, 1500);
+//   }
+// });
 
 function OnReturnToLastPage() {
   router.replace(authStore.pageBeforeRefreshToken);
