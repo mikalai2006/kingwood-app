@@ -176,7 +176,11 @@ const resetForm = () => {
 };
 
 const rolesWorkers = computed(() =>
-  roleStore.items.filter((x) => ["user"].includes(x.code)).map((x) => x.id)
+  roleStore.items
+    .filter(
+      (x) => !["admin", "systemrole", "boss", "designer"].includes(x.code)
+    )
+    .map((x) => x.id)
 );
 
 const workers = computed(() => {

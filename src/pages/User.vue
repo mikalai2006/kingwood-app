@@ -238,7 +238,11 @@ const onSetColumns = (value: string, key: string, data: string[]) => {
 const activeKey = ref("current");
 
 const roleUser = computed(() =>
-  roleStore.items.filter((x) => x.code === "user").map((x) => x.id)
+  roleStore.items
+    .filter(
+      (x) => !["admin", "systemrole", "boss", "designer"].includes(x.code)
+    )
+    .map((x) => x.id)
 );
 
 onMounted(() => {
