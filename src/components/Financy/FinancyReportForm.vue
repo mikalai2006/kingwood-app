@@ -30,7 +30,7 @@ const onQuery = (isSaveOption: boolean) => {
   const data: IPaneOptionFinancyInput = {
     ...props.pane,
     month: month.value?.toString(),
-    monthIndex: month.value.month(),
+    monthIndex: month.value?.month(),
     orderId: orderId.value,
     // workerId: workerId.value,
     title: `${currentDate.value.format("YYYY-MM")}`,
@@ -50,8 +50,8 @@ const onQuery = (isSaveOption: boolean) => {
   // });
 
   payStore.find({
-    month: currentDate.value.month(),
-    year: currentDate.value.year(),
+    month: currentDate.value?.month(),
+    year: currentDate.value?.year(),
   });
 };
 </script>

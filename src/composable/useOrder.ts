@@ -365,7 +365,7 @@ const useOrder = () => {
     localStorage.setItem(key, JSON.stringify(data));
   };
 
-  const allColumns = ref([
+  const allColumns = computed(() => [
     { key: "number", sorter: (a: IOrder, b: IOrder) => a.number - b.number },
     {
       key: "name",

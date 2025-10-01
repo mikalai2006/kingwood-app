@@ -80,7 +80,7 @@ const onQuery = (isSaveOption: boolean) => {
   const data: IPaneOptionFinancyInput = {
     ...props.pane,
     month: month.value?.toString(),
-    monthIndex: month.value.month(),
+    monthIndex: month.value?.month(),
     orderId: orderId.value,
     workerId: workerId.value,
     title: worker.value
@@ -155,8 +155,8 @@ const showModal = () => {
 const defaultData = computed<IPayInput>(() => {
   return {
     workerId: workerId.value,
-    year: currentDate.value.year(),
-    month: currentDate.value.month(),
+    year: currentDate.value?.year(),
+    month: currentDate.value?.month(),
   };
 });
 

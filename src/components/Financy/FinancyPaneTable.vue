@@ -147,7 +147,10 @@ const toggleArchive = ref(false);
       </template>
     </template>
 
-    <template #expandedRowRender="{ record }">
+    <template
+      v-if="authStore.roles.includes('workHistory-list')"
+      #expandedRowRender="{ record }"
+    >
       <template v-if="workHistorys[record.day]?.length">
         <div
           class="p-4 ml-[39px] border-l border-b rounded-bl-lg border-g-100 dark:border-g-700 bg-white dark:bg-g-950/40"

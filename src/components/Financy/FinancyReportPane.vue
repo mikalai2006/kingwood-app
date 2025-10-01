@@ -36,9 +36,9 @@ const userStore = useUserStore();
 const postStore = usePostStore();
 const workHistoryStore = useWorkHistoryStore();
 
-const month = computed(() => dayjs(props.pane.month) || "");
-const workerId = computed<string>(() => props.pane.workerId || "");
-const orderId = ref(props.pane.orderId);
+const month = computed(() => dayjs(props.pane?.month) || "");
+const workerId = computed<string>(() => props.pane?.workerId || "");
+// const orderId = ref(props.pane?.orderId);
 
 const currentDate = computed(() => dayjs(month.value));
 
