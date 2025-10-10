@@ -250,7 +250,7 @@ watch(taskFromDate, (v) => {
 const disableEdit = computed(
   () =>
     formState.status &&
-    !["finish", "autofinish", "wait"].includes(
+    !["finish", "autofinish", "wait", "pause", "process"].includes(
       // "pause",, "process"
       formState.status
     ) &&
@@ -279,6 +279,7 @@ onMounted(() => {
 <template>
   <div>
     <!-- {{ JSON.stringify(formState) }} -->
+
     <a-form
       ref="formRef"
       layout="horizontal"
@@ -427,6 +428,13 @@ onMounted(() => {
           <a-checkbox value="3" name="type">Offline</a-checkbox>
         </a-checkbox-group>
       </a-form-item> -->
+
+      <!-- <a-alert
+        class="mb-4"
+        v-if="formState.status == 'process'"
+        :message="$t('info.notPermissionTaskWorkRun')"
+        banner
+      /> -->
 
       <a-form-item
         v-if="
