@@ -76,7 +76,11 @@ const worker = computed(() =>
   userStore.items.find((x) => x.id === workerId.value)
 );
 
-const onQuery = (isSaveOption: boolean) => {
+const loading = ref(false);
+
+const onQuery = async (isSaveOption: boolean) => {
+  loading.value = true;
+
   const data: IPaneOptionFinancyInput = {
     ...props.pane,
     month: month.value?.toString(),
@@ -96,12 +100,14 @@ const onQuery = (isSaveOption: boolean) => {
   if (!workerId.value || !month.value) {
     return;
   }
-  workHistoryStore.find({
+  await workHistoryStore.find({
     workerId: workerId.value ? [workerId.value] : undefined,
     from: month.value ? currentDate.value.startOf("month").format() : undefined,
     to: month.value ? currentDate.value.endOf("month").format() : undefined,
     $limit: 1000,
   });
+
+  loading.value = false;
 };
 
 const listData = computed(() => {
@@ -175,12 +181,20 @@ const onEditPay = (item: IPay) => {
 };
 
 onMounted(() => {
-  // onQuery(false);
+  onQuery(false);
 });
 </script>
 
 <template>
-  <div class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50">
+  <div
+    class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50 relative"
+  >
+    <div
+      v-if="loading"
+      class="absolute inset-0 pt-24 px-12 bg-s-50 dark:bg-s-900 z-50"
+    >
+      <a-spin size="large" />
+    </div>
     <div class="flex flex-row items-stretch basis-5/12 shrink-0 grow-1">
       <div class="py-4 pl-4 overflow-hidden w-full">
         <!-- {{ JSON.stringify(daysList) }} -->
@@ -226,6 +240,7 @@ onMounted(() => {
               <a-date-picker
                 v-model:value="month"
                 picker="month"
+                :allowClear="false"
                 @change="() => onQuery(true)"
               />
             </a-form-item>

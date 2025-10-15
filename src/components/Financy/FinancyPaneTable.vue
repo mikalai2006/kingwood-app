@@ -198,13 +198,13 @@ const toggleArchive = ref(false);
           v-if="!expanded"
           :path="iChevronDown"
           class="transition-all rotate-0 text-g-300 dark:text-g-600"
-          @click="(e) => onExpand(record, e)"
+          @click="(e: Event) => onExpand(record, e)"
         />
         <VIcon
           v-else
           :path="iChevronDown"
           class="transition-all rotate-180 text-g-300 dark:text-g-600"
-          @click="(e) => onExpand(record, e)"
+          @click="(e: Event) => onExpand(record, e)"
         />
       </div>
     </template>

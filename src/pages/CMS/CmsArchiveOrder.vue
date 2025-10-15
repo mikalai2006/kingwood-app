@@ -292,6 +292,7 @@ const showFilter = ref(false);
                 <a-date-picker
                   v-model:value="year"
                   picker="year"
+                  :allowClear="false"
                   @change="(v:any) => {
                         filter.year = v?.year()
                         // console.log(v);

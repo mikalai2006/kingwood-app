@@ -136,13 +136,13 @@ const totalPayed = computed(() =>
   listPay.value.reduce((a, b) => a + b.total, 0)
 );
 
-const onFindPays = () => {
-  payStore.find({
-    month: currentDate.value.month(),
-    year: currentDate.value.year(),
-    workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
-  });
-};
+// const onFindPays = () => {
+//   payStore.find({
+//     month: currentDate.value.month(),
+//     year: currentDate.value.year(),
+//     workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
+//   });
+// };
 
 const showDetails = ref(false);
 
@@ -153,24 +153,39 @@ const onViewChanged = (item: IPay) => {
   showPayChanged.value = true;
 };
 
-onMounted(() => {
-  onFindPays();
+// const loading = ref(false);
+// onMounted(async () => {
+//   if (!props.pane.workerId) {
+//     return;
+//   }
 
-  workHistoryStore.find({
-    workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
-    from: props.pane.month
-      ? currentDate.value.startOf("month").format()
-      : undefined,
-    to: props.pane.month
-      ? currentDate.value.endOf("month").format()
-      : undefined,
-    $limit: 10000,
-  });
-});
+//   onFindPays();
+
+//   loading.value = true;
+
+//   await workHistoryStore.find({
+//     workerId: props.pane.workerId ? [props.pane.workerId] : undefined,
+//     from: props.pane.month
+//       ? currentDate.value.startOf("month").format()
+//       : undefined,
+//     to: props.pane.month
+//       ? currentDate.value.endOf("month").format()
+//       : undefined,
+//     $limit: 10000,
+//   });
+
+//   loading.value = false;
+// });
 </script>
 
 <template>
-  <div>
+  <div class="relative">
+    <!-- <div
+      v-if="loading"
+      class="absolute inset-0 pt-24 px-12 bg-s-50 opacity-90 dark:bg-s-900 z-50"
+    >
+      <a-spin size="large" />
+    </div> -->
     <!-- {{ JSON.stringify(totalMoney) }}
     {{ JSON.stringify(listPay, null, 2) }} -->
 

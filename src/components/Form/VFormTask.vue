@@ -304,6 +304,7 @@ onMounted(() => {
           v-model:value="taskDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :allowClear="false"
           :disabled="!!formState.id"
         />
       </a-form-item>

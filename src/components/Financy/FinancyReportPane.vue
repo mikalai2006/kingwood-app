@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import {
-  IFormOptionFilter,
-  IPaneOptionFinancy,
-  IPaneOptionFinancyInput,
-} from "@/api/types";
+import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
 import useOrder from "@/composable/useOrder";
-import { usePostStore, useUserStore, useWorkHistoryStore } from "@/store";
+import { useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
-import groupBy from "lodash-es/groupBy";
 import { computed, onMounted, ref } from "vue";
-import FinancyTotal from "./FinancyTotal.vue";
-import FinancyPaneTable from "./FinancyPaneTable.vue";
 import { IPay, IPayInput } from "@/api/pay/types";
 import VFormPay from "../Form/VFormPay.vue";
-import { getShortFIO } from "@/utils/utils";
 import FinancyReportPaneUsers from "./FinancyReportPaneUsers.vue";
 import FinancyReportTotal from "./FinancyReportTotal.vue";
 import FinancyReportForm from "./FinancyReportForm.vue";
@@ -21,6 +13,7 @@ import { iChevronDown } from "@/utils/icons";
 import FinancyReportUserInfo from "./FinancyReportUserInfo.vue";
 import { getStatByMonth } from "@/api/work_history";
 import { IWorkHistoryStatByMonth } from "@/api/work_history/types";
+import FinancyReportPaneUser from "./FinancyReportPaneUser.vue";
 
 const props = defineProps<{
   pane: IPaneOptionFinancy;
@@ -33,8 +26,8 @@ const emit = defineEmits({
 });
 
 const userStore = useUserStore();
-const postStore = usePostStore();
-const workHistoryStore = useWorkHistoryStore();
+// const postStore = usePostStore();
+// const workHistoryStore = useWorkHistoryStore();
 
 const month = computed(() => dayjs(props.pane?.month) || "");
 const workerId = computed<string>(() => props.pane?.workerId || "");
@@ -42,42 +35,21 @@ const workerId = computed<string>(() => props.pane?.workerId || "");
 
 const currentDate = computed(() => dayjs(month.value));
 
-const countDays = computed(() =>
-  month.value ? currentDate.value.daysInMonth() : 0
-);
-
-const daysList = computed(() =>
-  Array.from(Array(countDays.value).keys()).map((x) => {
-    const _date = month.value.startOf("month").add(x, "day");
-    // dayjs(
-    //   `${x + 1}-${month.value.month()}-${month.value.year()}`,
-    //   "D-M-YYYY"
-    // );
-    return {
-      key: x.toString(),
-      day: x + 1,
-      date: _date.format(),
-      dayWeek: _date.day(),
-      dayName: _date.format("dd"),
-    };
-  })
-);
-
-const workers = computed(() => {
-  return userStore.items
-    .filter((x) => !x.hidden)
-    .map((x) => {
-      const post = postStore.items.find((y) => y.id === x.postId);
-      return {
-        post,
-        value: x.id,
-        label: x.name,
-      };
-    });
-});
-const filterOption = (input: string, option: IFormOptionFilter) => {
-  return option.label.toUpperCase().indexOf(input.toUpperCase()) >= 0;
-};
+// const workers = computed(() => {
+//   return userStore.items
+//     .filter((x) => !x.hidden)
+//     .map((x) => {
+//       const post = postStore.items.find((y) => y.id === x.postId);
+//       return {
+//         post,
+//         value: x.id,
+//         label: x.name,
+//       };
+//     });
+// });
+// const filterOption = (input: string, option: IFormOptionFilter) => {
+//   return option.label.toUpperCase().indexOf(input.toUpperCase()) >= 0;
+// };
 
 const worker = computed(() =>
   userStore.items.find((x) => x.id === workerId.value)
@@ -135,7 +107,11 @@ const idsWorkerWithWorkHistory = computed<string[]>(() => {
   ];
 });
 
-const onQuery = async () => {
+const loading = ref(false);
+
+const onQueryStat = async () => {
+  loading.value = true;
+
   await getStatByMonth({
     from: props.pane.month
       ? currentDate.value.startOf("month").format()
@@ -149,47 +125,9 @@ const onQuery = async () => {
     statData.value = r ? r.sort((a, b) => a.total - b.total) : [];
     return r;
   });
+
+  loading.value = false;
 };
-
-const listData = computed(() => {
-  const _list = workHistoryStore.items
-    .filter(
-      (x) =>
-        workerId.value == x.workerId &&
-        dayjs(x.to).year() > 1 &&
-        dayjs(x.to)
-          .utc(true)
-          .isBetween(
-            currentDate.value.utc(true).startOf("month"),
-            currentDate.value.utc(true).endOf("month"),
-            "day",
-            "[]"
-          )
-    )
-    .map((x) => {
-      const _totalMs = dayjs(x.to).diff(x.from);
-      // x.workHistory.reduce(
-      //   (a, b) => a + dayjs(b.to).diff(b.from),
-      //   0
-      // );
-      return {
-        ...x,
-        totalMs: _totalMs,
-      };
-    });
-  return _list;
-});
-
-const listDataGroupDays = computed(() => {
-  const _list = listData.value.map((x) => {
-    return {
-      ...x,
-      day: dayjs(x.from).utc(true).date(),
-    };
-  });
-
-  return groupBy(_list, "day");
-});
 
 const { state, onFetchOrders } = useOrder();
 
@@ -222,10 +160,9 @@ const onEditPay = (item: IPay) => {
 };
 
 const showTotal = ref(false);
-const showTable = ref(false);
 
 onMounted(() => {
-  onQuery();
+  onQueryStat();
 });
 </script>
 
@@ -245,8 +182,9 @@ onMounted(() => {
             "
           />
         </div>
-
+        <!-- {{ JSON.stringify(props.pane) }} -->
         <div
+          v-if="props.pane.month"
           class="mt-4 p-4 bg-s-100 dark:bg-g-800 rounded-lg overflow-y-auto max-h-[calc(100vh_-_235px)] b-scroll"
         >
           <div
@@ -257,7 +195,9 @@ onMounted(() => {
               {{ $t("table.financy.totalByMonth") }}
             </div>
             <div>
+              <a-spin v-if="loading" />
               <VIcon
+                v-else
                 :path="iChevronDown"
                 :class="[showTotal ? 'rotate-180' : '', 'transition-transform']"
               />
@@ -271,10 +211,11 @@ onMounted(() => {
             @onEditPay="onEditPay"
           />
         </div>
+        <a-alert v-else :message="$t('form.selectDate')" type="error" banner />
       </div>
     </div>
 
-    <div class="basis-2/12 shrink-0 grow-1 min-w-80">
+    <div v-if="!loading" class="basis-2/12 shrink-0 grow-1 min-w-80">
       <div
         class="mt-4 rounded-lg overflow-y-auto h-[calc(100vh_-_165px)] b-scroll"
       >
@@ -287,7 +228,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-if="idsWorkerWithWorkHistory.length"
+      v-if="!loading && idsWorkerWithWorkHistory.length"
       class="flex-auto flex flex-col items-stretch m-4"
     >
       <!-- <div class="flex-auto flex flex-col">
@@ -319,7 +260,7 @@ onMounted(() => {
           </div>
         </div>
       </div> -->
-      <div class="flex flex-row items-center pb-4 px-4">
+      <div v-if="pane.workerId" class="flex flex-row items-center pb-4 px-4">
         <div class="flex-auto">
           <FinancyReportUserInfo :pane="pane" />
         </div>
@@ -329,40 +270,8 @@ onMounted(() => {
           </a-button>
         </div>
       </div>
-      <div class="overflow-y-scroll h-[calc(100vh_-_170px)] b-scroll">
-        <div class="bg-s-50 dark:bg-g-800 rounded-lg p-4">
-          <FinancyTotal
-            :pane="pane"
-            :key="pane?.workerId"
-            @onEditPay="onEditPay"
-          />
-        </div>
-
-        <div class="mt-4 bg-s-50 dark:bg-g-800 rounded-lg">
-          <!-- {{ pane.workerId }} -->
-
-          <div
-            class="cursor-pointer flex flex-row items-center text-s-500 dark:text-g-300 p-4"
-            @click="showTable = !showTable"
-          >
-            <div class="flex-auto">
-              {{ $t("page.financy.everyDayReport") }}
-            </div>
-            <div>
-              <VIcon
-                :path="iChevronDown"
-                :class="[showTable ? 'rotate-180' : '', 'transition-transform']"
-              />
-            </div>
-          </div>
-          <FinancyPaneTable
-            v-if="showTable"
-            :key="pane.workerId"
-            :data="daysList"
-            :pane="pane"
-            :work-historys="listDataGroupDays"
-          />
-        </div>
+      <div class="overflow-y-scroll h-[calc(100vh_-_170px)] b-scroll relative">
+        <FinancyReportPaneUser :key="pane?.workerId" :pane="pane" />
       </div>
     </div>
   </div>

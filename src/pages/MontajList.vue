@@ -535,6 +535,7 @@ onBeforeUnmount(() => {
         <div class="flex flex-row items-center">
           <a-date-picker
             v-model:value="week"
+            :allowClear="false"
             picker="week"
             :format="customWeekStartEndFormat"
             @change="onChangeWeek"

@@ -226,6 +226,7 @@ onMounted(() => {
               <a-date-picker
                 v-model:value="month"
                 picker="month"
+                :allowClear="false"
                 @change="() => onQuery(true)"
               />
             </a-form-item>

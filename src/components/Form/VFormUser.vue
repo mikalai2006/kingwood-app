@@ -462,6 +462,7 @@ onMounted(() => {
             <a-date-picker
               v-model:value="formState.birthday"
               :format="dateFormat"
+              :allowClear="false"
               :value-format="dateFormat"
               style="width: 100%"
               :placeholder="$t('form.user.selectBirthday')"

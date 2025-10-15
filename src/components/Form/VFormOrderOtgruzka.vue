@@ -135,6 +135,7 @@ onBeforeUnmount(() => {
           style="width: 100%"
           :placeholder="$t('form.order.selectTerm')"
           :disabled="true"
+          :allowClear="false"
         />
       </a-form-item>
 
@@ -144,6 +145,7 @@ onBeforeUnmount(() => {
           :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          :allowClear="false"
           :placeholder="$t('form.order.selectDateOtgruzka')"
         />
       </a-form-item>

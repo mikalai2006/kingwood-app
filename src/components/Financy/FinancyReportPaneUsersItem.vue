@@ -61,7 +61,7 @@ const totalTime = computed(() => {
         workerId: workerId,
       },
     }"
-    class="flex flex-row items-center gap-3 p-2 mb-2 rounded-lg"
+    class="flex flex-row items-center cursor-pointer gap-3 p-2 mb-2 rounded-lg"
     :class="[
       workerId === pane.workerId
         ? 'bg-s-100 dark:bg-g-600'

@@ -391,6 +391,7 @@ onMounted(() => {
           v-model:value="taskFromDate"
           :disabledDate="disabledDate"
           :format="dateFormat"
+          :allowClear="false"
           :disabled="
             !authStore.roles.includes('taskWorker-typeGo') || disableEditDate
           "

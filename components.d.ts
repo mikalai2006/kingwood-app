@@ -75,6 +75,7 @@ declare module 'vue' {
     FinancyReportForm: typeof import('./src/components/Financy/FinancyReportForm.vue')['default']
     FinancyReportPane: typeof import('./src/components/Financy/FinancyReportPane.vue')['default']
     'FinancyReportPane copy': typeof import('./src/components/Financy/FinancyReportPane copy.vue')['default']
+    FinancyReportPaneUser: typeof import('./src/components/Financy/FinancyReportPaneUser.vue')['default']
     FinancyReportPaneUsers: typeof import('./src/components/Financy/FinancyReportPaneUsers.vue')['default']
     FinancyReportPaneUsersItem: typeof import('./src/components/Financy/FinancyReportPaneUsersItem.vue')['default']
     FinancyReportTotal: typeof import('./src/components/Financy/FinancyReportTotal.vue')['default']

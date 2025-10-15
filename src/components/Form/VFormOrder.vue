@@ -391,6 +391,7 @@ const showMore = ref(0);
           :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          :allowClear="false"
           :placeholder="$t('form.order.selectTerm')"
         />
       </a-form-item>
@@ -401,6 +402,7 @@ const showMore = ref(0);
           :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          :allowClear="false"
           :placeholder="$t('form.selectDate')"
         />
       </a-form-item>
@@ -410,6 +412,7 @@ const showMore = ref(0);
           :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          :allowClear="false"
           :placeholder="$t('form.order.selectTermMontaj')"
         />
       </a-form-item> -->
@@ -442,7 +445,11 @@ const showMore = ref(0);
               <!-- <template #help>
                 <a-alert :message="$t('info.helpMoreOrderYear')" banner />
               </template> -->
-              <a-date-picker v-model:value="year" picker="year" />
+              <a-date-picker
+                v-model:value="year"
+                :allowClear="false"
+                picker="year"
+              />
               <!-- <a-input v-model:value="formState.number" :disabled="true" /> -->
             </a-form-item>
           </a-tooltip>

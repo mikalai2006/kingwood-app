@@ -60,7 +60,8 @@ const workHistory = computed(() => {
     .filter(
       (x) =>
         props.pane.workerId == x.workerId &&
-        dayjs(x.date).date().toString() == props.date &&
+        // dayjs(x.date).date().toString() == props.date &&
+        dayjs(x.date).isSame(dayjs(props.fullDate), "day") &&
         dayjs(x.to).year() != 1
     )
     .map((x) => {
@@ -86,6 +87,8 @@ const workHistory = computed(() => {
         operation,
       };
     });
+  // console.log("workHistorys: ", _list);
+
   return _list;
 });
 

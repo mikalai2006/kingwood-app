@@ -136,6 +136,7 @@ onBeforeUnmount(() => {
           :format="dateFormat"
           value-format="YYYY-MM-DD"
           style="width: 100%"
+          :allowClear="false"
           :placeholder="$t('form.selectDate')"
         />
       </a-form-item>

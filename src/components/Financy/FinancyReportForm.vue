@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import dayjs from "@/utils/dayjs";
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
 import { usePayStore, useWorkHistoryStore } from "@/store";
@@ -17,8 +17,18 @@ const emit = defineEmits({
 const workHistoryStore = useWorkHistoryStore();
 const payStore = usePayStore();
 
-const month = ref(dayjs(props.pane.month) || "");
+const month = ref(dayjs(props.pane.month) || dayjs().month());
 const orderId = ref(props.pane.orderId);
+
+// watch(
+//   () => month.value,
+//   (oldValue) => {
+//     if (!oldValue.isValid()) {
+//       month.value = dayjs();
+//       onQuery(true);
+//     }
+//   }
+// );
 
 const currentDate = computed(() => dayjs(month.value));
 
@@ -54,6 +64,10 @@ const onQuery = (isSaveOption: boolean) => {
     year: currentDate.value?.year(),
   });
 };
+
+onMounted(() => {
+  onQuery(true);
+});
 </script>
 
 <template>
@@ -100,6 +114,7 @@ const onQuery = (isSaveOption: boolean) => {
         <a-date-picker
           v-model:value="month"
           picker="month"
+          :allowClear="false"
           @change="() => onQuery(true)"
         />
       </div>

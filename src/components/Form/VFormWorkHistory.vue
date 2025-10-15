@@ -195,6 +195,7 @@ onBeforeUnmount(() => {
           v-model:value="date"
           :format="dateFormat"
           style="width: 100%"
+          :allowClear="false"
           @change="onChangeTime"
         />
       </a-form-item> -->

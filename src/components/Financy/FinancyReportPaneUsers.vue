@@ -2,7 +2,6 @@
 import { IPaneOptionFinancy, IPaneOptionFinancyInput } from "@/api/types";
 import { usePostStore, useUserStore, useWorkHistoryStore } from "@/store";
 import dayjs from "@/utils/dayjs";
-import groupBy from "lodash-es/groupBy";
 import { computed, ref } from "vue";
 import FinancyReportPaneUsersItem from "./FinancyReportPaneUsersItem.vue";
 import { IUser } from "@/api/user/types";

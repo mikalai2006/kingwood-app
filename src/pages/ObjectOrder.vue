@@ -505,6 +505,7 @@ const onSetFilter = () => {
                 <a-form-item :label="$t('form.order.year')" name="year">
                   <a-date-picker
                     v-model:value="year"
+                    :allowClear="false"
                     picker="year"
                     @change="(v:any) => {
                         filter.year = v?.year()
