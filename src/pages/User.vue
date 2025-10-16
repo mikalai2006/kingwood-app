@@ -240,7 +240,8 @@ const activeKey = ref("current");
 const roleUser = computed(() =>
   roleStore.items
     .filter(
-      (x) => !["admin", "systemrole", "boss", "designer"].includes(x.code)
+      (x) =>
+        !["admin", "systemrole", "boss", "designer", "dir"].includes(x.code)
     )
     .map((x) => x.id)
 );
