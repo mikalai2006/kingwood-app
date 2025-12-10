@@ -20,11 +20,11 @@ export interface ITaskWorker {
   to: string;
   typeGo: string;
 
-  task: ITask;
-  taskStatus: ITaskStatus;
-  order: IOrder;
-  worker: IUser;
-  object: IObject;
+  // task: ITask;
+  // taskStatus: ITaskStatus;
+  // order: IOrder;
+  // worker: IUser;
+  // object: IObject;
 
   createdAt: Date;
   updatedAt: Date;
@@ -42,6 +42,7 @@ export interface ITaskWorkerFilter extends IPaginationParams<ITaskWorkerInput> {
   taskId?: string[];
   workerId?: string[];
   operationId?: string[];
+  status?: string[];
   from?: string;
   to?: string;
   date?: string;

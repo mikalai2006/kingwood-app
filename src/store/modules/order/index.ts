@@ -6,6 +6,7 @@ import { useObjectStore } from "../object";
 import { useTaskStore } from "../task";
 import { useTaskWorkerStore } from "../task_worker";
 import { getObjectId } from "@/utils/utils";
+import { useUserStore } from "../user";
 // import sift from 'sift'
 
 export const useOrderStore = defineStore("order", {
@@ -33,6 +34,33 @@ export const useOrderStore = defineStore("order", {
 
         this.onAddItemToStore(el);
       });
+
+      if (data?.objects) {
+        data.objects?.forEach((el) => {
+          objectStore.onAddItemToStore(el);
+        });
+      }
+
+      if (data?.tasks) {
+        const taskStore = useTaskStore();
+        data.tasks?.forEach((el) => {
+          taskStore.onAddItemToStore(el);
+        });
+      }
+
+      if (data.taskWorkers) {
+        const taskWorkerStore = useTaskWorkerStore();
+        data.taskWorkers.forEach((el) => {
+          taskWorkerStore.onAddItemToStore(el);
+        });
+      }
+
+      if (data.workers) {
+        const userStore = useUserStore();
+        data.workers.forEach((el) => {
+          userStore.onAddItemToStore(el);
+        });
+      }
       // }
 
       return data;

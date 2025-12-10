@@ -141,17 +141,17 @@ onMounted(async () => {
         <!-- {{ pane.workerId }} -->
 
         <div
-          class="cursor-pointer flex flex-row items-center text-s-500 dark:text-g-300 p-4"
+          class="cursor-pointer flex flex-row items-center text-base text-s-500 dark:text-g-300 p-4"
           @click="showTable = !showTable"
         >
-          <div class="flex-auto">
-            {{ $t("page.financy.everyDayReport") }}
-          </div>
-          <div>
+          <div class="px-2">
             <VIcon
               :path="iChevronDown"
               :class="[showTable ? 'rotate-180' : '', 'transition-transform']"
             />
+          </div>
+          <div class="flex-auto">
+            {{ $t("page.financy.everyDayReport") }}
           </div>
         </div>
         <FinancyPaneTable

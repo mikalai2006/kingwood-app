@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, h, ref } from "vue";
+import { computed, h, onMounted, ref } from "vue";
 
+import dayjs from "@/utils/dayjs";
 import {
   useObjectStore,
   useOrderStore,
@@ -21,6 +22,8 @@ import { patch } from "@/api/task_worker";
 import { message, Modal } from "ant-design-vue";
 import { iWraningTriangle } from "@/utils/icons";
 import { useI18n } from "vue-i18n";
+import { useTimerStore } from "@/store/modules/timer";
+import { dateTimeFullFormat, timeFormat } from "@/utils/date";
 
 const props = defineProps<{
   userId: string;
@@ -33,6 +36,7 @@ const objectStore = useObjectStore();
 const taskStatusStore = useTaskStatusStore();
 const workHistoryStore = useWorkHistoryStore();
 const userStore = useUserStore();
+const timerStore = useTimerStore();
 
 const user = computed(() => userStore.items.find((x) => x.id == props.userId));
 
@@ -170,50 +174,71 @@ const endWorkHistory = async () => {
 //     ? userStore.items.filter((x) => activeTasks.value?.workerId.includes(x.id))
 //     : []
 // );
+
+onMounted(() => {
+  if (activeWorkHistory.value) {
+    timerStore.find({
+      workerId: [activeWorkHistory.value.workerId],
+      isRunning: 1,
+      workHistoryId: [activeWorkHistory.value.id],
+    });
+  }
+});
+
+const activeTimer = computed(() => {
+  return timerStore.items.find(
+    (x) => x.workHistoryId == activeWorkHistory.value?.id && x.isRunning == 1
+  );
+});
 </script>
 <template>
-  <a-tag
-    v-if="activeWorkHistory"
-    :bordered="false"
-    class="flex items-center gap-1 leading-3 py-1"
-    :style="{
-      background: taskStatus?.color,
-      color: taskStatus ? invertColor(taskStatus?.color, true) : '',
-    }"
-  >
-    <VIcon
-      v-if="taskStatus?.icon"
-      :path="taskStatus.icon"
-      :class="['text-xl', taskStatus?.animate]"
-    />
-    <div class="w-48">
-      <p class="text-sm">
-        <!-- {{ activeWorkHistory.id }} -->
-        {{ activeObject?.name }}
-      </p>
-      <p class="text-sm truncate">
-        {{ order?.number ? "№" + order?.number + " - " : "" }}
-        {{ order?.name }}
-      </p>
-      <p v-if="taskStatus" class="text-sm truncate">
-        {{ activeTask?.name }}
-        <!-- : {{ taskStatus?.name }} -->
-      </p>
-      <template v-if="!order?.number">
-        <a-button
-          size="small"
-          :loading="loading"
-          :disabled="loading"
-          @click="onEndWorkHistory"
-        >
-          {{ $t("button.endWorkHistory") }}
-        </a-button>
-      </template>
-      <!-- <p>
+  <template v-if="activeWorkHistory">
+    <a-tag
+      :bordered="false"
+      class="flex items-center gap-1 leading-3 py-1"
+      :style="{
+        background: taskStatus?.color,
+        color: taskStatus ? invertColor(taskStatus?.color, true) : '',
+      }"
+    >
+      <VIcon
+        v-if="taskStatus?.icon"
+        :path="taskStatus.icon"
+        :class="['text-xl', taskStatus?.animate]"
+      />
+      <div class="w-48">
+        <p class="text-sm">
+          <!-- {{ activeWorkHistory.id }} -->
+          {{ activeObject?.name }}
+        </p>
+        <p class="text-sm truncate">
+          {{ order?.number ? "№" + order?.number + " - " : "" }}
+          {{ order?.name }}
+        </p>
+        <p v-if="taskStatus" class="text-sm truncate">
+          {{ activeTask?.name }}
+          <!-- : {{ taskStatus?.name }} -->
+        </p>
+        <template v-if="!order?.number">
+          <a-button
+            size="small"
+            :loading="loading"
+            :disabled="loading"
+            @click="onEndWorkHistory"
+          >
+            {{ $t("button.endWorkHistory") }}
+          </a-button>
+        </template>
+        <!-- <p>
             {{ getShortFIO(activeTaskWorker?.user?.name) }}
           </p> -->
-    </div>
-  </a-tag>
+      </div>
+    </a-tag>
+    <!-- <div>
+      {{ dayjs(activeWorkHistory.from).format(dateTimeFullFormat) }} ->
+      {{ dayjs(activeTimer?.executeAt).format(dateTimeFullFormat) }}
+    </div> -->
+  </template>
   <a-tag :bordered="false" v-else>
     {{ $t("table.user.isWork0") }}
   </a-tag>

@@ -6,6 +6,7 @@ import {
   useObjectStore,
   useOperationStore,
   useOrderStore,
+  usePostStore,
   useTaskStatusStore,
   useTaskStore,
   useTaskWorkerStore,
@@ -22,9 +23,15 @@ import VFormTaskWorker from "@/components/Form/VFormTaskWorker.vue";
 import { IObject } from "@/api/object/types";
 import MontajListItem from "@/components/Montaj/MontajListItem.vue";
 import VFormTask from "@/components/Form/VFormTask.vue";
+import MontajListObject from "@/components/Montaj/MontajListObject.vue";
+import MontajGroupByObject from "@/components/Montaj/MontajGroupByObject.vue";
+import { IWeekDay } from "@/api/types";
+import { message } from "ant-design-vue";
+import { IOrder } from "@/api/order/types";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
+const postStore = usePostStore();
 const orderStore = useOrderStore();
 const taskStatusStore = useTaskStatusStore();
 const objectStore = useObjectStore();
@@ -39,6 +46,16 @@ const operationMontaj = computed(() =>
     (x) => x.name.toLowerCase().indexOf("монтаж") > -1
   )
 );
+
+const idsPostMontaj = computed(() =>
+  postStore.items
+    .filter((x) => x.name.toLowerCase().indexOf("монтаж") > -1)
+    .map((x) => x.id)
+);
+
+const montajniks = computed(() => {
+  return userStore.items.filter((x) => idsPostMontaj.value.includes(x.postId));
+});
 
 const idsInstallOperation = computed(() =>
   operationStore.items.filter((x) => x.group === "5").map((x) => x.id)
@@ -115,23 +132,54 @@ const openTaskWorker = ref<boolean>(false);
 const showModalTaskWorker = () => {
   openTaskWorker.value = true;
 };
-const onAddNewItemTaskWorker = (
-  {
-    dayString,
-    day,
-  }: {
-    dayString: string;
-    day: string;
-  },
-  montaj: ITask
-) => {
-  dataFormTaskWorker.value = {
-    ...defaultDataTaskWorker,
-    taskId: montaj.id,
-    from: day,
-    objectId: montaj.objectId,
-    to: dayjs(day).add(100, "day").utc().format(),
-  };
+const onAddNewItemTaskWorker = (_orders: IOrder[]) => {
+  console.log("onAddNewItemTaskWorker", _orders);
+
+  // {
+  //     dayString,
+  //     day,
+  //   }: {
+  //     dayString: string;
+  //     day: string;
+  //   },
+  //   montaj: ITask
+  const montajOperation = operationStore.items.find(
+    (x) => x.name.toLowerCase() == "монтаж изделия"
+  );
+
+  if (montajOperation == null) {
+    message.error("Не найдена операция монтажа!");
+    return;
+  }
+
+  let notFoundTask = 0;
+  for (let index = 0; index < _orders.length; index++) {
+    const _order = _orders[index];
+    const task = taskStore.items.find(
+      (x) =>
+        x.objectId == _order.objectId &&
+        x.orderId == _order.id &&
+        x.operationId == montajOperation.id
+    );
+    if (!task) {
+      notFoundTask++;
+    }
+  }
+
+  if (notFoundTask > 0) {
+    message.error("Не найдено задания монтажа!");
+    return;
+  }
+
+  // dataFormTaskWorker.value = {
+  //   ...defaultDataTaskWorker,
+  //   taskId: task.id,
+  //   from: daysOfSelectWeek.value[0].day,
+  //   objectId: taskWorker.objectId,
+  //   typeGo: "range",
+  //   operationId: montajOperation.id,
+  //   to: dayjs(daysOfSelectWeek.value[0].day).add(365, "day").utc().format(),
+  // };
   showModalTaskWorker();
 };
 
@@ -143,7 +191,7 @@ const onEditTaskWorker = (data: ITaskWorker, objectId: string) => {
     // from: dayjs(data.from).format(dateFormat),
     // to: dayjs(data.to).format(dateFormat),
   };
-  console.log("edit TaskWorker: ", dataFormTaskWorker.value);
+  // console.log("edit TaskWorker: ", dataFormTaskWorker.value);
 
   showModalTaskWorker();
 };
@@ -154,7 +202,7 @@ const customDateFormat = "DD MMM, dddd, YYYY";
 const dateFormat = "DD MMMM YYYY";
 const weekFormat = "DD MMM YYYY";
 
-const daysOfSelectWeek = ref<{ dayString: string; day: string }[]>([]);
+const daysOfSelectWeek = ref<IWeekDay[]>([]);
 
 // const daysWeekInterpolate = [1,2,3,4,5,6,0]
 const onCreateWeekDays = (startDay: Dayjs) => {
@@ -232,123 +280,123 @@ const customWeekStartEndFormat = (value: Dayjs) => {
 //   return _taskMontajWorkers; //groupBy(_taskMontajWorkers, "from");
 // });
 
-const mapTasksByDates = computed(() => {
-  // console.log(
-  //   'week.value.startOf("week")=',
-  //   week.value.startOf("week"),
-  //   week.value,
-  //   dayjs("2025-01-01T21:00:00Z").diff(week.value.startOf("week"), "day")
-  // );
-  const firstDay = dayjs(week.value).startOf("week").startOf("day");
-  const dateWithTaskWorker: {
-    [key: string]: ITaskWorker[];
-  } = {};
+// const mapTasksByDates = computed(() => {
+//   // console.log(
+//   //   'week.value.startOf("week")=',
+//   //   week.value.startOf("week"),
+//   //   week.value,
+//   //   dayjs("2025-01-01T21:00:00Z").diff(week.value.startOf("week"), "day")
+//   // );
+//   const firstDay = dayjs(week.value).startOf("week").startOf("day");
+//   const dateWithTaskWorker: {
+//     [key: string]: ITaskWorker[];
+//   } = {};
 
-  for (let i = 0; i < daysOfSelectWeek.value.length; i++) {
-    const diff = daysOfSelectWeek.value.length - i;
-    const d = daysOfSelectWeek.value[i];
-    const _allTaskWorkers = taskWorkerStore.items
-      .filter(
-        (x) =>
-          // dayjs(x.from).diff(d.day, "day") <= 0 &&
-          // dayjs(x.to).diff(d.day, "day") <= 0
-          // dayjs(x.order.dateOtgruzka).year() != 1 &&
-          operationMontaj.value.map((xx) => xx.id).includes(x.operationId) &&
-          dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
-      )
-      .map((y) => {
-        // console.group("isBetween: ", y.from, y.to);
-        // console.log(d.day, dayjs(d.day).isBetween(y.from, y.to, "day", "[]"));
-        // console.groupEnd();
+//   for (let i = 0; i < daysOfSelectWeek.value.length; i++) {
+//     const diff = daysOfSelectWeek.value.length - i;
+//     const d = daysOfSelectWeek.value[i];
+//     const _allTaskWorkers = taskWorkerStore.items
+//       .filter(
+//         (x) =>
+//           // dayjs(x.from).diff(d.day, "day") <= 0 &&
+//           // dayjs(x.to).diff(d.day, "day") <= 0
+//           // dayjs(x.order.dateOtgruzka).year() != 1 &&
+//           operationMontaj.value.map((xx) => xx.id).includes(x.operationId) &&
+//           dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
+//       )
+//       .map((y) => {
+//         // console.group("isBetween: ", y.from, y.to);
+//         // console.log(d.day, dayjs(d.day).isBetween(y.from, y.to, "day", "[]"));
+//         // console.groupEnd();
 
-        const user = userStore.items.find((u) => u.id === y.workerId);
-        const taskStatus = taskStatusStore.items.find(
-          (x) => x.id === y?.statusId
-        );
-        return {
-          ...y,
-          user,
-          taskStatus,
-        };
-      });
+//         const user = userStore.items.find((u) => u.id === y.workerId);
+//         const taskStatus = taskStatusStore.items.find(
+//           (x) => x.id === y?.statusId
+//         );
+//         return {
+//           ...y,
+//           user,
+//           taskStatus,
+//         };
+//       });
 
-    // dateWithTaskWorker[d.day] = _allTaskWorkers.map((x) => {
-    //   return {
-    //     name: x.worker.name,
-    //     from: x.from,
-    //     to: x.to,
-    //   };
-    // });
+//     // dateWithTaskWorker[d.day] = _allTaskWorkers.map((x) => {
+//     //   return {
+//     //     name: x.worker.name,
+//     //     from: x.from,
+//     //     to: x.to,
+//     //   };
+//     // });
 
-    // for (const taskW of _allTaskWorkers) {
-    //   if (
-    //     (!_taskMontajWorkers[taskW.objectId] ||
-    //       !_taskMontajWorkers[taskW.objectId][taskW.workerId]) &&
-    //     !["finish", "autofinish"].includes(taskW.status)
-    //   ) {
-    //     const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
-    //     const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
-    //     _taskMontajWorkers[taskW.objectId] = Object.assign(
-    //       _taskMontajWorkers[taskW.objectId] || {},
-    //       {
-    //         [taskW.workerId]: {
-    //           item: taskW,
-    //           stat: {
-    //             startCol: diffFrom > 0 ? diffFrom : 0,
-    //             length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
-    //             diffFrom,
-    //             diffTo,
-    //           },
-    //         },
-    //       }
-    //     );
-    //   }
-    // }
-  }
+//     // for (const taskW of _allTaskWorkers) {
+//     //   if (
+//     //     (!_taskMontajWorkers[taskW.objectId] ||
+//     //       !_taskMontajWorkers[taskW.objectId][taskW.workerId]) &&
+//     //     !["finish", "autofinish"].includes(taskW.status)
+//     //   ) {
+//     //     const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+//     //     const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+//     //     _taskMontajWorkers[taskW.objectId] = Object.assign(
+//     //       _taskMontajWorkers[taskW.objectId] || {},
+//     //       {
+//     //         [taskW.workerId]: {
+//     //           item: taskW,
+//     //           stat: {
+//     //             startCol: diffFrom > 0 ? diffFrom : 0,
+//     //             length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+//     //             diffFrom,
+//     //             diffTo,
+//     //           },
+//     //         },
+//     //       }
+//     //     );
+//     //   }
+//     // }
+//   }
 
-  // for (const objectKey in _taskMontajWorkers) {
-  //   for (const taskKey in _taskMontajWorkers[objectKey]) {
-  //     if (
-  //       !_taskMontajWorkers[objectKey] ||
-  //       !_taskMontajWorkers[taskW.objectId][taskW.id]
-  //     ) {
-  //       const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
-  //       const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
-  //       _taskMontajWorkers[taskW.objectId] = Object.assign(
-  //         _taskMontajWorkers[taskW.objectId] || {},
-  //         {
-  //           [taskW.id]: {
-  //             item: taskW,
-  //             stat: {
-  //               startCol: diffFrom > 0 ? diffFrom : 0,
-  //               length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
-  //               diffFrom,
-  //               diffTo,
-  //             },
-  //           },
-  //         }
-  //       );
-  //     }
-  //   }
-  // }
+//   // for (const objectKey in _taskMontajWorkers) {
+//   //   for (const taskKey in _taskMontajWorkers[objectKey]) {
+//   //     if (
+//   //       !_taskMontajWorkers[objectKey] ||
+//   //       !_taskMontajWorkers[taskW.objectId][taskW.id]
+//   //     ) {
+//   //       const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+//   //       const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+//   //       _taskMontajWorkers[taskW.objectId] = Object.assign(
+//   //         _taskMontajWorkers[taskW.objectId] || {},
+//   //         {
+//   //           [taskW.id]: {
+//   //             item: taskW,
+//   //             stat: {
+//   //               startCol: diffFrom > 0 ? diffFrom : 0,
+//   //               length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+//   //               diffFrom,
+//   //               diffTo,
+//   //             },
+//   //           },
+//   //         }
+//   //       );
+//   //     }
+//   //   }
+//   // }
 
-  // console.log(mapTasksByDates);
+//   // console.log(mapTasksByDates);
 
-  return dateWithTaskWorker;
-  // Object.entries(_taskMontajWorkers).map(([key, el]) => {
-  //   const diff = dayjs(el.from).startOf("day").diff(dayjs(firstDay), "day");
-  //   return {
-  //     id: key,
-  //     objectId: el.objectId,
-  //     from: el.from,
-  //     to: el.to,
-  //     name: el.user.name,
-  //     diff,
-  //     length: dayjs(dayjs(firstDay)).endOf("day").diff(el.to, "day"),
-  //   };
-  // }); //groupBy(_taskMontajWorkers, "from");
-});
-// console.log("mapTasksByDates: ", mapTasksByDates.value);
+//   return dateWithTaskWorker;
+//   // Object.entries(_taskMontajWorkers).map(([key, el]) => {
+//   //   const diff = dayjs(el.from).startOf("day").diff(dayjs(firstDay), "day");
+//   //   return {
+//   //     id: key,
+//   //     objectId: el.objectId,
+//   //     from: el.from,
+//   //     to: el.to,
+//   //     name: el.user.name,
+//   //     diff,
+//   //     length: dayjs(dayjs(firstDay)).endOf("day").diff(el.to, "day"),
+//   //   };
+//   // }); //groupBy(_taskMontajWorkers, "from");
+// });
+// // console.log("mapTasksByDates: ", mapTasksByDates.value);
 
 const newTaskMontajWorkers = computed(() => {
   // console.log(
@@ -361,7 +409,7 @@ const newTaskMontajWorkers = computed(() => {
   const _taskMontajWorkers: {
     [key: string]: {
       [key: string]: {
-        item: ITaskWorker;
+        item: IObject;
         stat: { startCol: number; length: number };
       };
     };
@@ -388,8 +436,10 @@ const newTaskMontajWorkers = computed(() => {
         const taskStatus = taskStatusStore.items.find(
           (x) => x.id === y?.statusId
         );
+        const object = objectStore.items.find((x) => x.id == y.objectId);
         return {
           ...y,
+          object,
           user,
           taskStatus,
         };
@@ -399,17 +449,17 @@ const newTaskMontajWorkers = computed(() => {
 
     for (const taskW of _allTaskWorkers) {
       if (
-        (!_taskMontajWorkers[taskW.objectId] ||
-          !_taskMontajWorkers[taskW.objectId][taskW.workerId]) &&
+        (!_taskMontajWorkers[taskW.workerId] ||
+          !_taskMontajWorkers[taskW.workerId][taskW.objectId]) &&
         !["finish", "autofinish"].includes(taskW.status)
       ) {
         const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
         const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
-        _taskMontajWorkers[taskW.objectId] = Object.assign(
-          _taskMontajWorkers[taskW.objectId] || {},
+        _taskMontajWorkers[taskW.workerId] = Object.assign(
+          _taskMontajWorkers[taskW.workerId] || {},
           {
-            [taskW.workerId]: {
-              item: taskW,
+            [taskW.objectId]: {
+              item: taskW.object,
               stat: {
                 startCol: diffFrom > 0 ? diffFrom : 0,
                 length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
@@ -466,6 +516,119 @@ const newTaskMontajWorkers = computed(() => {
   // }); //groupBy(_taskMontajWorkers, "from");
 });
 
+const newTaskMontajWorkersEveryDay = computed(() => {
+  // console.log(
+  //   'week.value.startOf("week")=',
+  //   week.value.startOf("week"),
+  //   week.value,
+  //   dayjs("2025-01-01T21:00:00Z").diff(week.value.startOf("week"), "day")
+  // );
+  const firstDay = dayjs(week.value).startOf("week").startOf("day");
+  const _taskMontajWorkers: {
+    [key: string]: {
+      // key = workerId
+      [key: string]: {
+        // key = day
+        [key: string]: // key = objectId
+        ITaskWorker[];
+      };
+    };
+  } = {};
+
+  for (let i = 0; i < daysOfSelectWeek.value.length; i++) {
+    const diff = daysOfSelectWeek.value.length - i;
+    const d = daysOfSelectWeek.value[i];
+    const _allTaskWorkers = taskWorkerStore.items
+      .filter(
+        (x) =>
+          // dayjs(x.from).diff(d.day, "day") <= 0 &&
+          // dayjs(x.to).diff(d.day, "day") <= 0
+          // dayjs(x.order.dateOtgruzka).year() != 1 &&
+          operationMontaj.value.map((xx) => xx.id).includes(x.operationId) &&
+          dayjs(d.day).isBetween(dayjs(x.from), dayjs(x.to), "day", "[]")
+      )
+      .map((y) => {
+        // console.group("isBetween: ", y.from, y.to);
+        // console.log(d.day, dayjs(d.day).isBetween(y.from, y.to, "day", "[]"));
+        // console.groupEnd();
+
+        const user = userStore.items.find((u) => u.id === y.workerId);
+        const taskStatus = taskStatusStore.items.find(
+          (x) => x.id === y?.statusId
+        );
+        const object = objectStore.items.find((x) => x.id == y.objectId);
+        return {
+          ...y,
+          object,
+          user,
+          taskStatus,
+        };
+      });
+
+    // console.log(_allTaskWorkers);
+
+    for (const taskW of _allTaskWorkers) {
+      if (!["finish", "autofinish"].includes(taskW.status)) {
+        if (!_taskMontajWorkers[taskW.workerId]) {
+          _taskMontajWorkers[taskW.workerId] = {};
+        }
+
+        if (!_taskMontajWorkers[taskW.workerId][d.day]) {
+          _taskMontajWorkers[taskW.workerId][d.day] = {};
+        }
+
+        if (!_taskMontajWorkers[taskW.workerId][d.day][taskW.objectId]) {
+          _taskMontajWorkers[taskW.workerId][d.day][taskW.objectId] = [];
+        }
+
+        _taskMontajWorkers[taskW.workerId][d.day][taskW.objectId].push(taskW);
+      }
+    }
+  }
+
+  // for (const objectKey in _taskMontajWorkers) {
+  //   for (const taskKey in _taskMontajWorkers[objectKey]) {
+  //     if (
+  //       !_taskMontajWorkers[objectKey] ||
+  //       !_taskMontajWorkers[taskW.objectId][taskW.id]
+  //     ) {
+  //       const diffFrom = dayjs(taskW.from).diff(dayjs(firstDay), "day");
+  //       const diffTo = dayjs(dayjs(taskW.to)).diff(dayjs(firstDay), "day");
+  //       _taskMontajWorkers[taskW.objectId] = Object.assign(
+  //         _taskMontajWorkers[taskW.objectId] || {},
+  //         {
+  //           [taskW.id]: {
+  //             item: taskW,
+  //             stat: {
+  //               startCol: diffFrom > 0 ? diffFrom : 0,
+  //               length: diffTo - (diffFrom > 0 ? diffFrom : 0) + 1,
+  //               diffFrom,
+  //               diffTo,
+  //             },
+  //           },
+  //         }
+  //       );
+  //     }
+  //   }
+  // }
+
+  console.log(_taskMontajWorkers);
+
+  return _taskMontajWorkers;
+  // Object.entries(_taskMontajWorkers).map(([key, el]) => {
+  //   const diff = dayjs(el.from).startOf("day").diff(dayjs(firstDay), "day");
+  //   return {
+  //     id: key,
+  //     objectId: el.objectId,
+  //     from: el.from,
+  //     to: el.to,
+  //     name: el.user.name,
+  //     diff,
+  //     length: dayjs(dayjs(firstDay)).endOf("day").diff(el.to, "day"),
+  //   };
+  // }); //groupBy(_taskMontajWorkers, "from");
+});
+
 const tblRef = ref<HTMLElement>();
 const sizeColumn = ref<number[]>([]);
 const onSetSizeColumn = () => {
@@ -478,6 +641,7 @@ const onSetSizeColumn = () => {
 
       return rect.width - 1;
     });
+    // console.log("sizeColumn.value", sizeColumn.value);
   }
 };
 
@@ -489,6 +653,7 @@ const onQuery = async () => {
     .find({
       date: week.value.startOf("week").utc().format(),
       operationId: operationMontaj.value.map((x) => x.id),
+      status: ["process", "wait", "pause"],
       $limit: 100,
     })
     .finally(() => {
@@ -499,29 +664,29 @@ const onQuery = async () => {
 onMounted(async () => {
   onCreateWeekDays(week.value.startOf("week"));
 
-  onQuery();
-  // await orderStore.find({
-  //   // stolyarComplete: 1,
-  //   // shlifComplete: 1,
-  //   // malyarComplete: 1,
-  //   goComplete: 1,
-  //   status: [1],
-  // });
-  // taskStore.find({ $limit: 100 });
+  //   await onQuery();
+  //   // await orderStore.find({
+  //   //   // stolyarComplete: 1,
+  //   //   // shlifComplete: 1,
+  //   //   // malyarComplete: 1,
+  //   //   goComplete: 1,
+  //   //   status: [1],
+  //   // });
+  //   // taskStore.find({ $limit: 100 });
 
-  // setTimeout(() => {
-  // }, 100);
-  onSetSizeColumn();
+  //   // setTimeout(() => {
+  //   // }, 100);
+  //   onSetSizeColumn();
 
-  window.addEventListener("resize", onSetSizeColumn);
+  //   window.addEventListener("resize", onSetSizeColumn);
 });
 
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", onSetSizeColumn);
-});
+// onBeforeUnmount(() => {
+//   window.removeEventListener("resize", onSetSizeColumn);
+// });
 </script>
 <template>
-  <div class="flex-auto">
+  <div class="flex-auto flex flex-col w-full">
     <VHeader :title="$t('page.montajList.title')">
       <template #back>&nbsp;</template>
     </VHeader>
@@ -541,7 +706,7 @@ onBeforeUnmount(() => {
             @change="onChangeWeek"
           />
           <!-- {{ week }}
-      <br /> -->
+          <br /> -->
           <!-- <pre>
             {{ JSON.stringify(daysOfSelectWeek, null, 2) }}
           </pre> -->
@@ -558,18 +723,19 @@ onBeforeUnmount(() => {
         </div>
       </div>
       <div class="mt-4 p-4">
-        <pre>
+        <!-- <pre>
           {{ mapTasksByDates }}
-        </pre>
+        </pre> -->
         <div
+          v-if="false"
           ref="tblRef"
           class="rounded-lg bg-white dark:bg-g-900 border-t border-r border-s-200 dark:border-g-700 w-full overflow-x-auto"
         >
           <div class="flex flex-row flex-nowrap">
             <div
-              class="flex-none w-64 px-4 text-normal border-l border-b border-s-200 dark:border-g-700"
+              class="flex-none w-64 p-4 text-normal border-l border-b border-s-200 dark:border-g-700"
             >
-              Объект
+              ФИО
             </div>
             <!-- <td class="px-4 text-normal border border-s-200 dark:border-g-700">
               Изделия
@@ -611,7 +777,79 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="flex flex-col items-justify overflow-hidden">
-            <template
+            <template v-for="montajnik in montajniks" :key="montajnik.id">
+              <div class="flex flex-row flex-nowrap items-stretch">
+                <div
+                  class="w-64 p-4 border-l border-b border-s-200 dark:border-g-700"
+                >
+                  <span class="text-md leading-4">
+                    {{ montajnik?.name }}
+                    <!-- {{ montajnik?.id }} -->
+                  </span>
+                  <!-- <MontajObjectOrders
+                    v-if="montajnik?.id"
+                    :object-id="montajnik.id"
+                  /> -->
+                </div>
+                <!-- <div
+                  v-if="montajnik?.id"
+                  v-for="(day, index) in daysOfSelectWeek"
+                  :key="day.dayString"
+                  class="flex-auto basis-0 relative border-l border-b border-s-200 dark:border-g-700 m-0 p-0 group tdDay"
+                  :style="{
+                    'min-height': newTaskMontajWorkers[montajnik.id]
+                      ? `${
+                          Object.values(newTaskMontajWorkers[montajnik.id])
+                            .length * 50
+                        }px`
+                      : 'auto',
+                  }"
+                >
+                  <div
+                    v-if="index === 0"
+                    :key="`${obj.item.id}_${sizeColumn[0]}`"
+                    v-for="(obj, objId, indexM) in newTaskMontajWorkers[
+                      montajnik.id
+                    ]"
+                    class="text-left text-sm text-nowrap"
+                  >
+                    <MontajListObject
+                      v-if="sizeColumn.length"
+                      :index="indexM"
+                      :size-column="sizeColumn[0]"
+                      :object="obj"
+                      :worker-id="montajnik.id"
+                      @on-edit-task-worker="onEditTaskWorker"
+                    />
+                  </div>
+                </div> -->
+
+                <div
+                  v-if="montajnik?.id"
+                  v-for="(day, index) in daysOfSelectWeek"
+                  :key="day.dayString"
+                  class="flex-auto basis-0 relative border-l border-b border-s-200 dark:border-g-700 m-0 p-2 group tdDay"
+                >
+                  <div
+                    v-if="newTaskMontajWorkersEveryDay[montajnik.id]"
+                    v-for="(obj, objId, indexM) in newTaskMontajWorkersEveryDay[
+                      montajnik.id
+                    ][day.day]"
+                    :key="`${day}_${montajnik.id}_${objId}`"
+                    class="text-left text-sm text-nowrap"
+                  >
+                    <MontajListObject
+                      v-if="sizeColumn.length"
+                      :index="indexM"
+                      :object-id="objId"
+                      :worker-id="montajnik.id"
+                      @on-edit-task-worker="onEditTaskWorker"
+                    />
+                  </div>
+                </div>
+              </div>
+            </template>
+            <!-- <template
               v-for="objectMontaj in objectsForMontaj"
               :key="objectMontaj.id"
             >
@@ -627,12 +865,6 @@ onBeforeUnmount(() => {
                     :object-id="objectMontaj.id"
                   />
                 </div>
-                <!-- <th class="py-4 border border-s-200 dark:border-g-700"></th> -->
-                <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
-              <span class="text-base font-normal leading-4">
-                Исполнитель 1
-              </span>
-            </th> -->
                 <div
                   v-if="objectMontaj?.id"
                   v-for="(day, index) in daysOfSelectWeek"
@@ -664,23 +896,18 @@ onBeforeUnmount(() => {
                       @on-edit-task-worker="onEditTaskWorker"
                     />
                   </div>
-                  <!-- <a-tooltip>
-                  <template #title>
-                    {{ $t("button.addTask") }}
-                  </template>
-                  <a-button
-                    class="absolute bottom-0 invisible group-hover:visible flex items-center justify-center"
-                    shape="circle"
-                    type="dashed"
-                    @click="onAddNewItemTaskWorker(day, objectMontaj)"
-                  >
-                    <VIcon :path="iPlusLg" />
-                  </a-button>
-                </a-tooltip> -->
                 </div>
               </div>
-            </template>
+            </template> -->
           </div>
+        </div>
+
+        <div class="overflow-x-auto b-scroll">
+          <MontajGroupByObject
+            :week-days="daysOfSelectWeek"
+            @on-edit-task-worker="onEditTaskWorker"
+            @on-add-new-task-worker="onAddNewItemTaskWorker"
+          />
         </div>
       </div>
       <!-- <div>

@@ -14,6 +14,7 @@ import { create, patch } from "@/api/task_worker";
 import { Rule } from "ant-design-vue/es/form";
 import {
   useAuthStore,
+  useOperationStore,
   usePostStore,
   useRoleStore,
   useTaskStatusStore,
@@ -41,6 +42,7 @@ const userStore = useUserStore();
 const taskStatusStore = useTaskStatusStore();
 const postStore = usePostStore();
 const roleStore = useRoleStore();
+const operationStore = useOperationStore();
 
 const formState: UnwrapRef<ITaskWorkerInput> = reactive({ ...props.data });
 const formRef = ref();
@@ -261,6 +263,21 @@ const disableEdit = computed(
 const disableEditDate = computed(
   () => formState.status != "wait" && authStore.code != "systemrole"
 );
+
+const operationTask = computed(() =>
+  operationStore.items.find((x) => x.id == formState.operationId)
+);
+
+// watch(operationTask, (newValue, oldValue) => {
+//   console.log("group=", newValue?.group);
+
+//   if (newValue?.group == "5") {
+//     formState.typeGo = "range";
+//   } else {
+//     formState.typeGo = "default";
+//   }
+// });
+
 onMounted(() => {
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
@@ -271,7 +288,16 @@ onMounted(() => {
       formState.status = waitStatus.status;
       formState.statusId = waitStatus.id;
     }
+  } else {
+    taskFromDate.value = dayjs(props.data.from);
   }
+
+  if (operationTask.value?.group == "5") {
+    formState.typeGo = "range";
+  } else {
+    formState.typeGo = "default";
+  }
+
   if (formState.to && formState.from) {
     taskRange.value = [dayjs(formState.from), dayjs(formState.to)];
   }
@@ -279,7 +305,8 @@ onMounted(() => {
 </script>
 <template>
   <div>
-    <!-- {{ JSON.stringify(formState) }} -->
+    <!-- {{ JSON.stringify(formState.typeGo) }}
+    {{ JSON.stringify(operationTask) }} -->
 
     <a-form
       ref="formRef"
@@ -357,8 +384,8 @@ onMounted(() => {
         ></a-select>
       </a-form-item> -->
 
-      <!-- <a-form-item
-        v-if="formState.typeGo === 'range'"
+      <a-form-item
+        v-if="operationTask?.group == '5'"
         :label="$t('form.taskWorker.range')"
         name="to"
       >
@@ -370,7 +397,7 @@ onMounted(() => {
             !authStore.roles.includes('taskWorker-typeGo') || disableEdit
           "
         />
-      </a-form-item> -->
+      </a-form-item>
 
       <!-- <a-form-item
         v-else-if="formState.typeGo === 'date'"
@@ -387,7 +414,11 @@ onMounted(() => {
         />
       </a-form-item> -->
 
-      <a-form-item :label="$t('form.taskWorker.from')" name="from">
+      <a-form-item
+        v-if="operationTask?.group != '5'"
+        :label="$t('form.taskWorker.from')"
+        name="from"
+      >
         <a-date-picker
           v-model:value="taskFromDate"
           :disabledDate="disabledDate"

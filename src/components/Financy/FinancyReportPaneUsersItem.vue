@@ -64,7 +64,7 @@ const totalTime = computed(() => {
     class="flex flex-row items-center cursor-pointer gap-3 p-2 mb-2 rounded-lg"
     :class="[
       workerId === pane.workerId
-        ? 'bg-s-100 dark:bg-g-600'
+        ? 'bg-s-100 dark:bg-g-600 font-medium '
         : ' cursor-pointer bg-transparent dark:bg-g-900/50 hover:bg-s-100 dark:hover:bg-g-800',
     ]"
     @click="

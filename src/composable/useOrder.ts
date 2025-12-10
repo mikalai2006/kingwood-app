@@ -281,7 +281,7 @@ const useOrder = () => {
   };
 
   const onCheckComplete = async (item: IOrder) => {
-    console.log("Check order complete: ", item);
+    // console.log("Check order complete: ", item);
     Modal.confirm({
       // transitionName: "",
       icon: null,
@@ -407,6 +407,7 @@ const useOrder = () => {
     { key: "montajComplete" },
     { key: "createdAt" },
     { key: "updatedAt" },
+    { key: "userId" },
     { key: "action" },
   ]);
   const optionsForSelect = computed(() =>
@@ -431,6 +432,7 @@ const useOrder = () => {
     // "term",
     // "group",
     // "activeOperation",
+    "userId",
     "action",
   ]);
 

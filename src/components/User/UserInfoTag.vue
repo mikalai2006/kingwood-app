@@ -48,7 +48,9 @@ const post = computed(() =>
     </div>
 
     <div class="">
-      {{ getShortFIO(user?.name) }}
+      <span>
+        {{ getShortFIO(user?.name) }}
+      </span>
       <span
         class="block font-normal leading-3 text-xs text-s-400 dark:text-g-300"
       >

@@ -33,6 +33,26 @@
     @apply cursor-move;
   }
 
+  /* .diagonal-cell {
+    background: linear-gradient(
+      to left bottom,
+      transparent 50%,
+      #eeeff1 50%,
+      #eeeff1 51%,
+      transparent 51%
+    );
+  }
+
+  .dark .diagonal-cell {
+    background: linear-gradient(
+      to left bottom,
+      transparent 50%,
+      #474747 50%,
+      #474747 51%,
+      transparent 51%
+    );
+  } */
+
   .b-scroll::-webkit-scrollbar-track,
   .ant-modal-wrap::-webkit-scrollbar-track {
     @apply bg-s-100 dark:bg-g-800;

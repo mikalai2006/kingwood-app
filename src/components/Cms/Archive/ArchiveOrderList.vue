@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, reactive, ref, watch } from "vue";
+import { computed, h, onMounted, reactive, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 
 import { IOrder, IOrderFilter } from "@/api/order/types";
@@ -17,11 +17,7 @@ import {
   iWraningTriangle,
 } from "@/utils/icons";
 import { dateFormat } from "@/utils/date";
-import {
-  getObjectId,
-  getShortFIO,
-  replaceSubstringByArray,
-} from "@/utils/utils";
+import { replaceSubstringByArray } from "@/utils/utils";
 import colors from "tailwindcss/colors";
 import sift from "sift";
 import { message, Modal } from "ant-design-vue";
@@ -30,6 +26,7 @@ import useOrder from "@/composable/useOrder";
 import { Colors } from "@/utils/colors";
 import VIcon from "@/components/UI/VIcon.vue";
 import ArchiveOrderTaskList from "./ArchiveOrderTaskList.vue";
+import UserFIO from "@/components/User/UserFIO.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -490,16 +487,7 @@ const activeKey = ref("list");
       </template>
 
       <template v-if="column.key === 'constructorId'">
-        <p class="text-nowrap">
-          {{
-            getObjectId(record.constructorId) != "0"
-              ? getShortFIO(
-                  userStore.items.find((x) => x.id === record.constructorId)
-                    ?.name
-                )
-              : "-"
-          }}
-        </p>
+        <UserFIO :user-id="record.constructorId" />
       </template>
 
       <template v-if="column.key === 'activeOperation'">

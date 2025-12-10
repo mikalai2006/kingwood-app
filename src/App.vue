@@ -336,11 +336,15 @@ onErrorCaptured((error: any, vm, info) => {
 
 <template>
   <div
-    class="h-8 w-full flex flex-row items-center px-2 flex-shrink-0 flex-grow-0 title-drag"
+    class="relative h-8 w-full flex flex-row items-center flex-shrink-0 flex-grow-0 title-drag"
   >
-    <p class="text-sm text-s-900 dark:text-g-300">
-      {{ $t("nameApp") }} {{ version }}
-    </p>
+    <div
+      class="h-full w-56 flex items-center rounded-tl-lg bg-s-900 dark:bg-g-950"
+    >
+      <p class="px-2 text-sm text-s-500 dark:text-g-600">
+        {{ $t("nameApp") }} {{ version }}
+      </p>
+    </div>
   </div>
   <div class="flex-auto overflow-hidden">
     <a-config-provider
@@ -469,7 +473,7 @@ onErrorCaptured((error: any, vm, info) => {
               >
                 <aside
                   id="sidebar"
-                  class="overflow-hidden rounded-tr-xl shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 md:w-64 w-3/4 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
+                  class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 w-56 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
                 >
                   <div class="flex items-center justify-center">
                     <a href="#" class="" :title="$t('nameApp')">
@@ -564,6 +568,7 @@ onErrorCaptured((error: any, vm, info) => {
                   </div>
                 </aside>
                 <div
+                  id="main"
                   class="flex-auto flex flex-col overflow-auto b-scroll bg-s-200 dark:bg-g-951"
                 >
                   <div

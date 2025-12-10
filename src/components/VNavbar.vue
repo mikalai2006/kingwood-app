@@ -106,7 +106,7 @@ const menuItems = computed(() =>
         class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
         :class="[
           route.name === item
-            ? 'bg-white  dark:bg-g-700 text-black dark:text-white'
+            ? 'bg-white dark:bg-g-700 text-black dark:text-white'
             : 'text-s-200 dark:text-g-400',
         ]"
       >
@@ -115,9 +115,15 @@ const menuItems = computed(() =>
       ></span> -->
         <span>{{ $t(`page.${item}.title`) }}</span>
         <!-- <span
-        v-if="route.name === item"
-        class="w-4 h-4 rotate-45 bg-s-200 absolute -right-2 z-50"
-      ></span> -->
+          v-if="route.name === item"
+          class="w-4 h-4 rotate-45 bg-s-200 absolute -right-2 z-50"
+        ></span> -->
+        <span
+          v-if="item == 'montajList'"
+          class="bg-lime-600 px-1.5 rounded-md text-white"
+        >
+          тест
+        </span>
       </RouterLink>
     </template>
   </nav>

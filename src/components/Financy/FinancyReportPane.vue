@@ -168,7 +168,7 @@ onMounted(() => {
 
 <template>
   <div class="flex-auto flex flex-row items-stretch bg-white dark:bg-g-900/50">
-    <div class="flex flex-row items-stretch basis-4/12 shrink-0 grow-1 gap-4">
+    <div class="flex flex-row items-stretch basis-3/12 shrink-0 grow-1 gap-4">
       <div class="p-4 overflow-hidden w-full">
         <!-- {{ JSON.stringify(daysList) }} -->
         <div class="bg-s-100 dark:bg-g-800 rounded-lg">
@@ -185,22 +185,22 @@ onMounted(() => {
         <!-- {{ JSON.stringify(props.pane) }} -->
         <div
           v-if="props.pane.month"
-          class="mt-4 p-4 bg-s-100 dark:bg-g-800 rounded-lg overflow-y-auto max-h-[calc(100vh_-_235px)] b-scroll"
+          class="mt-4 p-2 bg-s-100 dark:bg-g-800 rounded-lg overflow-y-auto max-h-[calc(100vh_-_235px)] b-scroll"
         >
           <div
-            class="cursor-pointer flex flex-row items-center text-s-500 dark:text-g-300 p-4"
+            class="cursor-pointer flex flex-row items-center text-base text-s-500 dark:text-g-300 py-4 px-2"
             @click="showTotal = !showTotal"
           >
-            <div class="flex-auto">
-              {{ $t("table.financy.totalByMonth") }}
-            </div>
-            <div>
+            <div class="pr-2">
               <a-spin v-if="loading" />
               <VIcon
                 v-else
                 :path="iChevronDown"
                 :class="[showTotal ? 'rotate-180' : '', 'transition-transform']"
               />
+            </div>
+            <div class="flex-auto">
+              {{ $t("table.financy.totalByMonth") }}
             </div>
           </div>
           <FinancyReportTotal

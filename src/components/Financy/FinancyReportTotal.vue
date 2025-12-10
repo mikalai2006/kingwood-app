@@ -173,7 +173,7 @@ onMounted(() => {
 
     <!-- {{ totalMoney }}|{{ totalPayed }} -->
 
-    <div class="relative overflow-x-auto">
+    <div class="relative overflow-x-auto bg-white dark:bg-g-900">
       <table class="w-full text-left rtl:text-right border-collapse">
         <!-- <thead class="text-sm border-b dark:bg-g-800 dark:border-g-700">
           <tr>
@@ -187,12 +187,12 @@ onMounted(() => {
         </thead> -->
         <tbody>
           <tr
-            class="cursor-pointer border-l-2 border-g-200 dark:border-g-500"
+            class="cursor-pointer border-l border-g-200 dark:border-g-500"
             @click="showDetails = !showDetails"
           >
             <td
               scope="row"
-              class="px-4 py-2 font-normal text-g-900 dark:text-white"
+              class="px-2 py-2 font-normal text-base text-s-500 dark:text-g-300"
             >
               <div class="flex gap-2 items-center">
                 <VIcon
@@ -206,18 +206,21 @@ onMounted(() => {
               </div>
             </td>
             <td
-              class="px-6 py-2 text-base text-right whitespace-nowrap font-medium text-p-700 dark:text-p-400"
+              class="px-2 py-2 text-base text-right whitespace-nowrap font-medium text-p-700 dark:text-p-400"
             >
               {{ totalMoney.toLocaleString("ru-RU") }} ₽
             </td>
           </tr>
           <tr
             v-if="showDetails"
-            class="border-l-2 border-g-200 dark:border-g-500 text-g-500 dark:text-g-400"
+            class="border-l border-g-200 dark:border-g-500 text-g-500 dark:text-g-400"
           >
             <td colspan="2">
-              <div class="bg-s-200 dark:bg-g-900 text-sm">
-                <div v-for="item in statData" class="flex items-center">
+              <div class="text-sm">
+                <div
+                  v-for="item in statData"
+                  class="flex items-center border-dotted border-t border-g-200 dark:border-g-500"
+                >
                   <div class="flex-auto px-4 py-2 font-normal">
                     <template v-if="item.order.name">
                       {{
@@ -229,7 +232,7 @@ onMounted(() => {
                     <template v-else> Хоз. работы, Цех </template>
                   </div>
                   <div
-                    class="px-6 py-2 whitespace-nowrap text-right font-medium text-p-700 dark:text-p-400"
+                    class="px-4 py-2 whitespace-nowrap text-right font-medium text-p-700 dark:text-p-400"
                   >
                     {{ item.total.toLocaleString("ru-RU") }} ₽
                   </div>

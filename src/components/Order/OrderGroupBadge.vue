@@ -18,6 +18,7 @@ import { ITaskWorker } from "@/api/task_worker/types";
 import { Colors } from "@/utils/colors";
 import dayjs from "@/utils/dayjs";
 import { dateFormat, dateFormatShort } from "@/utils/date";
+import UserFIO from "../User/UserFIO.vue";
 
 const props = defineProps<{
   group: string;
@@ -241,7 +242,7 @@ const allWorkers = computed(() =>
                 : 'text-black dark:text-g-200'
             "
           >
-            {{ getShortFIO(worker.worker?.name) }}
+            <UserFIO :user-id="worker.workerId" />
           </div>
 
           <div

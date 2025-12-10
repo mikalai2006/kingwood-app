@@ -1,4 +1,8 @@
 import { Dayjs } from "dayjs";
+import { IObject } from "./object/types";
+import { ITask } from "./task/types";
+import { ITaskWorker } from "./task_worker/types";
+import { IUser } from "./user/types";
 
 export interface IPaginationParams<T> {
   $limit?: number;
@@ -14,6 +18,10 @@ export interface IResponseData<T> {
   limit: number;
   total: number;
   skip: number;
+  objects?: IObject[];
+  tasks?: ITask[];
+  taskWorkers?: ITaskWorker[];
+  workers?: IUser[];
 }
 
 export interface IRequestParams<T> extends IPaginationParams<T> {
@@ -79,3 +87,8 @@ export interface IDoplata {
 export type IDoplataInput = {
   [Property in keyof IDoplata]?: IDoplata[Property];
 };
+
+export interface IWeekDay {
+  dayString: string;
+  day: string;
+}

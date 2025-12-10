@@ -178,7 +178,7 @@ const activeKey = ref("list");
       <draggable
         :list="tasksByOrder"
         item-key="name"
-        :disabled="false"
+        :disabled="true"
         @end="onSaveSortOrder"
       >
         <template #item="{ element }">

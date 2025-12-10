@@ -18,11 +18,7 @@ import {
   iWraningTriangle,
 } from "@/utils/icons";
 import { dateFormat } from "@/utils/date";
-import {
-  getObjectId,
-  getShortFIO,
-  replaceSubstringByArray,
-} from "@/utils/utils";
+import { replaceSubstringByArray } from "@/utils/utils";
 import colors from "tailwindcss/colors";
 import sift from "sift";
 import OrderGroupBadge from "./OrderGroupBadge.vue";
@@ -36,6 +32,8 @@ import OrderMessages from "./OrderMessages.vue";
 import OrderTaskList from "./OrderTaskList.vue";
 import FinancyOrder from "../Financy/FinancyOrder.vue";
 import { ITaskWorker } from "@/api/task_worker/types";
+import UserFIO from "../User/UserFIO.vue";
+import OrderListButtonCompleted from "./OrderListButtonCompleted.vue";
 
 export interface IConfigTable {
   sort: { field: string; order: number; key: string }[];
@@ -251,7 +249,7 @@ const onQueryData = async () => {
     });
 };
 
-const handleTableChange: any = (
+const handleTableChange: any = async (
   //TableProps["onChange"]
   pag: { pageSize: number; current: number },
   filters: any,
@@ -287,7 +285,7 @@ const handleTableChange: any = (
     filtersColumn.value = {};
   }
 
-  onQueryData();
+  await onQueryData();
   // console.log({
   //   sorter,
   //   ...filters,
@@ -300,6 +298,13 @@ const handleTableChange: any = (
   //   sortOrder: sorter.order,
   //   ...filters,
   // });
+  setTimeout(() => {
+    document.getElementById("main")?.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    });
+  }, 300);
 };
 
 const onDeleteOrder = async (input: IOrder) => {
@@ -433,7 +438,7 @@ const activeKey = ref("list");
     size="small"
     class="table_order"
     @change="handleTableChange"
-    :row-class-name="(_record: IOrder, index: number) => (_record.status == 200 ? 'custom priority cursor-pointer !bg-green-500/60 hover:!bg-green-500/70' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
+    :row-class-name="(_record: IOrder, index: number) => (_record.status == 200 ? 'custom priority cursor-pointer !bg-green-500/40 hover:!bg-green-500/70' : _record.priority ? 'custom priority cursor-pointer bg-red-500/30 hover:!bg-red-500/40' :  'cursor-pointer')"
     :customRow="
             (record: IOrder) => {
               return {
@@ -463,25 +468,10 @@ const activeKey = ref("list");
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
         <div v-if="record.status != 200" class="flex gap-0 items-center">
-          <a-tooltip
-            placement="topRight"
-            v-if="record.tasks?.filter((x: ITaskWorker) => !['finish', 'autofinish'].includes(x.status)).length == 0 && record.tasks.length > 0 && record.status != 200"
-          >
-            <template #title>
-              {{ $t("button.checkCompleteOrder") }}
-            </template>
-            <a-button
-              type="primary"
-              @click="(e: Event) => {onCheckComplete(record); e.preventDefault(); e.stopPropagation()}"
-            >
-              <div class="flex items-center gap-2">
-                <VIcon :path="iCheckLg" />
-                <!-- {{ $t("button.checkComplete") }} -->
-                <!-- {{ $t("button.delete") }} -->
-              </div>
-            </a-button>
-          </a-tooltip>
-
+          <OrderListButtonCompleted
+            :order-id="record.id"
+            @on-check-complete="onCheckComplete"
+          />
           <a-tooltip
             v-if="authStore.roles.includes('order-patch')"
             placement="topRight"
@@ -574,7 +564,7 @@ const activeKey = ref("list");
 
       <template v-if="column.key === 'goComplete'">
         <div
-          v-if="record.goComplete"
+          v-if="record.goComplete && record.status != 200"
           class="relative min-w-32 min-h-16 rounded-md bg-green-600 dark:bg-green-700 flex items-center justify-center"
         >
           <div
@@ -594,6 +584,7 @@ const activeKey = ref("list");
               <a-button
                 v-if="authStore.roles.includes('order-otgruzka')"
                 size="small"
+                class="bg-purple-500 text-white"
                 @click="
                   (e: Event) => {
                     onOtgruzka(record);
@@ -625,16 +616,23 @@ const activeKey = ref("list");
         </div>
       </template>
 
+      <template v-if="column.key === 'userId'">
+        <p class="text-nowrap">
+          <UserFIO :user-id="record.userId" />
+        </p>
+      </template>
+
       <template v-if="column.key === 'constructorId'">
         <p class="text-nowrap">
-          {{
+          <!-- {{
             getObjectId(record.constructorId) != "0"
               ? getShortFIO(
                   userStore.items.find((x) => x.id === record.constructorId)
                     ?.name
                 )
               : "-"
-          }}
+          }} -->
+          <UserFIO :user-id="record.constructorId" />
         </p>
       </template>
 
@@ -645,7 +643,7 @@ const activeKey = ref("list");
 
       <template v-if="column.key === 'name'">
         <div class="flex gap-2 items-center">
-          <span class="font-medium">
+          <span class="leading-4">
             {{ record.name }}
           </span>
           <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
@@ -667,7 +665,7 @@ const activeKey = ref("list");
               objectId: record.objectId,
             },
           }"
-          class="flex items-center gap-2"
+          class="flex items-center gap-2 text-s-600 dark:text-g-200 underline underline-offset-4 hover:no-underline"
         >
           <!-- {{ record?.object?.name }} -->
           <OrderObject :object-id="record.objectId" />
@@ -712,6 +710,7 @@ const activeKey = ref("list");
               {{ $t("info.dateStart") }}
             </template>
             <a-button
+              type="primary"
               size="small"
               @click="
                     (e: Event) => {

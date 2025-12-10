@@ -2,13 +2,12 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { showMessage } from "./status";
 import { IResponse } from "./type";
 import { useAuthStore } from "@/store";
-import { useI18n } from "vue-i18n";
 import { CustomError } from "@/utils/customError";
 // import { useUniversalCookies } from '@/plugins/universal-cookies'
 // const cookie = useUniversalCookies()
 // import { getToken } from '/@/utils/auth'
 // If the request takes longer than `timeout`, the request will be interrupted
-axios.defaults.timeout = 5000;
+axios.defaults.timeout = 60000;
 // Indicates whether credentials are required for cross-origin requests
 axios.defaults.withCredentials = false;
 // axios.defaults.headers.common['token'] =  AUTH_TOKEN

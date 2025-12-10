@@ -422,12 +422,8 @@ const onEditTaskWorker = (item: ITaskWorker) => {
       <div
         :class="[
           ' self-start whitespace-nowrap ',
-          !dayjs(new Date()).isBetween(
-            dayjs(item.from),
-            dayjs(item.to),
-            'day',
-            '[]'
-          ) && !['finish', 'autofinish'].includes(item.status)
+          !dayjs().isBetween(dayjs(item.from), dayjs(item.to), 'day', '[]') &&
+          !['finish', 'autofinish'].includes(item.status)
             ? 'px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black'
             : 'text-g-300 dark:text-g-500',
         ]"
