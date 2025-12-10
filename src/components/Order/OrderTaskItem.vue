@@ -168,6 +168,7 @@ const onDeleteTask = (item: ITask | undefined) => {
 };
 
 const onDeleteTaskWorker = (item: ITaskWorker | undefined) => {
+  const worker = userStore.items.find((y) => y.id === item?.workerId);
   Modal.confirm({
     // transitionName: "",
     icon: null,
@@ -196,7 +197,7 @@ const onDeleteTaskWorker = (item: ITaskWorker | undefined) => {
               "div",
               {},
               replaceSubstringByArray(t("message.removeTaskWorker"), [
-                item?.worker?.name,
+                worker?.name,
                 order.value?.number,
                 order.value?.name,
               ])
@@ -211,13 +212,14 @@ const onDeleteTaskWorker = (item: ITaskWorker | undefined) => {
     onOk() {
       return new Promise((resolve, reject) => {
         try {
+          const worker = userStore.items.find((y) => y.id === item?.workerId);
           item?.id &&
             taskWorkerStore
               .onRemove(item.id)
               .then((res) => {
                 message.success(
                   replaceSubstringByArray(t("message.deleteTaskWorkerOk"), [
-                    getShortFIO(res?.worker.name),
+                    getShortFIO(worker?.name),
                   ])
                 );
               })

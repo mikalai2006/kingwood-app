@@ -122,13 +122,11 @@ const order = computed(() => {
           background: taskStatus?.color,
         }"
       ></div>
-      <ArchiveOrderTaskUser v-if="item.worker" :user="item.worker">
+      TODO
+      <!-- <ArchiveOrderTaskUser v-if="item.worker" :user="item.worker">
         <template #description>
-          <!-- c {{ dayjs(item.from).format(dateFormat) }} -->
-          <!-- ->
-          {{ dayjs(item.to).format(dateFormat) }} -->
         </template>
-      </ArchiveOrderTaskUser>
+      </ArchiveOrderTaskUser> -->
       <div class="text-g-300 dark:text-g-500 self-start">
         {{ $t("from") }} {{ dayjs(item.from).format(dateFormat) }}
         <!-- <TimePretty

@@ -54,15 +54,15 @@ const activeStyle = computed(() => {
     width: "0px",
   };
 
-  if (activeTaskWorker.value) {
-    _style = {
-      background: activeTaskWorker.value.taskStatus?.color,
-      color: invertColor(activeTaskWorker.value.taskStatus?.color, true),
-      left: `${props.taskMW.stat.startCol * props.sizeColumn + 3}px`,
-      top: `${props.index * 35 + 3}px`,
-      width: `${props.taskMW.stat.length * props.sizeColumn - 5}px`,
-    };
-  }
+  // if (activeTaskWorker.value) {
+  //   _style = {
+  //     background: activeTaskWorker.value.taskStatus?.color,
+  //     color: invertColor(activeTaskWorker.value.taskStatus?.color, true),
+  //     left: `${props.taskMW.stat.startCol * props.sizeColumn + 3}px`,
+  //     top: `${props.index * 35 + 3}px`,
+  //     width: `${props.taskMW.stat.length * props.sizeColumn - 5}px`,
+  //   };
+  // }
   return _style;
 });
 </script>
@@ -79,9 +79,9 @@ const activeStyle = computed(() => {
       >
         <TaskWorkerStatusTagDot :task-worker-id="activeTaskWorker?.id" />
         <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
-        {{ getShortFIO(activeTaskWorker?.worker?.name) }}
+        <!-- {{ getShortFIO(activeTaskWorker?.worker?.name) }}
         - №{{ activeTaskWorker?.order.number }}
-        {{ activeTaskWorker?.order.name }}
+        {{ activeTaskWorker?.order.name }} -->
       </div>
     </a-tooltip>
   </div>

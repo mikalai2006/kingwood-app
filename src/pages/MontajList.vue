@@ -530,7 +530,7 @@ const newTaskMontajWorkersEveryDay = computed(() => {
       [key: string]: {
         // key = day
         [key: string]: // key = objectId
-        ITaskWorker[];
+        any[];
       };
     };
   } = {};

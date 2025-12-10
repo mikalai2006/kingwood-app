@@ -171,7 +171,8 @@ const allWorkers = computed(() =>
             class="text-sm text-nowrap"
             :class="status ? 'text-white' : 'text-black dark:text-g-100'"
           >
-            {{ getShortFIO(worker.worker?.name) }}
+            <!-- {{ getShortFIO(worker.worker?.name) }} -->
+            TODO
           </div>
           <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"

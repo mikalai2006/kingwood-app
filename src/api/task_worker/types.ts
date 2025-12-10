@@ -20,11 +20,11 @@ export interface ITaskWorker {
   to: string;
   typeGo: string;
 
-  // task: ITask;
+  task: ITask;
   // taskStatus: ITaskStatus;
-  // order: IOrder;
+  order: IOrder;
   // worker: IUser;
-  // object: IObject;
+  object: IObject;
 
   createdAt: Date;
   updatedAt: Date;
