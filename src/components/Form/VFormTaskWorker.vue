@@ -31,6 +31,7 @@ import { message } from "ant-design-vue";
 const props = defineProps<{
   data: ITaskWorkerInput;
   defaultData: ITaskWorkerInput;
+  hideStatus?: boolean;
 }>();
 const emit = defineEmits(["callback"]);
 
@@ -441,7 +442,9 @@ onMounted(() => {
           :placeholder="$t('form.taskWorker.selectStatusId')"
           :options="taskStatuses"
           :disabled="
-            !authStore.roles.includes('taskWorker-statusId') || disableEdit
+            !authStore.roles.includes('taskWorker-statusId') ||
+            disableEdit ||
+            hideStatus
           "
         ></a-select>
       </a-form-item>
@@ -493,5 +496,3 @@ onMounted(() => {
     </a-form>
   </div>
 </template>
-
-<style scoped></style>

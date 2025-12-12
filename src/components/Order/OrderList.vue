@@ -453,13 +453,17 @@ const activeKey = ref("list");
               };
             }
           "
-    :pagination="{
-      ...pagination,
-      disabled: loading,
-      onChange: onChangePagintaion,
-      showSizeChanger: true,
-      position: ['bottomCenter'],
-    }"
+    :pagination="
+      columnsData.length > 10
+        ? {
+            ...pagination,
+            disabled: loading,
+            onChange: onChangePagintaion,
+            showSizeChanger: true,
+            position: ['bottomCenter'],
+          }
+        : false
+    "
   >
     <template #title>
       <slot name="header"></slot>

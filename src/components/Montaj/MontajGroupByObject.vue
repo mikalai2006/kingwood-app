@@ -1,6 +1,6 @@
 <script setup lang="ts" async>
 import { useUserStore } from "@/store/modules/user";
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 import {
   useObjectStore,
@@ -12,16 +12,13 @@ import {
 } from "@/store";
 import { useI18n } from "vue-i18n";
 import { Dayjs } from "dayjs";
-import { ITask } from "@/api/task/types";
-import { ITaskWorker, ITaskWorkerInput } from "@/api/task_worker/types";
-import { groupBy } from "lodash-es";
-import { IObject } from "@/api/object/types";
 import MontajListItemRelative from "./MontajListItemRelative.vue";
 import { IWeekDay } from "@/api/types";
 import { Colors } from "@/utils/colors";
 import MontajListNotWorkByDay from "./MontajListNotWorkByDay.vue";
 import { iChevronDown, iChevronRight } from "@/utils/icons";
 import MontajObjectOrders from "./MontajObjectOrders.vue";
+import MontajObjectOrdersInTable from "./MontajObjectOrdersInTable.vue";
 
 dayjs.locale("ru");
 
@@ -66,6 +63,18 @@ const taskWorkersForMontaj = computed(() => {
             dayjs(props.weekDays[props.weekDays.length - 1].day).isBetween(
               dayjs(x.from),
               dayjs(x.to),
+              "day",
+              "[]"
+            ) ||
+            dayjs(x.from).isBetween(
+              dayjs(props.weekDays[0].day),
+              dayjs(props.weekDays[props.weekDays.length - 1].day),
+              "day",
+              "[]"
+            ) ||
+            dayjs(x.to).isBetween(
+              dayjs(props.weekDays[0].day),
+              dayjs(props.weekDays[props.weekDays.length - 1].day),
               "day",
               "[]"
             ))
@@ -447,9 +456,9 @@ onBeforeUnmount(() => {
   window.removeEventListener("resize", onSetSizeColumn);
 });
 
-const openRows = ref<{ [key: string]: boolean }>({});
+const openRow = ref<number>(-1);
 const OnToggleRow = (indexRow: number) => {
-  openRows.value[indexRow] = !!!openRows.value[indexRow];
+  openRow.value = indexRow == openRow.value ? -1 : indexRow;
 };
 </script>
 <template>
@@ -543,6 +552,9 @@ const OnToggleRow = (indexRow: number) => {
           <td
             class="sticky left-0 p-4 border-r border-b border-s-200 dark:border-g-700"
             :class="[
+              indexRow == openRow
+                ? 'border-l-4 border-l-p-500 dark:border-l-p-700'
+                : '',
               indexRow % 2 == 0
                 ? 'bg-s-100 dark:bg-g-800 group-hover:bg-green-100 dark:group-hover:bg-g-500'
                 : 'bg-white dark:bg-g-900 group-hover:bg-green-100 dark:group-hover:bg-g-500',
@@ -585,11 +597,14 @@ const OnToggleRow = (indexRow: number) => {
             </template> -->
             </MontajObjectOrders>
 
-            <!-- <div class="absolute right-3 bottom-3">
+            <div class="absolute right-3 bottom-3">
               <a-button size="small" type="text" @click="OnToggleRow(indexRow)">
-                <VIcon :path="iChevronDown" />
+                <VIcon
+                  class="text-s-300 dark:text-g-500"
+                  :path="iChevronDown"
+                />
               </a-button>
-            </div> -->
+            </div>
           </td>
           <!-- <th class="py-4 border border-s-200 dark:border-g-700"></th> -->
           <!-- <th class="w-64 py-4 border border-s-200 dark:border-g-700">
@@ -705,8 +720,11 @@ const OnToggleRow = (indexRow: number) => {
           </div>
         </td> -->
         </tr>
-        <tr v-show="openRows[indexRow] == true" class="">
-          <td colspan="8" class="p-4 border-b border-s-200 dark:border-g-700">
+        <tr v-show="openRow == indexRow" class="">
+          <td
+            colspan="8"
+            class="p-2 border-b border-s-200 dark:border-g-700 border-l-4 border-l-p-500 dark:border-l-p-700"
+          >
             <MontajObjectOrdersInTable
               v-if="objectMontaj?.id"
               :object-id="objectMontaj.id"

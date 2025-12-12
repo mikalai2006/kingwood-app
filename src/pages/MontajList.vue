@@ -941,6 +941,7 @@ onMounted(async () => {
     <VFormTaskWorker
       :data="dataFormTaskWorker"
       :default-data="defaultDataTaskWorker"
+      :hide-status="true"
       @callback="
         () => {
           openTaskWorker = false;
