@@ -13,5 +13,5 @@ RUN npm run build-simple
 FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html/dist
 # Expose the standard HTTP port
-EXPOSE 7777
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
