@@ -10,6 +10,7 @@ import {
   IArchiveWorkHistory,
   IArchiveWorkHistoryFilter,
 } from "./types";
+import { INotifyListQuery } from "../notify/types";
 
 enum URLS {
   notify = "/archive_notify",
@@ -62,6 +63,12 @@ const removeArchiveUser = async (id: string | number) =>
     url: `${URLS.user}/${id}`,
   });
 
+const removeListArchiveNotify = async (data: INotifyListQuery) =>
+  $post<IArchiveNotify[]>({
+    url: `${URLS.notify}/remove_list`,
+    data,
+  });
+
 export {
   findArchiveNotify,
   removeArchiveNotify,
@@ -71,4 +78,5 @@ export {
   removeArchiveOrder,
   findArchiveUser,
   removeArchiveUser,
+  removeListArchiveNotify,
 };

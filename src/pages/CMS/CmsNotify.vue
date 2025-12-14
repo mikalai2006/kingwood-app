@@ -25,21 +25,21 @@ const onSetItems = (data: INotify[]) => {
 };
 
 const userFilter = computed(() => {
-  return notifyStore.items.map((x) => {
-    const user = getUserById.value(x.userId);
+  return userStore.items.map((x) => {
+    // const user = getUserById.value(x.userId);
     return {
-      text: user?.name,
-      value: user?.id,
+      text: x?.name,
+      value: x?.id,
     };
   });
 });
 
 const userRecepientFilter = computed(() => {
-  return notifyStore.items.map((x) => {
-    const user = getUserById.value(x.userTo);
+  return userStore.items.map((x) => {
+    // const user = getUserById.value(x.userTo);
     return {
-      text: user?.name,
-      value: user?.id,
+      text: x?.name,
+      value: x?.id,
     };
   });
 });
@@ -80,6 +80,8 @@ const allColumns = computed(() => [
   },
   {
     key: "createdAt",
+    sorter: (a: INotify, b: INotify) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   },
   { key: "action" },
 ]);

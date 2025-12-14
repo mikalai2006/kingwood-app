@@ -1,7 +1,7 @@
 <script setup lang="ts" async>
 import { computed, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
-import { useAuthStore, useGeneralStore } from "@/store";
+import { useAuthStore, useGeneralStore, useObjectStore } from "@/store";
 import { IOrder, IOrderFilter } from "@/api/order/types";
 import { useI18n } from "vue-i18n";
 import VIcon from "@/components/UI/VIcon.vue";
@@ -17,10 +17,12 @@ import {
   useRoute,
   useRouter,
 } from "vue-router";
+import VObject from "@/components/V/VObject.vue";
 
 dayjs.locale("ru");
 const authStore = useAuthStore();
 const generalStore = useGeneralStore();
+const objectStore = useObjectStore();
 
 const route = useRoute();
 const router = useRouter();
@@ -117,7 +119,10 @@ const onRemoveFilterKey = (key: keyof IOrderFilter) => {
 
 const nameKeyLocalFilterAll = computed(() => "filter.all");
 const filterParams = ref<IOrderFilter>({});
+const countQuery = ref(1);
 const onSetFilter = () => {
+  countQuery.value++;
+
   filterParams.value = Object.fromEntries(
     Object.entries(filter.value).filter(([k, v]) => v)
   );
@@ -506,7 +511,7 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
       </a-tab-pane>
       <a-tab-pane key="all" :tab="$t('tabs.order.all')">
         <OrderList
-          :key="Object.keys(filterParams).join('-')"
+          :key="Object.keys(filterParams).join('-') + countQuery"
           keyList="all"
           :keyColumns="nameKeyLocalStorageColumns"
           :params="{ ...filterParams }"
@@ -533,7 +538,14 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
                       v-for="[k, v] in Object.entries(filterParams)"
                       @close="() => onRemoveFilterKey(k as keyof IOrderFilter)"
                     >
-                      <span> {{ $t(`form.order.${k}`) }} - {{ v }} </span>
+                      <span>
+                        {{ $t(`form.order.${k}`) }} -
+                        {{
+                          k == "objectId"
+                            ? objectStore.items.find((x) => x.id == v)?.name
+                            : v
+                        }}
+                      </span>
 
                       <template #closeIcon>
                         <a-tooltip>
@@ -564,6 +576,9 @@ function onCheckHash(to: RouteLocationNormalizedGeneric) {
                   <a-form-item :label="$t('form.order.number')" name="number">
                     <a-input-number v-model:value="filter.number" />
                   </a-form-item>
+
+                  <VObject value-as-array v-model="filter.objectId" />
+
                   <a-form-item :label="$t('form.order.name')" name="name">
                     <a-input v-model:value="filter.name" />
                   </a-form-item>

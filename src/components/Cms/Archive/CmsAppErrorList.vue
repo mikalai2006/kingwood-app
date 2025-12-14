@@ -37,29 +37,33 @@ const appErrorStore = useAppErrorStore();
 
 const authStore = useAuthStore();
 
-const siftParams = computed(() => {
-  const _result = Object.fromEntries(
-    Object.entries(props.params)
-      // .filter(([key, value]) => !["to"].includes(key))
-      .map(([key, value]) => {
-        if (typeof value === "object" && value?.length) {
-          return [key, { $in: value }];
-        } else {
-          return [key, value];
-        }
-      })
-  );
-  return _result;
-});
+// const siftParams = computed(() => {
+//   const _result = Object.fromEntries(
+//     Object.entries(props.params)
+//       // .filter(([key, value]) => !["to"].includes(key))
+//       .map(([key, value]) => {
+//         if (typeof value === "object" && value?.length) {
+//           return [key, { $in: value }];
+//         } else {
+//           return [key, value];
+//         }
+//       })
+//   );
+//   return _result;
+// });
 const loading = ref(false);
 
 const columnsData = computed(() => {
-  return appErrorStore.items.filter(sift(siftParams.value)).map((x) => {
-    return {
-      ...x,
-      key: x.id,
-    };
-  });
+  return (
+    appErrorStore.items
+      //.filter(sift(siftParams.value))
+      .map((x) => {
+        return {
+          ...x,
+          key: x.id,
+        };
+      })
+  );
 });
 
 const rowSelection = ref({
@@ -103,7 +107,10 @@ const OnRemoveSelected = () => {
 };
 
 onMounted(async () => {
-  await appErrorStore.find({ ...props.params });
+  await appErrorStore.find({
+    ...props.params,
+    $sort: [{ key: "createdAt", value: -1 }],
+  });
 });
 </script>
 

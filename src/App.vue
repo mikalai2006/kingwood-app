@@ -291,6 +291,13 @@ const tokenTheme = computed(() => {
 
 // const errorApp = ref<any>(null);
 
+const isElectron = computed(
+  () =>
+    typeof navigator === "object" &&
+    typeof navigator.userAgent === "string" &&
+    navigator.userAgent.indexOf("Electron") >= 0
+);
+
 onErrorCaptured((error: any, vm, info) => {
   // this.error = error;
   // this.errorMessage = info;
@@ -336,9 +343,11 @@ onErrorCaptured((error: any, vm, info) => {
 
 <template>
   <div
+    v-if="isElectron"
     class="relative h-8 w-full flex flex-row items-center flex-shrink-0 flex-grow-0 title-drag"
   >
     <div
+      v-if="!generalStore.error && !loading"
       class="h-full w-56 flex items-center rounded-tl-lg bg-s-900 dark:bg-g-950"
     >
       <p class="px-2 text-sm text-s-500 dark:text-g-600">
@@ -472,6 +481,7 @@ onErrorCaptured((error: any, vm, info) => {
                 class="flex-auto flex flex-col md:flex-row overflow-auto b-scroll"
               >
                 <aside
+                  v-if="isElectron"
                   id="sidebar"
                   class="overflow-hidden shrink-0 bg-s-900 dark:bg-g-950 text-gray-100 w-56 px-0 absolute inset-y-0 left-0 transform md:sticky md:translate-x-0 transition duration-200 ease-in-out md:flex md:flex-col md:justify-between pt-4"
                 >

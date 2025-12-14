@@ -534,8 +534,9 @@ const onEditTaskWorker = (item: ITaskWorker) => {
 
     <div
       v-if="
-        authStore.roles?.includes('taskWorker-create') &&
-        task?.status != 'finish'
+        authStore.roles?.includes('taskWorker-create')
+        // &&
+        // task?.status != 'finish'
       "
       class="flex flex-row items-center gap-4 py-1"
     >

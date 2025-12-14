@@ -1,17 +1,30 @@
 <script setup lang="ts">
 import useObject from "@/composable/useObject";
 import { useObjectStore } from "@/store";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 
-// const props = defineProps<{ label: string }>();
-const model = defineModel();
+const model = defineModel<string[] | string>();
+const props = defineProps<{
+  valueAsArray?: boolean;
+}>();
 
 const objectStore = useObjectStore();
 
 const { onCreateObject, onFetchObjects, state } = useObject();
 
+const subModel = ref();
+
+const OnChangeOption = () => {
+  model.value = props.valueAsArray ? [subModel.value] : subModel.value;
+};
+
 onMounted(() => {
-  const object = objectStore.items.find((x) => x.id === model.value);
+  if (typeof model.value == "object" && model.value.length) {
+    subModel.value = model.value[0];
+  } else {
+    subModel.value = model.value;
+  }
+  const object = objectStore.items.find((x) => x.id === subModel.value);
   object?.name && onFetchObjects(object?.name);
 });
 </script>
@@ -19,12 +32,13 @@ onMounted(() => {
 <template>
   <a-form-item :label="$t('form.order.objectId')" name="objectId">
     <a-select
-      v-model:value="model"
+      v-model:value="subModel"
       style="width: 100%"
       :placeholder="$t('form.order.selectObject')"
       :options="state.data"
       :fieldNames="{ label: 'name', value: 'id' }"
       @search="onFetchObjects"
+      @change="OnChangeOption"
       :show-search="true"
       :filter-option="false"
       :not-found-content="state.value ? undefined : null"
@@ -41,6 +55,7 @@ onMounted(() => {
               @click="
                 () =>
                   onCreateObject((result) => {
+                    subModel = result.id;
                     model = result.id;
                   })
               "

@@ -3,7 +3,6 @@ import { onMounted, reactive, ref } from "vue";
 import VTitle from "../components/VTitle.vue";
 import { useAuthStore } from "@/store";
 import { useRouter } from "vue-router";
-import { message } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
 import { IFailedFinishForm, useError } from "@/composable/useError";
 import { IAuthData } from "@/api/auth/types";

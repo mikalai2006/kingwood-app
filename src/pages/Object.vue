@@ -74,7 +74,7 @@ const onAddNewItem = () => {
 };
 
 const onEditItem = (item: IObject) => {
-  console.log("Edit object item: ", item);
+  // console.log("Edit object item: ", item);
 
   dataForm.value = Object.assign({}, item);
   showModal();

@@ -6,24 +6,32 @@ import { message } from "ant-design-vue";
 import VIcon from "@/components/UI/VIcon.vue";
 import { iCog } from "@/utils/icons";
 import { IArchiveNotify } from "@/api/archive/types";
-import { removeArchiveNotify } from "@/api/archive";
+import { removeArchiveNotify, removeListArchiveNotify } from "@/api/archive";
 import CmsArchiveNotifyList from "@/components/Cms/Archive/CmsArchiveNotifyList .vue";
 import CmsNotifyActive from "@/components/Cms/Archive/CmsNotifyActive.vue";
+import { useUserStore } from "@/store";
+import { INotifyListQuery } from "@/api/notify/types";
+import { replaceSubstringByArray } from "@/utils/utils";
 
 dayjs.locale("ru");
 
 const { t } = useI18n();
 
+const userStore = useUserStore();
+
 const notifys = ref<IArchiveNotify[]>([]);
 const onSetItems = (data: IArchiveNotify[]) => {
   notifys.value = [...data];
 };
+const onResetItems = () => {
+  notifys.value = [];
+};
 
 const userFilter = computed(() => {
-  return notifys.value.map((x) => {
+  return userStore.items.map((x) => {
     return {
-      text: x.user.name,
-      value: x.user.name,
+      text: x.name,
+      value: x.id,
     };
   });
 });
@@ -42,13 +50,13 @@ const allColumns = computed(() => [
     key: "userId",
     filters: userFilter.value,
     onFilter: (value: string, record: IArchiveNotify) =>
-      record.user.name === value,
+      record.userId === value,
   },
   {
     key: "userTo",
     filters: userFilter.value,
     onFilter: (value: string, record: IArchiveNotify) =>
-      record.user.name === value,
+      record.userTo === value,
   },
   {
     key: "title",
@@ -65,6 +73,8 @@ const allColumns = computed(() => [
   },
   {
     key: "createdAt",
+    sorter: (a: IArchiveNotify, b: IArchiveNotify) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   },
   { key: "action" },
 ]);
@@ -177,6 +187,33 @@ const onSetColumns = (value: string, key: string, data: string[]) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 
+const OnRemoveList = async (items: INotifyListQuery) => {
+  await removeListArchiveNotify(items)
+    .then(() => {
+      // for (let i = 0; i < items.id.length; i++) {
+      //   const removeIndex = notifys.value.findIndex((x) => x.id == items.id[i]);
+
+      //   if (removeIndex != -1) {
+      //     notifys.value = notifys.value.splice(removeIndex, 1);
+      //   }
+      // }
+      notifys.value = notifys.value.filter((x) => !items.id.includes(x.id));
+      message.success(
+        replaceSubstringByArray(t("message.notifyRemoveListOk"), [
+          items.id?.length,
+        ])
+      );
+    })
+    .catch((error: any) => {
+      message.error(error);
+      throw new Error(error);
+    })
+    .finally(() => {
+      loading.value = false;
+      open.value = false;
+    });
+};
+
 onMounted(() => {
   // sync columns from localStorage.
   const _columns = localStorage.getItem(nameKeyLocalStorageColumns.value);
@@ -186,7 +223,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="flex-auto">
+  <div class="flex-auto relative">
     <VHeader :title="$t('cms.page.cms-archive-notify')">
       <template #back>
         <div class="pl-4">
@@ -253,6 +290,8 @@ onMounted(() => {
       @on-remove-item="onRemoveItem"
       @on-view-item="onViewItem"
       @on-set-items="onSetItems"
+      @on-reset-items="onResetItems"
+      @on-remove-list="OnRemoveList"
     />
   </div>
 

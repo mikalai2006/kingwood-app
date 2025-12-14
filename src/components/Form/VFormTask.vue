@@ -202,7 +202,11 @@ watch(taskDate, (v) => {
   formState.to = v?.toISOString();
 });
 
+const nameSelect = ref();
+
 onMounted(() => {
+  nameSelect.value?.focus();
+
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
   }
@@ -255,6 +259,7 @@ onMounted(() => {
           </template>
         </a-auto-complete> -->
         <a-select
+          ref="nameSelect"
           v-model:value="formState.operationId"
           style="width: 100%"
           show-search

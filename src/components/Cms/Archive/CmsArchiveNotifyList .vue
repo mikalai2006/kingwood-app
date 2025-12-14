@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useAuthStore } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { iCheckLg } from "@/utils/icons";
-import VIcon from "@/components/UI/VIcon.vue";
 import { useI18n } from "vue-i18n";
-import sift from "sift";
 import { dateTimeFormat } from "@/utils/date";
 import UserInfo from "@/components/User/UserInfo.vue";
 import { IArchiveNotify, IArchiveNotifyFilter } from "@/api/archive/types";
 import { findArchiveNotify } from "@/api/archive";
 import { IConfigTable } from "./ArchiveOrderList.vue";
+import { Colors } from "@/utils/colors";
 
 const props = defineProps<{
   keyList: string;
@@ -29,33 +27,40 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const emit = defineEmits(["onRemoveItem", "onViewItem", "onSetItems"]);
+const emit = defineEmits([
+  "onRemoveItem",
+  "onResetItems",
+  "onViewItem",
+  "onSetItems",
+  "onRemoveList",
+]);
 
 const authStore = useAuthStore();
 
-const siftParams = computed(() => {
-  const _result = Object.fromEntries(
-    Object.entries(props.params)
-      // .filter(([key, value]) => !["to"].includes(key))
-      .map(([key, value]) => {
-        if (typeof value === "object" && value?.length) {
-          return [key, { $in: value }];
-        } else {
-          return [key, value];
-        }
-      })
-  );
-  return _result;
-});
+// const siftParams = computed(() => {
+//   const _result = Object.fromEntries(
+//     Object.entries(props.params)
+//       // .filter(([key, value]) => !["to"].includes(key))
+//       .map(([key, value]) => {
+//         if (typeof value === "object" && value?.length) {
+//           return [key, { $in: value }];
+//         } else {
+//           return [key, value];
+//         }
+//       })
+//   );
+//   return _result;
+// });
 const loading = ref(false);
 
 const columnsData = computed(() => {
-  return props.items.filter(sift(siftParams.value)).map((x) => {
-    return {
-      ...x,
-      key: x.id,
-    };
-  });
+  return props.items;
+  // .filter(sift(siftParams.value)).map((x) => {
+  //   return {
+  //     ...x,
+  //     key: x.id,
+  //   };
+  // });
 });
 const nameKeyLocalStorage = computed(
   () => `tableConfig.archiveNotify.${props.keyList}`
@@ -72,12 +77,14 @@ const onChangePagintaion = async (_page: number, _pageSize: number) => {
   pagination.value.pageSize = _pageSize;
 };
 
-const sort = ref([{ field: "createdAt", order: 1, key: "createdAt" }]);
+const sort = ref([{ field: "createdAt", order: -1, key: "createdAt" }]);
+const filtersColumn = ref<{ [key: string]: any }>({});
 
 const onQueryData = async () => {
   loading.value = true;
   await findArchiveNotify({
     ...props.params,
+    ...filtersColumn.value,
     $limit: pagination.value.pageSize,
     $skip: Math.max(
       pagination.value.pageSize * (pagination.value.current - 1) - 1,
@@ -93,15 +100,21 @@ const onQueryData = async () => {
       : undefined,
   })
     .then((r) => {
-      // notifys.value = r?.data;
-      emit("onSetItems", r.data);
-      pagination.value.total = r.total;
-      localStorage.setItem(
-        nameKeyLocalStorage.value,
-        JSON.stringify(
-          Object.assign({}, { sort: sort.value, pagination: pagination.value })
-        )
-      );
+      if (r.data) {
+        // const ids = r?.data.map((x) => x.id);
+        // const data = props.items.filter((x) => !ids.includes(x.id));
+        emit("onSetItems", r.data);
+        pagination.value.total = r.total;
+        localStorage.setItem(
+          nameKeyLocalStorage.value,
+          JSON.stringify(
+            Object.assign(
+              {},
+              { sort: sort.value, pagination: pagination.value }
+            )
+          )
+        );
+      }
     })
     .finally(() => {
       loading.value = false;
@@ -115,6 +128,7 @@ const handleTableChange: any = (
   sorter: any
 ) => {
   // console.log("sorter", sorter);
+  emit("onResetItems");
 
   if (Object.values(sorter).length > 0) {
     sort.value = sorter.order
@@ -129,6 +143,20 @@ const handleTableChange: any = (
   } else {
     sort.value = [];
   }
+
+  const objFilters: any = {};
+  for (const key in filters) {
+    if (filters[key]) {
+      objFilters[key] = filters[key];
+    }
+  }
+
+  if (Object.values(objFilters).length > 0) {
+    filtersColumn.value = Object.assign({}, objFilters);
+  } else {
+    filtersColumn.value = {};
+  }
+
   onQueryData();
   // console.log({
   //   sorter,
@@ -143,6 +171,55 @@ const handleTableChange: any = (
   //   ...filters,
   // });
 };
+const rowSelection = ref({
+  checkStrictly: false,
+  selectedRowKeys: [] as (string | number)[],
+  onChange: (
+    selectedRowKeys: (string | number)[],
+    selectedRows: IArchiveNotify[]
+  ) => {
+    // console.log(
+    //   `selectedRowKeys: ${selectedRowKeys}`,
+    //   "selectedRows: ",
+    //   selectedRows
+    // );
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+  },
+  onSelect: (
+    record: IArchiveNotify,
+    selected: boolean,
+    selectedRows: IArchiveNotify[]
+  ) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(record, selected, selectedRows);
+  },
+  onSelectAll: (
+    selected: boolean,
+    selectedRows: IArchiveNotify[],
+    changeRows: IArchiveNotify[]
+  ) => {
+    rowSelection.value.selectedRowKeys = selectedRows.map((x) => x.id);
+    // console.log(selected, selectedRows, changeRows);
+  },
+});
+
+const OnRemoveSelected = () => {
+  // console.log(`Remove ${selectedIds.value}`);
+  emit("onRemoveList", {
+    id: rowSelection.value.selectedRowKeys,
+  });
+  pagination.value.current = pagination.value.current - 1;
+  rowSelection.value.selectedRowKeys = [];
+};
+
+watch(
+  () => columnsData.value,
+  () => {
+    if (columnsData.value.length == 0) {
+      onQueryData();
+    }
+  }
+);
 
 onMounted(async () => {
   // sync columns from localStorage.
@@ -158,11 +235,33 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Transition name="height">
+    <div
+      v-show="rowSelection.selectedRowKeys.length"
+      class="mb-4 absolute top-0 bg-s-200 dark:bg-g-951 p-4"
+    >
+      <a-button
+        type="primary"
+        :disabled="!rowSelection.selectedRowKeys.length"
+        :loading="loading"
+        @click="OnRemoveSelected"
+      >
+        {{ $t("button.delete") }}
+      </a-button>
+      <span style="margin-left: 8px">
+        <template v-if="rowSelection.selectedRowKeys.length">
+          {{ `Selected ${rowSelection.selectedRowKeys.length} items` }}
+        </template>
+      </span>
+    </div>
+  </Transition>
   <a-table
     :columns="columns"
     :data-source="columnsData"
     size="small"
+    :row-selection="rowSelection"
     :loading="loading"
+    rowKey="id"
     :customRow="
             (record: IArchiveNotify) => {
               return {
@@ -228,9 +327,8 @@ onMounted(async () => {
       </template>
       <template v-if="column.key === 'status'">
         <a-tag
-          v-if="!record.status"
           :bordered="false"
-          :color="record.status ? '#5ea500' : ''"
+          :color="record.status == 1 ? Colors.g[500] : Colors.p[500]"
         >
           {{ $t(`error.status.${record.status}`) }}
         </a-tag>

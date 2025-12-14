@@ -279,7 +279,11 @@ const operationTask = computed(() =>
 //   }
 // });
 
+const nameSelect = ref();
+
 onMounted(() => {
+  nameSelect.value?.focus();
+
   if (!props.data.id) {
     formState.typeGo = typesGo.value[0].value;
     taskFromDate.value = dayjs();
@@ -354,6 +358,7 @@ onMounted(() => {
 
       <a-form-item :label="$t('form.taskWorker.workerId')" name="workerId">
         <a-select
+          ref="nameSelect"
           v-model:value="formState.workerId"
           style="width: 100%"
           show-search

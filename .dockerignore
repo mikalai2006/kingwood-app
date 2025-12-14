@@ -1,0 +1,5 @@
+# .dockerignore
+node_modules
+# you might also want to ignore other things like:
+.git
+npm-debug.log

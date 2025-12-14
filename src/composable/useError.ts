@@ -67,7 +67,10 @@ export const useError = () => {
     }
 
     message.error({
-      content: err.code == "0" ? t(err?.message || err) : err?.message || err,
+      content:
+        err.code == "0"
+          ? t(err?.message.replaceAll('"', "") || err.replaceAll('"', ""))
+          : err?.message.replaceAll('"', "") || err.replaceAll('"', ""),
       key: "err",
     });
   };

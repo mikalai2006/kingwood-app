@@ -454,7 +454,7 @@ const activeKey = ref("list");
             }
           "
     :pagination="
-      columnsData.length > 10
+      pagination.total > 10
         ? {
             ...pagination,
             disabled: loading,
@@ -466,16 +466,18 @@ const activeKey = ref("list");
     "
   >
     <template #title>
-      <slot name="header"></slot>
+      <slot name="header"> </slot>
     </template>
     <template #bodyCell="{ column, record }">
       <!-- <template v-if="record"></template> -->
       <template v-if="column.key === 'action'">
         <div v-if="record.status != 200" class="flex gap-0 items-center">
           <OrderListButtonCompleted
+            v-if="authStore.roles.includes('order-completed')"
             :order-id="record.id"
             @on-check-complete="onCheckComplete"
           />
+
           <a-tooltip
             v-if="authStore.roles.includes('order-patch')"
             placement="topRight"

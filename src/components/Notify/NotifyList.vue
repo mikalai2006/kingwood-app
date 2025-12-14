@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 
 import { useAuthStore, useNotifyStore, useUserStore } from "@/store";
@@ -7,7 +7,6 @@ import { useI18n } from "vue-i18n";
 import sift from "sift";
 import { INotifyFilter } from "@/api/notify/types";
 import UserShortInfo from "../User/UserShortInfo.vue";
-import { replaceSubstringByArray } from "@/utils/utils";
 
 const props = defineProps<{
   keyList: string;

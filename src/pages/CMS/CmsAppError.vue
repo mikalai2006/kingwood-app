@@ -55,6 +55,8 @@ const allColumns = computed(() => [
   },
   {
     key: "createdAt",
+    sorter: (a: IAppError, b: IAppError) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   },
   { key: "action" },
 ]);

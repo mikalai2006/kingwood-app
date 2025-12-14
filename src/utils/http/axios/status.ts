@@ -34,6 +34,9 @@ export const showMessage = (status: number | string): string => {
     case 505:
       message = "HTTP время не поддерживается(505)";
       break;
+    case 506:
+      message = "Исполнитель уже добавлени!";
+      break;
     default:
       message = `Ошибка соединения(${status})!`;
   }

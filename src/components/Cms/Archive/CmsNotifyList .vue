@@ -2,14 +2,12 @@
 import { computed, onMounted, ref, Transition, watch } from "vue";
 import { useAppErrorStore, useAuthStore, useNotifyStore } from "@/store";
 import dayjs from "@/utils/dayjs";
-import { iCheckLg } from "@/utils/icons";
-import VIcon from "@/components/UI/VIcon.vue";
 import { useI18n } from "vue-i18n";
-import sift from "sift";
 import { dateTimeFormat } from "@/utils/date";
 import UserInfo from "@/components/User/UserInfo.vue";
 import { INotify, INotifyFilter } from "@/api/notify/types";
 import { IConfigTable } from "./ArchiveOrderList.vue";
+import { Colors } from "@/utils/colors";
 
 const props = defineProps<{
   keyList: string;
@@ -82,13 +80,15 @@ const onChangePagintaion = async (_page: number, _pageSize: number) => {
   pagination.value.pageSize = _pageSize;
 };
 
-const sort = ref([{ field: "createdAt", order: 1, key: "createdAt" }]);
+const sort = ref([{ field: "createdAt", order: -1, key: "createdAt" }]);
+const filtersColumn = ref<{ [key: string]: any }>({});
 
 const onQueryData = async () => {
   loading.value = true;
   await await notifyStore
     .find({
       ...props.params,
+      ...filtersColumn.value,
       $limit: pagination.value.pageSize,
       $skip: Math.max(
         pagination.value.pageSize * (pagination.value.current - 1) - 1,
@@ -147,6 +147,20 @@ const handleTableChange: any = (
   } else {
     sort.value = [];
   }
+
+  const objFilters: any = {};
+  for (const key in filters) {
+    if (filters[key]) {
+      objFilters[key] = filters[key];
+    }
+  }
+
+  if (Object.values(objFilters).length > 0) {
+    filtersColumn.value = Object.assign({}, objFilters);
+  } else {
+    filtersColumn.value = {};
+  }
+
   onQueryData();
   // console.log({
   //   sorter,
@@ -306,9 +320,8 @@ onMounted(async () => {
       </template>
       <template v-if="column.key === 'status'">
         <a-tag
-          v-if="!record.status"
           :bordered="false"
-          :color="record.status ? '#5ea500' : ''"
+          :color="record.status == 1 ? Colors.g[500] : Colors.p[500]"
         >
           {{ $t(`error.status.${record.status}`) }}
         </a-tag>

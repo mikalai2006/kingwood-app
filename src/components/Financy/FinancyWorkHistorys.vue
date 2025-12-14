@@ -32,6 +32,7 @@ import FinancyDetailsList from "./FinancyDetailsList.vue";
 import { IWorkHistoryInput } from "@/api/work_history/types";
 import VFormWorkHistory from "../Form/VFormWorkHistory.vue";
 import { Modal } from "ant-design-vue";
+import UserInfoTag from "../User/UserInfoTag.vue";
 
 const COUNT_DAY_ADD_WORKTIME = 31;
 
@@ -53,6 +54,12 @@ const orderStore = useOrderStore();
 const workHistoryStore = useWorkHistoryStore();
 
 const columns = ref([
+  {
+    title: t("table.financy.userId"),
+    dataIndex: "userId",
+    key: "userId",
+    fixed: false,
+  },
   {
     title: t("table.financy.from"),
     dataIndex: "from",
@@ -95,6 +102,7 @@ const listData = computed(() => {
         dayjs(x.to).year() > 1 &&
         dayjs(x.date).isSame(dayjs(props.date), "day")
     )
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((x) => {
       const _totalMs = dayjs(x.to).diff(x.from);
       const _order = orderStore.items.find((ord) => ord.id == x.orderId);
@@ -336,6 +344,10 @@ const startDayMs = computed(() => dayjs(props.date).startOf("day").valueOf());
             {{ record.dayName }}
           </span>
         </div>
+      </template>
+
+      <template v-if="column.key === 'userId'">
+        <UserInfoTag :user-id="record.userId" show-post />
       </template>
 
       <template v-if="column.key === 'from'">

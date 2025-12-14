@@ -234,10 +234,10 @@ const activeTimer = computed(() => {
           </p> -->
       </div>
     </a-tag>
-    <!-- <div>
+    <div>
       {{ dayjs(activeWorkHistory.from).format(dateTimeFullFormat) }} ->
       {{ dayjs(activeTimer?.executeAt).format(dateTimeFullFormat) }}
-    </div> -->
+    </div>
   </template>
   <a-tag :bordered="false" v-else>
     {{ $t("table.user.isWork0") }}

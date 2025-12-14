@@ -3,6 +3,7 @@ import { useUserStore } from "@/store/modules/user";
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import dayjs from "@/utils/dayjs";
 import {
+  useAuthStore,
   useObjectStore,
   useOperationStore,
   useOrderStore,
@@ -19,6 +20,7 @@ import MontajListNotWorkByDay from "./MontajListNotWorkByDay.vue";
 import { iChevronDown, iChevronRight } from "@/utils/icons";
 import MontajObjectOrders from "./MontajObjectOrders.vue";
 import MontajObjectOrdersInTable from "./MontajObjectOrdersInTable.vue";
+import OrderObject from "../Order/OrderObject.vue";
 
 dayjs.locale("ru");
 
@@ -35,6 +37,7 @@ const objectStore = useObjectStore();
 const taskStore = useTaskStore();
 const operationStore = useOperationStore();
 const taskWorkerStore = useTaskWorkerStore();
+const authStore = useAuthStore();
 
 const { t } = useI18n();
 
@@ -550,10 +553,10 @@ const OnToggleRow = (indexRow: number) => {
           ]"
         >
           <td
-            class="sticky left-0 p-4 border-r border-b border-s-200 dark:border-g-700"
+            class="sticky left-0 z-10 p-4 border-r border-b border-s-200 dark:border-g-700"
             :class="[
               indexRow == openRow
-                ? 'border-l-4 border-l-p-500 dark:border-l-p-700'
+                ? 'border-l-4 border-l-p-500 dark:border-l-p-700 '
                 : '',
               indexRow % 2 == 0
                 ? 'bg-s-100 dark:bg-g-800 group-hover:bg-green-100 dark:group-hover:bg-g-500'
@@ -571,7 +574,10 @@ const OnToggleRow = (indexRow: number) => {
               class="flex items-center gap-2 text-s-600 dark:text-g-200 underline underline-offset-4 hover:no-underline"
             >
               <!-- {{ record?.object?.name }} -->
-              <OrderObject :object-id="objectMontaj.id" />
+              <OrderObject
+                :object-id="objectMontaj.id"
+                class="text-base font-medium"
+              />
               <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
             </RouterLink>
             <MontajObjectOrders
@@ -597,7 +603,10 @@ const OnToggleRow = (indexRow: number) => {
             </template> -->
             </MontajObjectOrders>
 
-            <div class="absolute right-3 bottom-3">
+            <div
+              v-if="authStore.roles.includes('montajList-viewOrders')"
+              class="absolute right-3 bottom-3"
+            >
               <a-button size="small" type="text" @click="OnToggleRow(indexRow)">
                 <VIcon
                   class="text-s-300 dark:text-g-500"
@@ -720,7 +729,11 @@ const OnToggleRow = (indexRow: number) => {
           </div>
         </td> -->
         </tr>
-        <tr v-show="openRow == indexRow" class="">
+        <tr
+          v-if="authStore.roles.includes('montajList-viewOrders')"
+          v-show="openRow == indexRow"
+          class=""
+        >
           <td
             colspan="8"
             class="p-2 border-b border-s-200 dark:border-g-700 border-l-4 border-l-p-500 dark:border-l-p-700"
@@ -741,7 +754,9 @@ const OnToggleRow = (indexRow: number) => {
           colspan="8"
           class="border-b pt-8 border-s-200 dark:border-g-700 bg-s-200 dark:bg-g-951"
         >
-          Вспомогательная информация
+          <div class="sticky left-0 inline-block">
+            Вспомогательная информация
+          </div>
         </td>
       </tr>
       <tr class="group">
@@ -768,18 +783,18 @@ const OnToggleRow = (indexRow: number) => {
     </tfoot>
   </table>
 
-  <RouterLink
-    :to="`/order#goComplete`"
-    class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
-  >
-    {{ $t("info.order_plural", ordersGoComplete.length) }}
-    {{ $t("info.may_plural", ordersGoComplete.length) }}
-    для отгрузки:
-    <br />
-    <!-- {{ $t("info.object_plural", idsObjectGoComplete.length) }}  -->
-    <div v-for="item in ordersGoComplete">{{ item.name }},</div>
-    <!-- {{ idsObjectGoComplete.map((x) => x.name).join(", ") }} -->
-  </RouterLink>
+  <!-- <div class="sticky left-0 inline-block">
+    <RouterLink
+      :to="`/order#goComplete`"
+      class="flex items-center space-x-2 py-2 px-4 transition duration-200 hover:bg-s-300 dark:hover:bg-g-700 hover:text-black dark:hover:text-white group rounded-lg"
+    >
+      {{ $t("info.order_plural", ordersGoComplete.length) }}
+      {{ $t("info.may_plural", ordersGoComplete.length) }}
+      для отгрузки:
+      <br />
+      <div v-for="item in ordersGoComplete">{{ item.name }},</div>
+    </RouterLink>
+  </div> -->
 
   <!-- <div class="flex flex-row flex-nowrap">
     <div
