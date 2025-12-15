@@ -3,6 +3,7 @@ import { computed, h, onMounted, ref } from "vue";
 
 import dayjs from "@/utils/dayjs";
 import {
+  useAuthStore,
   useObjectStore,
   useOrderStore,
   useTaskStatusStore,
@@ -37,6 +38,7 @@ const taskStatusStore = useTaskStatusStore();
 const workHistoryStore = useWorkHistoryStore();
 const userStore = useUserStore();
 const timerStore = useTimerStore();
+const authStore = useAuthStore();
 
 const user = computed(() => userStore.items.find((x) => x.id == props.userId));
 
@@ -234,7 +236,7 @@ const activeTimer = computed(() => {
           </p> -->
       </div>
     </a-tag>
-    <div>
+    <div v-if="authStore.code == 'systemrole'">
       {{ dayjs(activeWorkHistory.from).format(dateTimeFullFormat) }} ->
       {{ dayjs(activeTimer?.executeAt).format(dateTimeFullFormat) }}
     </div>
