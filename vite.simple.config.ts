@@ -18,7 +18,8 @@ export default defineConfig(({ mode, command }) => {
   // const sourcemap = isServe || !!process.env.VSCODE_DEBUG;
 
   return {
-    base: "/dist/",
+    base: "/app-site/",
+    outDir: "app-site",
     resolve: {
       alias: [
         { find: "@", replacement: "/src" },
