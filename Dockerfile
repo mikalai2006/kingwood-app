@@ -11,7 +11,7 @@ RUN npm run build-simple
 
 # Stage 2: Serve the static files with Nginx
 FROM nginx:stable-alpine AS production-stage
-COPY --from=build-stage /app/dist /usr/share/nginx/html/dist
+COPY --from=build-stage /app/dist /usr/share/nginx/html/app-site
 # Expose the standard HTTP port
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
