@@ -39,6 +39,7 @@ import { useError } from "./composable/useError";
 import CmsMenu from "./components/Cms/CmsMenu.vue";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import { isExpiredTime } from "./utils/utils";
+import { useSystem } from "./composable/useSystem";
 
 const generalStore = useGeneralStore();
 
@@ -65,6 +66,8 @@ const { t } = useI18n();
 const noty = useNotification();
 
 const { onShowError } = useError();
+
+const { isElectron } = useSystem();
 
 const loading = ref(false);
 
@@ -290,13 +293,6 @@ const tokenTheme = computed(() => {
 });
 
 // const errorApp = ref<any>(null);
-
-const isElectron = computed(
-  () =>
-    typeof navigator === "object" &&
-    typeof navigator.userAgent === "string" &&
-    navigator.userAgent.indexOf("Electron") >= 0
-);
 
 onErrorCaptured((error: any, vm, info) => {
   // this.error = error;

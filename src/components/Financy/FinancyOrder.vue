@@ -52,7 +52,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex-auto overflow-hidden max-h-screen">
+  <div class="flex-auto overflow-hidden">
     <div class="flex-auto p-4">
       <a-table
         :columns="columns"

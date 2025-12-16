@@ -7,6 +7,7 @@ import { useI18n } from "vue-i18n";
 import { IFailedFinishForm, useError } from "@/composable/useError";
 import { IAuthData } from "@/api/auth/types";
 import { CustomError } from "@/utils/customError";
+import { useSystem } from "@/composable/useSystem";
 
 const router = useRouter();
 
@@ -17,6 +18,8 @@ const authStore = useAuthStore();
 const formState = reactive<IAuthData>({ ...authStore.authData });
 
 const { onGetValidateError } = useError();
+
+const { isElectron } = useSystem();
 
 const loading = ref(false);
 
@@ -40,11 +43,14 @@ const onFinish = async (values: any) => {
           authStore.setAuthData(_data);
           localStorage.setItem("remembe", JSON.stringify(_data));
         }
-        router.replace("/order").then(() => {
-          console.log("Go to order");
-
-          // window.location.reload();
-        });
+        if (isElectron.value) {
+          router.replace("/order").then(() => {
+            // console.log("Go to order");
+            // window.location.reload();
+          });
+        } else {
+          router.replace("/montajList");
+        }
         return r;
       })
       .catch((error: any) => {

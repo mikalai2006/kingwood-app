@@ -730,8 +730,10 @@ const OnToggleRow = (indexRow: number) => {
         </td> -->
         </tr>
         <tr
-          v-if="authStore.roles.includes('montajList-viewOrders')"
-          v-show="openRow == indexRow"
+          v-if="
+            authStore.roles.includes('montajList-viewOrders') &&
+            openRow == indexRow
+          "
           class=""
         >
           <td
