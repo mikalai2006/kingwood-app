@@ -4,8 +4,6 @@ import router from "./router";
 import { createPinia } from "pinia";
 import { i18n } from "./plugins/i18n";
 
-import { VueRecaptchaPlugin } from "vue-recaptcha/head";
-
 import App from "./App.vue";
 
 import "./style.css";
@@ -17,10 +15,6 @@ const pinia = createPinia();
 
 const app = createApp(App);
 app.use(router);
-
-app.use(VueRecaptchaPlugin, {
-  v2SiteKey: import.meta.env.VITE_RECAPTCHA2,
-});
 
 pinia.use(({ store }) => {
   store.router = markRaw(router);
