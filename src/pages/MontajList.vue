@@ -689,10 +689,7 @@ onMounted(async () => {
 const { isElectron } = useSystem();
 </script>
 <template>
-  <div
-    class="flex-auto flex flex-col w-full"
-    :class="[isElectron ? '' : 'tele']"
-  >
+  <div class="flex-auto flex flex-col w-full">
     <div class="px-4 py-2 flex flex-row items-center gap-4">
       <p>{{ $t("page.montajList.title") }}</p>
       <a-date-picker

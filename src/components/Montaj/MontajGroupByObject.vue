@@ -21,6 +21,7 @@ import { iChevronDown, iChevronRight } from "@/utils/icons";
 import MontajObjectOrders from "./MontajObjectOrders.vue";
 import MontajObjectOrdersInTable from "./MontajObjectOrdersInTable.vue";
 import OrderObject from "../Order/OrderObject.vue";
+import { useSystem } from "@/composable/useSystem";
 
 dayjs.locale("ru");
 
@@ -463,11 +464,14 @@ const openRow = ref<number>(-1);
 const OnToggleRow = (indexRow: number) => {
   openRow.value = indexRow == openRow.value ? -1 : indexRow;
 };
+
+const { isElectron } = useSystem();
 </script>
 <template>
   <table
     ref="tblRef"
     class="w-full table-auto border-separate border-spacing-[0px] rounded-lg bg-white dark:bg-g-900"
+    :class="[isElectron ? '' : 'tele']"
   >
     <thead>
       <tr>

@@ -62,7 +62,6 @@ declare module 'vue' {
     CmsMenu: typeof import('./src/components/Cms/CmsMenu.vue')['default']
     CmsNotifyActive: typeof import('./src/components/Cms/Archive/CmsNotifyActive.vue')['default']
     'CmsNotifyList ': typeof import('./src/components/Cms/Archive/CmsNotifyList .vue')['default']
-    copy: typeof import('./src/components/Montaj/MontajGroupByObject copy.vue')['default']
     FinancyDetails: typeof import('./src/components/Financy/FinancyDetails.vue')['default']
     FinancyDetailsList: typeof import('./src/components/Financy/FinancyDetailsList.vue')['default']
     FinancyDetailsListArchive: typeof import('./src/components/Financy/FinancyDetailsListArchive.vue')['default']
