@@ -29,6 +29,7 @@ import { IWeekDay } from "@/api/types";
 import { message } from "ant-design-vue";
 import { IOrder } from "@/api/order/types";
 import { useSystem } from "@/composable/useSystem";
+import VChangerMode from "@/components/VChangerMode.vue";
 
 dayjs.locale("ru");
 const userStore = useUserStore();
@@ -690,15 +691,20 @@ const { isElectron } = useSystem();
 </script>
 <template>
   <div class="flex-auto flex flex-col w-full">
-    <div class="px-4 py-2 flex flex-row items-center gap-4">
-      <p>{{ $t("page.montajList.title") }}</p>
+    <div class="px-4 py-1 flex flex-row items-center gap-4">
+      <p class="text-sm">{{ $t("page.montajList.title") }}</p>
       <a-date-picker
+        size="small"
         v-model:value="week"
         :allowClear="false"
         picker="week"
         :format="customWeekStartEndFormat"
         @change="onChangeWeek"
       />
+      <div class="flex-auto"></div>
+      <div v-if="!isElectron" class="leading-3">
+        <VChangerMode />
+      </div>
     </div>
     <div class="flex-auto">
       <div class="px-4">
@@ -929,10 +935,3 @@ const { isElectron } = useSystem();
     />
   </a-modal>
 </template>
-
-<style>
-.tele {
-  transform: scale(0.6);
-  transform-origin: top left;
-}
-</style>

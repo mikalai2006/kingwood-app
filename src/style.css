@@ -33,6 +33,11 @@
     @apply cursor-move;
   }
 
+  .tele {
+    transform: scale(0.7);
+    transform-origin: top left;
+  }
+
   /* .diagonal-cell {
     background: linear-gradient(
       to left bottom,

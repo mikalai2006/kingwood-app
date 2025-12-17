@@ -474,12 +474,12 @@ const { isElectron } = useSystem();
     :class="[isElectron ? '' : 'tele']"
   >
     <thead>
-      <tr>
+      <!-- <tr>
         <th></th>
         <th colspan="7" class="border-b border-s-200 dark:border-g-700">
           <p class="py-2 font-normal text-g-500">Дата</p>
         </th>
-      </tr>
+      </tr> -->
       <tr>
         <th
           class="overflow-hidden text-left text-nowrap rounded-tl-lg sticky left-0 bg-white dark:bg-g-900 font-medium flex-none px-4 text-normal border-r border-b border-s-200 dark:border-g-700"
@@ -495,7 +495,7 @@ const { isElectron } = useSystem();
         <th
           v-for="(day, index) in weekDays"
           :key="day.day"
-          class="rowBody px-4 py-2 font-medium text-base border-r border-b border-s-200 dark:border-g-700"
+          class="rowBody px-4 py-0.5 font-medium text-sm border-r border-b border-s-200 dark:border-g-700"
           :class="[
             dayjs().isSame(day.day, 'day')
               ? 'bg-green-500/10 dark:bg-white/10'
@@ -513,7 +513,7 @@ const { isElectron } = useSystem();
                 .join(" ")
             }}
           </div>
-          <p class="font-normal text-s-500 dark:text-p-400">
+          <p class="font-normal leading-3 text-s-500 dark:text-p-400">
             {{
               day.dayString
                 .split(",")
@@ -523,7 +523,7 @@ const { isElectron } = useSystem();
             <a-tag
               :color="Colors.p[600]"
               v-if="dayjs().isSame(day.day, 'day')"
-              class="text-sm"
+              class="text-xs py-0 px-1 leading-4"
             >
               {{ "Сегодня" }}
             </a-tag>
@@ -690,7 +690,7 @@ const { isElectron } = useSystem();
                 newTaskMontajWorkersEveryDay[day.day][objectMontaj.id]
               )"
               :key="`${taskMW[0].id}_${sizeColumn[0]}`"
-              class="text-left pb-1 text-g-900 dark:text-white"
+              class="text-left pb-0 text-g-900 dark:text-white"
             >
               <MontajListItemRelative
                 :index="indexM"
