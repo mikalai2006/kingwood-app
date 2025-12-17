@@ -114,15 +114,15 @@ const { isElectron } = useSystem();
         <div class="flex-auto text-nowrap">
           <template v-if="isElectron">
             <template v-if="isElectron">
-              <a-button type="text">
+              <p type="text" class="p-1.5 leading-3">
                 <UserFIO :user-id="activeTaskWorker.workerId" />
-              </a-button>
+              </p>
             </template>
             <template v-else>
               <UserFIO :user-id="activeTaskWorker.workerId" />
             </template>
           </template>
-          <div v-else class="leading-6">
+          <div v-else class="leading-5">
             <UserFIO :user-id="activeTaskWorker.workerId" />
           </div>
         </div>

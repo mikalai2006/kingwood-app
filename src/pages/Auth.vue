@@ -15,7 +15,7 @@ const { t, te } = useI18n();
 
 const authStore = useAuthStore();
 
-const formState = reactive<IAuthData>({ ...authStore.authData });
+const formState = reactive<IAuthData>({ ...authStore.authData, remembe: true });
 
 const { onGetValidateError } = useError();
 
@@ -38,7 +38,7 @@ const onFinish = async (values: any) => {
           const _data = {
             login: "",
             password: "",
-            remembe: false,
+            remembe: true,
           };
           authStore.setAuthData(_data);
           localStorage.setItem("remembe", JSON.stringify(_data));
