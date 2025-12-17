@@ -76,7 +76,34 @@ const onFinishFailed = (errorInfo: IFailedFinishForm) => {
   onGetValidateError(errorInfo);
 };
 
+// const onLoadRecaptcha = () => {
+//   // const script = document.createElement("script");
+//   // script.setAttribute(
+//   //   "src",
+//   //   "https://www.google.com/recaptcha/enterprise.js?render=KEY_ID"
+//   // );
+//   // script.async = true;
+//   // document.head.appendChild(script);
+
+//   if (document.getElementById("vue-recaptcha")) {
+//     return;
+//   }
+
+//   const script = document.createElement("script");
+//   script.src = `https://www.google.com/recaptcha/enterprise.js?render=${
+//     import.meta.env.VITE_RECAPTCHA
+//   }`;
+//   script.async = true;
+//   script.defer = true;
+//   script.id = "vue-recaptcha";
+//   // script.nonce = "vue-recaptcha";
+
+//   document.head.append(script);
+// };
+
 onMounted(() => {
+  // onLoadRecaptcha();
+
   const remembe = localStorage.getItem("remembe");
   if (remembe) {
     const _remembe = JSON.parse(remembe);

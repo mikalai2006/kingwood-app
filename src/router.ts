@@ -31,6 +31,7 @@ import CmsAppError from "./pages/CMS/CmsAppError.vue";
 import CmsArchiveNotify from "./pages/CMS/CmsArchiveNotify.vue";
 import CmsNotify from "./pages/CMS/CmsNotify.vue";
 import ReAuth from "./pages/ReAuth.vue";
+import MontajListTele from "./pages/MontajListTele.vue";
 
 const routes = [
   {
@@ -121,6 +122,12 @@ const routes = [
     path: "/montajList",
     name: "montajList",
     component: MontajList,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/montajListTele",
+    name: "montajListTele",
+    component: MontajListTele,
     meta: { requiresAuth: true },
   },
   // {

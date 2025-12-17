@@ -10,6 +10,7 @@ import dayjs from "@/utils/dayjs";
 import { getShortFIO, invertColor } from "@/utils/utils";
 import { computed } from "vue";
 import UserFIO from "../User/UserFIO.vue";
+import { useSystem } from "@/composable/useSystem";
 
 const props = defineProps<{
   taskMW: ITaskWorker;
@@ -92,12 +93,14 @@ const activeStyle = computed(() => {
   }
   return _style;
 });
+
+const { isElectron } = useSystem();
 </script>
 
 <template>
   <div class="z-50 rounded-lg" :style="activeStyle">
     <div
-      class="flex items-center gap-1 cursor-pointer text-md"
+      class="flex items-center gap-1 cursor-pointer"
       @click="emit('onEditTaskWorker', taskMW, objectId)"
     >
       <div class="self-center">
@@ -108,11 +111,18 @@ const activeStyle = computed(() => {
       </div>
       <div v-if="activeTaskWorker" class="flex-auto flex items-center">
         <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
-        <div class="text-md flex-auto text-nowrap">
-          <a-button v-if="!isSameDay" type="text">
-            <UserFIO :user-id="activeTaskWorker.workerId" />
-          </a-button>
-          <div v-else class="leading-7">
+        <div class="flex-auto text-nowrap">
+          <template v-if="isElectron">
+            <template v-if="isElectron">
+              <a-button type="text">
+                <UserFIO :user-id="activeTaskWorker.workerId" />
+              </a-button>
+            </template>
+            <template v-else>
+              <UserFIO :user-id="activeTaskWorker.workerId" />
+            </template>
+          </template>
+          <div v-else class="leading-6">
             <UserFIO :user-id="activeTaskWorker.workerId" />
           </div>
         </div>
@@ -127,7 +137,7 @@ const activeStyle = computed(() => {
                 isSameDay &&
                 ['process'].includes(activeTaskWorker.status)
               "
-              class="leading-3 text-sm"
+              class="leading-3"
             >
               №{{ activeOrder.number }}
               {{ activeOrder.name }}
