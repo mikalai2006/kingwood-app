@@ -150,7 +150,7 @@ const { isElectron } = useSystem();
               isSameDay &&
               ['process'].includes(activeTaskWorker.status)
             "
-            class="bg-black/20 py-0.5 px-2 m-1 leading-5 rounded-md"
+            class="bg-black/20 py-0 px-2 mx-1 leading-3 rounded-md"
           >
             {{ activeOrder.number }}
             <!-- {{ activeTaskWorker?.order.name }} -->
