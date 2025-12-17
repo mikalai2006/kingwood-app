@@ -495,7 +495,7 @@ const { isElectron } = useSystem();
         <th
           v-for="(day, index) in weekDays"
           :key="day.day"
-          class="rowBody px-4 py-0.5 font-medium text-sm border-r border-b border-s-200 dark:border-g-700"
+          class="rowBody px-4 pt-0.5 font-medium text-xs border-r border-b border-s-200 dark:border-g-700"
           :class="[
             dayjs().isSame(day.day, 'day')
               ? 'bg-green-500/10 dark:bg-white/10'
@@ -557,7 +557,7 @@ const { isElectron } = useSystem();
           ]"
         >
           <td
-            class="sticky left-0 z-10 p-4 border-r border-b border-s-200 dark:border-g-700"
+            class="sticky left-0 z-10 p-2 border-r border-b border-s-200 dark:border-g-700"
             :class="[
               indexRow == openRow
                 ? 'border-l-4 border-l-p-500 dark:border-l-p-700 '
@@ -568,7 +568,7 @@ const { isElectron } = useSystem();
             ]"
           >
             <RouterLink
-              v-if="objectMontaj"
+              v-if="objectMontaj && isElectron"
               :to="{
                 name: 'objectOrderId',
                 params: {
@@ -584,6 +584,13 @@ const { isElectron } = useSystem();
               />
               <VIcon :path="iChevronRight" class="text-g-300 dark:text-g-500" />
             </RouterLink>
+            <template v-else>
+              <OrderObject
+                v-if="objectMontaj"
+                :object-id="objectMontaj.id"
+                class="text-base font-medium"
+              />
+            </template>
             <MontajObjectOrders
               v-if="objectMontaj?.id"
               :object-id="objectMontaj.id"
@@ -675,7 +682,7 @@ const { isElectron } = useSystem();
             v-if="objectMontaj?.id"
             v-for="(day, indexDay) in weekDays"
             :key="day.dayString"
-            class="m-0 py-2 px-4 border-r border-b border-s-200 dark:border-g-700 group tdDay"
+            class="m-0 py-1 px-2 border-r border-b border-s-200 dark:border-g-700 group tdDay"
             :class="[
               dayjs().isSame(day.day, 'day')
                 ? 'bg-green-500/10 dark:bg-white/10'

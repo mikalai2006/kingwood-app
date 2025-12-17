@@ -101,7 +101,7 @@ const { isElectron } = useSystem();
   <div class="z-50 rounded-lg" :style="activeStyle">
     <div
       class="flex items-center gap-1 cursor-pointer"
-      @click="emit('onEditTaskWorker', taskMW, objectId)"
+      @click="isElectron ? emit('onEditTaskWorker', taskMW, objectId) : {}"
     >
       <div class="self-center">
         <TaskWorkerStatusTagDot
