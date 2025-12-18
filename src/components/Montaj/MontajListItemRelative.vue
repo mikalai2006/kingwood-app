@@ -109,9 +109,12 @@ const { isElectron } = useSystem();
           :task-worker-id="activeTaskWorker?.id"
         />
       </div>
-      <div v-if="activeTaskWorker" class="flex-auto flex items-center">
+      <div v-if="activeTaskWorker" class="flex-auto flex flex-row items-center">
         <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
-        <div class="flex-auto text-nowrap">
+        <div
+          class="flex-auto text-nowrap"
+          :class="[{ 'text-xs': !isElectron }]"
+        >
           <template v-if="isElectron">
             <template v-if="isElectron">
               <p type="text" class="p-1.5 leading-3">
@@ -143,18 +146,18 @@ const { isElectron } = useSystem();
               {{ activeOrder.name }}
             </div>
           </template>
-          <div
+          <span
             v-if="
               activeTaskWorker &&
               activeOrder &&
               isSameDay &&
               ['process'].includes(activeTaskWorker.status)
             "
-            class="bg-black/20 py-0 px-2 mx-1 leading-3 rounded-md"
+            class="inline px-2 bg-black/20 rounded-r-md"
           >
             {{ activeOrder.number }}
             <!-- {{ activeTaskWorker?.order.name }} -->
-          </div>
+          </span>
         </a-popover>
       </div>
     </div>

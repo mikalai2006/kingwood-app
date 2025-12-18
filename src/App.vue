@@ -73,6 +73,47 @@ const loading = ref(false);
 
 const loadingText = ref("");
 
+const isActive = ref(true);
+
+const handleVisibilityChange = () => {
+  isActive.value = !document.hidden;
+  console.log(`Вкладка ${isActive.value ? "активна" : "неактивна"}`);
+};
+
+const onMount = async () => {
+  try {
+    generalStore.onGetMode();
+    await authStore.initToken();
+    //   // if (authStore.tokenData) {
+    //   await roleStore.find({ $limit: 100 });
+    //   await postStore.find({ $limit: 100 });
+    //   await userStore.find({ $limit: 100 });
+    //   await operationStore.find({ $limit: 100 });
+    //   await taskStore.find({ $limit: 300 });
+    //   await orderStore.find({ $limit: 100 });
+    //   await taskWorkerStore.find({ $limit: 100 });
+    //   await taskStatus.find();
+    //   setTimeout(() => {
+    //     const { socket: _socket } = useSocket();
+    //     socket = _socket;
+
+    //     // check auth token.
+    //     socket.onopen = () => {
+    //       socket.send(
+    //         JSON.stringify({
+    //           type: "jwt",
+    //           content: authStore.tokenData?.access_token,
+    //         })
+    //       );
+    //     };
+    //   }, 500);
+  } catch (e: any) {
+    onShowError(e);
+
+    generalStore.setError(e);
+  }
+};
+
 const onInitData = async () => {
   try {
     loading.value = true;
@@ -198,6 +239,19 @@ watch(
 );
 
 watch(
+  () => isActive.value,
+  (val, oldVal) => {
+    if (val) {
+      onMount();
+    } else {
+      socket?.close();
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+watch(
   () => authStore.tokenData?.access_token,
   () => {
     if (
@@ -210,6 +264,8 @@ watch(
 );
 
 onMounted(async () => {
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
   window?.ipcRenderer?.invoke("get-version").then((_version: string) => {
     console.log(`Version ${version}`);
     version.value = _version;
@@ -226,45 +282,15 @@ onMounted(async () => {
 
   //   noty.onShowNotify(text);
   // });
-
-  try {
-    generalStore.onGetMode();
-    await authStore.initToken();
-    //   // if (authStore.tokenData) {
-    //   await roleStore.find({ $limit: 100 });
-    //   await postStore.find({ $limit: 100 });
-    //   await userStore.find({ $limit: 100 });
-    //   await operationStore.find({ $limit: 100 });
-    //   await taskStore.find({ $limit: 300 });
-    //   await orderStore.find({ $limit: 100 });
-    //   await taskWorkerStore.find({ $limit: 100 });
-    //   await taskStatus.find();
-    //   setTimeout(() => {
-    //     const { socket: _socket } = useSocket();
-    //     socket = _socket;
-
-    //     // check auth token.
-    //     socket.onopen = () => {
-    //       socket.send(
-    //         JSON.stringify({
-    //           type: "jwt",
-    //           content: authStore.tokenData?.access_token,
-    //         })
-    //       );
-    //     };
-    //   }, 500);
-  } catch (e: any) {
-    onShowError(e);
-
-    generalStore.setError(e);
-  }
+  await onMount();
 });
-
-const version = ref("0.0.0");
 
 onUnmounted(() => {
   socket?.close();
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
 });
+
+const version = ref("0.0.0");
 
 const tokenTheme = computed(() => {
   const result: any = {

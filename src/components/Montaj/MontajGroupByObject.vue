@@ -682,7 +682,7 @@ const { isElectron } = useSystem();
             v-if="objectMontaj?.id"
             v-for="(day, indexDay) in weekDays"
             :key="day.dayString"
-            class="m-0 py-1 px-2 border-r border-b border-s-200 dark:border-g-700 group tdDay"
+            class="m-0 py-1 px-1 border-r border-b border-s-200 dark:border-g-700 group tdDay"
             :class="[
               dayjs().isSame(day.day, 'day')
                 ? 'bg-green-500/10 dark:bg-white/10'
