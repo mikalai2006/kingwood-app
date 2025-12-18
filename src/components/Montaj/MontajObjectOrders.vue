@@ -29,7 +29,7 @@ const ordersByObject = computed(() =>
         </a-button> -->
         </div>
       </template>
-      <p class="text-g-500 dark:text-g-400 inline">
+      <p class="text-g-500 dark:text-g-400 inline text-xs">
         {{ $t("info.order_plural", ordersByObject.length) }}
       </p>
     </a-popover>

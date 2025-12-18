@@ -113,7 +113,7 @@ const { isElectron } = useSystem();
         <!-- [{{ taskMW.stat.length }} / {{ activeTaskWorker?.taskStatus?.id }}] -->
         <div
           class="flex-auto text-nowrap"
-          :class="[{ 'text-xs': !isElectron }]"
+          :class="[{ 'text-[11px]': !isElectron }]"
         >
           <template v-if="isElectron">
             <template v-if="isElectron">
@@ -153,7 +153,7 @@ const { isElectron } = useSystem();
               isSameDay &&
               ['process'].includes(activeTaskWorker.status)
             "
-            class="inline px-2 bg-black/20 rounded-r-md"
+            class="inline px-1 bg-black/20 rounded-r-md"
           >
             {{ activeOrder.number }}
             <!-- {{ activeTaskWorker?.order.name }} -->

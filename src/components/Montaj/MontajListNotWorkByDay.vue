@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useSystem } from "@/composable/useSystem";
 import { usePostStore, useUserStore } from "@/store";
 import dayjs from "@/utils/dayjs";
 import { getShortFIO } from "@/utils/utils";
@@ -9,6 +10,7 @@ const props = defineProps<{
   day: { dayString: string; day: string };
 }>();
 
+const { isElectron } = useSystem();
 const userStore = useUserStore();
 const postStore = usePostStore();
 
@@ -76,7 +78,8 @@ const isSameDay = computed(() => dayjs().isSame(props.day.day, "day"));
   <div class="z-50 rounded-lg">
     <div v-for="worker in montajnikWithoutWorkByDay">
       <div
-        class="text-sm flex-auto text-nowrap font-normal text-red-500 dark:text-red-200"
+        class="flex-auto text-nowrap font-normal text-red-500 dark:text-red-200"
+        :class="[{ 'text-[11px]': !isElectron }]"
       >
         {{ getShortFIO(worker?.name) }}
       </div>

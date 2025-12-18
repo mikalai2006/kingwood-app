@@ -482,7 +482,7 @@ const { isElectron } = useSystem();
       </tr> -->
       <tr>
         <th
-          class="overflow-hidden text-left text-nowrap rounded-tl-lg sticky left-0 bg-white dark:bg-g-900 font-medium flex-none px-4 text-normal border-r border-b border-s-200 dark:border-g-700"
+          class="overflow-hidden text-left text-nowrap rounded-tl-lg sticky left-0 bg-white dark:bg-g-900 font-medium flex-none px-2 text-normal border-r border-b border-s-200 dark:border-g-700"
         >
           <p class="font-normal text-g-500">Объект</p>
         </th>
@@ -495,7 +495,7 @@ const { isElectron } = useSystem();
         <th
           v-for="(day, index) in weekDays"
           :key="day.day"
-          class="rowBody px-4 pt-0.5 font-medium text-xs border-r border-b border-s-200 dark:border-g-700"
+          class="rowBody px-2 pt-0.5 font-medium text-xs border-r border-b border-s-200 dark:border-g-700"
           :class="[
             dayjs().isSame(day.day, 'day')
               ? 'bg-green-500/10 dark:bg-white/10'
@@ -588,7 +588,7 @@ const { isElectron } = useSystem();
               <OrderObject
                 v-if="objectMontaj"
                 :object-id="objectMontaj.id"
-                class="text-base font-medium"
+                class="text-sm font-medium"
               />
             </template>
             <MontajObjectOrders
@@ -781,7 +781,7 @@ const { isElectron } = useSystem();
         <td
           v-for="day in weekDays"
           :key="day.day"
-          class="m-0 py-2 px-4 border-r border-b border-s-200 dark:border-g-700 bg-s-100 dark:bg-g-900"
+          class="m-0 py-2 px-2 border-r border-b border-s-200 dark:border-g-700 bg-s-100 dark:bg-g-900"
           :class="[dayjs().isSame(day.day, 'day') ? '' : '']"
         >
           <MontajListNotWorkByDay
