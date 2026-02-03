@@ -19,6 +19,8 @@ import { Colors } from "@/utils/colors";
 import dayjs from "@/utils/dayjs";
 import { dateFormat, dateFormatShort } from "@/utils/date";
 import UserFIO from "../User/UserFIO.vue";
+import { iWraningTriangle } from "@/utils/icons";
+import TimeWorked from "../Time/TimeWorked.vue";
 
 const props = defineProps<{
   group: string;
@@ -74,20 +76,66 @@ const tasks = computed(() => {
     });
 });
 
+// работники, здействованнные во всех заданиях для изделия.
 const allWorkersInOrder = computed(() => {
   return tasks.value.reduce((ac, el) => {
     ac.push(...el.workers);
     return ac;
   }, [] as ITaskWorker[]);
 });
-const allWorkersInProcess = computed(() =>
-  allWorkersInOrder.value.filter((x) => x.status !== "finish")
+
+// все незавершенные задания.
+const tasksNotFinish = computed(() =>
+  tasks.value.filter((x) => !["finish", "autofinish"].includes(x.status))
 );
-const allWorkers = computed(() =>
-  allWorkersInProcess.value.length > 0
-    ? allWorkersInProcess.value.slice(0, 1)
-    : allWorkersInOrder.value.slice(0, 1)
+
+// все задания, которые выполняются.
+const tasksInProcess = computed(() =>
+  tasks.value.filter((x) => x.status !== "finish")
 );
+
+// задание, которое будет показано в бейдже.
+const focusTask = computed(() => {
+  return tasksInProcess.value.length > 0
+    ? tasksInProcess.value[0]
+    : tasksNotFinish.value.length > 0
+    ? tasksNotFinish.value[0]
+    : tasks.value[0];
+});
+
+// все работники из задания, которое активно в бейдже.
+const allWorkersForFocusTask = computed(() => {
+  return allWorkersInOrder.value
+    .filter((x) => x.taskId == focusTask.value.id)
+    .sort((a, b) => b.workedMs - a.workedMs);
+});
+
+const taskWorkersProcessFocusTask = computed(() =>
+  allWorkersForFocusTask.value.filter((x) => x.status == "process")
+);
+const taskWorkersNotFinishFocusTask = computed(() =>
+  allWorkersForFocusTask.value.filter(
+    (x) => !["finish", "autofinish"].includes(x.status)
+  )
+);
+const focusTaskWorker = computed(() =>
+  taskWorkersProcessFocusTask.value.length > 0
+    ? taskWorkersProcessFocusTask.value[0]
+    : taskWorkersNotFinishFocusTask.value.length > 0
+    ? taskWorkersNotFinishFocusTask.value[0]
+    : allWorkersForFocusTask.value[0]
+);
+// const allWorkersInProcess = computed(() =>
+//   allWorkersInOrder.value.filter((x) => x.status == "process")
+// );
+// const allWorkers = computed(() =>
+//   allWorkersInProcess.value.length > 0
+//     ? allWorkersInProcess.value.slice(0, 1)
+//     : allWorkersInOrder.value
+//         // .filter((x) => !["finish", "autofinish"].includes(x.status))
+//         .slice(0, 1)
+// );
+
 // const activeTasks = computed(() => {
 //   return tasks.value
 //     .filter((x) => x.active && x.orderId === props.orderId)
@@ -131,30 +179,33 @@ const allWorkers = computed(() =>
 </script>
 <template>
   <div
-    v-if="allWorkers.length"
-    class="relative min-w-32 min-h-16 rounded-md"
+    v-if="allWorkersForFocusTask.length"
+    class="relative min-w-32 min-h-16 rounded-md overflow-hidden"
     :class="[
       // {
       //   'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700': !status,
       // },
       !status
         ? order?.priority
-          ? 'bg-red-400 dark:bg-r-700 border border-red-500 dark:border-r-700'
+          ? 'bg-red-300 dark:bg-r-700 border border-red-300 dark:border-r-700'
           : 'bg-s-100 dark:bg-g-900 border border-s-200 dark:border-g-700'
         : '',
       { 'bg-green-600 dark:bg-green-700': status },
     ]"
   >
+    <!-- <div
+      v-if="focusTask.maxHours"
+      class="absolute h-2 bottom-1 left-1 right-1 bg-indigo-500 dark:bg-indigo-500 rounded-md z-10"
+    ></div> -->
     <div
       class="absolute w-2 h-2 top-1 left-1/2 bg-white dark:bg-g-900 rounded-full z-10"
     ></div>
-    <div class="p-2 pt-4">
+    <div class="p-2 pt-3 pb-4">
       <!-- <pre>
       {{ JSON.stringify(operationsByGroup, null, 2) }}
     </pre> -->
       <a-tooltip
-        v-for="worker in allWorkers"
-        :key="worker.id"
+        :key="focusTaskWorker.id"
         :color="
           status
             ? Colors.g[900]
@@ -167,6 +218,9 @@ const allWorkers = computed(() =>
           <div v-for="task in tasks" :key="task.id" class="mb-4">
             <div class="text-g-200 dark:text-g-100">
               {{ task.name }}
+            </div>
+            <div v-if="task.maxHours" class="rounded-md px-2 mb-1.5">
+              <TimeWorked :task="task" />
             </div>
             <div
               v-for="item in task.workers"
@@ -233,7 +287,7 @@ const allWorkers = computed(() =>
         {{ task.name }}
       </div> -->
         <div class="flex items-center gap-1 space-y-1">
-          <TaskWorkerStatusTagDot :task-worker-id="worker.id" />
+          <TaskWorkerStatusTagDot :task-worker-id="focusTaskWorker.id" />
           <div
             class="text-sm text-nowrap"
             :class="
@@ -242,21 +296,22 @@ const allWorkers = computed(() =>
                 : 'text-black dark:text-g-200'
             "
           >
-            <UserFIO :user-id="worker.workerId" />
+            <UserFIO :user-id="focusTaskWorker.workerId" />
           </div>
 
           <div
             v-if="
               !dayjs(new Date()).isBetween(
-                dayjs(worker.from),
-                dayjs(worker.to),
+                dayjs(focusTaskWorker.from),
+                dayjs(focusTaskWorker.to),
                 'day',
                 '[]'
-              ) && !['finish', 'autofinish'].includes(worker.status)
+              ) && !['finish', 'autofinish'].includes(focusTaskWorker.status)
             "
             class="whitespace-nowrap px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black"
           >
-            {{ $t("from") }} {{ dayjs(worker.from).format(dateFormatShort) }}
+            {{ $t("from") }}
+            {{ dayjs(focusTaskWorker.from).format(dateFormatShort) }}
           </div>
           <!-- <a-tag
           v-for="taskWorker in item.taskWorkers"
@@ -305,6 +360,13 @@ const allWorkers = computed(() =>
         {{ workers.map((x) => x.name).join(", ") }}
       </div>
     </div> -->
+    </div>
+
+    <div
+      v-if="focusTask.maxHours"
+      class="absolute h-4 bottom-0.5 left-2 right-2"
+    >
+      <TimeWorked :task="focusTask" />
     </div>
   </div>
 </template>

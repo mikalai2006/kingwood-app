@@ -248,7 +248,7 @@ const useOrder = () => {
     openTaskModal.value = true;
   };
 
-  const defaultDataTask: ITaskInput = {};
+  const defaultDataTask: ITaskInput = { maxHours: 0 };
 
   const dataTaskForm = ref(defaultDataTask);
 

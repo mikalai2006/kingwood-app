@@ -19,14 +19,14 @@ import {
   useTaskStore,
   useUserStore,
 } from "@/store";
-import { ITask } from "@/api/task/types";
+import { ITask, ITaskInput } from "@/api/task/types";
 import { Dayjs } from "dayjs";
 import dayjs from "@/utils/dayjs";
 import { dateFormat } from "@/utils/date";
 import { useError } from "@/composable/useError";
 import { message } from "ant-design-vue";
 
-const props = defineProps<{ data: ITask; defaultData: ITask }>();
+const props = defineProps<{ data: ITaskInput; defaultData: ITaskInput }>();
 const emit = defineEmits(["callback"]);
 
 const { t } = useI18n();
@@ -37,7 +37,7 @@ const operationStore = useOperationStore();
 const taskStatusStore = useTaskStatusStore();
 const authStore = useAuthStore();
 
-const formState: UnwrapRef<ITask> = reactive({ ...props.data });
+const formState: UnwrapRef<ITaskInput> = reactive({ ...props.data });
 const formRef = ref();
 
 const rules = computed(() => {
@@ -387,11 +387,11 @@ onMounted(() => {
         </a-checkbox-group>
       </a-form-item> -->
 
-      <!-- <template v-if="authStore.roles.includes('task-maxHours')">
+      <template v-if="authStore.roles.includes('task-maxHours')">
         <a-form-item :label="$t('form.task.maxHours')" name="maxHours">
           <a-input-number class="w-full" v-model:value="formState.maxHours" />
         </a-form-item>
-      </template> -->
+      </template>
 
       <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
         <a-button v-if="!formState?.id" :disabled="loading" @click="resetForm">

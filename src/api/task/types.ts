@@ -20,6 +20,9 @@ export interface ITask {
   typeGo: string;
   from: string;
   to: string;
+  maxHours: number;
+  workedMs: number;
+  total: number;
 
   workers: ITaskWorker[];
   object: IObject;

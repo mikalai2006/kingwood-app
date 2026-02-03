@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ITask } from "@/api/task/types";
+import { ITask, ITaskInput } from "@/api/task/types";
 import {
   useAuthStore,
-  useOperationStore,
   useOrderStore,
   usePostStore,
   useTaskStatusStore,
@@ -10,7 +9,13 @@ import {
   useTaskWorkerStore,
   useUserStore,
 } from "@/store";
-import { iPen, iPlusLg, iTrashFill, iWraningTriangle } from "@/utils/icons";
+import {
+  iPen,
+  iPlusLg,
+  iTimer,
+  iTrashFill,
+  iWraningTriangle,
+} from "@/utils/icons";
 import { computed, h, ref } from "vue";
 import VIcon from "../UI/VIcon.vue";
 import {
@@ -21,14 +26,11 @@ import {
 import { ITaskWorker, ITaskWorkerInput } from "@/api/task_worker/types";
 import { message, Modal } from "ant-design-vue";
 import { useI18n } from "vue-i18n";
-import TaskWorkerStatusTag from "../Task/TaskWorkerStatusTag.vue";
 import VFormTaskWorker from "../Form/VFormTaskWorker.vue";
-import VImg from "../UI/VImg.vue";
-import UserListItem from "../User/UserListItem.vue";
-import dayjs from "dayjs";
-import { dateFormat } from "@/utils/date";
-import TimePretty from "../Time/TimePretty.vue";
-import { getObjectTime } from "@/utils/time";
+import OrderTaskItemWorker from "./OrderTaskItemWorker.vue";
+import VFormTaskMaxHours from "../Form/VFormTaskMaxHours.vue";
+import useOrder from "@/composable/useOrder";
+import TimeProgress from "../Time/TimeProgress.vue";
 
 const props = defineProps<{ taskId: string }>();
 const emit = defineEmits(["onEditTask"]);
@@ -40,6 +42,13 @@ const taskStore = useTaskStore();
 const taskWorkerStore = useTaskWorkerStore();
 const postStore = usePostStore();
 const taskStatusStore = useTaskStatusStore();
+
+const {
+  defaultDataTask,
+  dataTaskForm,
+  openTaskModal: openTaskMaxHours,
+  onEditTask,
+} = useOrder();
 
 const taskWorkers = computed(() => {
   return taskWorkerStore.items
@@ -56,8 +65,13 @@ const taskWorkers = computed(() => {
         post,
         statusObject,
       };
-    });
+    })
+    .sort((a, b) => b.workedMs - a.workedMs);
 });
+
+const maxWorkedMs = computed(() =>
+  Math.max(...taskWorkers.value.map((x) => x.workedMs))
+);
 
 const task = computed(() => taskStore.items.find((x) => x.id === props.taskId));
 
@@ -252,9 +266,9 @@ const showTaskModal = () => {
   openTaskModal.value = true;
 };
 
-const defaultDataTask: ITaskWorkerInput = {};
+const defaultDataTaskWorker: ITaskWorkerInput = {};
 
-const dataTaskForm = ref(defaultDataTask);
+const dataTaskWorkerForm = ref(defaultDataTaskWorker);
 
 const onAddNewTaskWorker = (orderId: string | undefined) => {
   if (!orderId) return;
@@ -262,8 +276,8 @@ const onAddNewTaskWorker = (orderId: string | undefined) => {
   import.meta.env.VIEW_CONSOLE &&
     console.log("Add task worker: taskId=", props.taskId);
 
-  dataTaskForm.value = {
-    ...defaultDataTask,
+  dataTaskWorkerForm.value = {
+    ...defaultDataTaskWorker,
     taskId: props.taskId,
     orderId: task.value?.orderId,
     objectId: task.value?.objectId,
@@ -275,7 +289,7 @@ const onAddNewTaskWorker = (orderId: string | undefined) => {
 const onEditTaskWorker = (item: ITaskWorker) => {
   import.meta.env.VIEW_CONSOLE && console.log("Edit taskWorker: ", item);
 
-  dataTaskForm.value = Object.assign({}, item, {
+  dataTaskWorkerForm.value = Object.assign({}, item, {
     orderId: task.value?.orderId,
     objectId: task.value?.objectId,
     operationId: task.value?.operationId,
@@ -290,6 +304,12 @@ const onEditTaskWorker = (item: ITaskWorker) => {
 //     setTimeout(() => resolve(true), 1000);
 //   });
 // };
+
+const percentWorkedMs = computed(() =>
+  task.value?.maxHours
+    ? Math.round((task.value.workedMs * 100) / (task.value.maxHours * 3600000))
+    : 0
+);
 </script>
 
 <template>
@@ -318,8 +338,8 @@ const onEditTaskWorker = (item: ITaskWorker) => {
     ></div>
   </div>
 
-  <div class="pl-2 flex-auto group pb-2">
-    <div class="flex flex-row items-center gap-1">
+  <div class="pl-2 flex-auto pb-2">
+    <div class="group flex flex-row items-center gap-1">
       <div class="font-bold pb-2 text-lg">
         <!-- {{ typeof task?.sortOrder == "number" && task.sortOrder + 1 }}) -->
         {{ task?.name }}
@@ -373,10 +393,7 @@ const onEditTaskWorker = (item: ITaskWorker) => {
           </a-button>
         </a-tooltip>
         <a-tooltip
-          v-if="
-            authStore.roles?.includes('taskWorker-patch') &&
-            order?.status != 200
-          "
+          v-if="authStore.roles?.includes('task-patch') && order?.status != 200"
         >
           <template #title>
             {{ $t("button.editTask") }}
@@ -391,146 +408,85 @@ const onEditTaskWorker = (item: ITaskWorker) => {
             </div>
           </a-button>
         </a-tooltip>
-      </div>
-    </div>
-
-    <div
-      v-for="(item, key) in taskWorkers"
-      class="relative bg-white dark:bg-g-800 mb-1 flex flex-row items-center gap-4 py-1 px-4 border-g-200 dark:border-g-700 rounded-lg"
-    >
-      <!-- :style="{
-        background: taskStatus?.color + '50',
-        color: invertColor(taskStatus?.color, true),
-      }" -->
-      <div
-        class="absolute -left-[25px] h-[1px] w-6 bg-g-200 dark:bg-g-700"
-        :style="{
-          // background: taskStatus?.color,
-        }"
-      ></div>
-      <div
-        class="absolute -left-[26px] h-1.5 w-1.5 rounded-full"
-        :style="{
-          background: taskStatus?.color,
-        }"
-      ></div>
-      <UserListItem v-if="item.worker" :user-id="item.worker.id">
-        <template #description>
-          <!-- c {{ dayjs(item.from).format(dateFormat) }} -->
-          <!-- ->
-          {{ dayjs(item.to).format(dateFormat) }} -->
-        </template>
-      </UserListItem>
-      <div
-        :class="[
-          ' self-start whitespace-nowrap ',
-          !dayjs().isBetween(dayjs(item.from), dayjs(item.to), 'day', '[]') &&
-          !['finish', 'autofinish'].includes(item.status)
-            ? 'px-1 rounded-md bg-yellow-400 dark:bg-yellow-500 text-black'
-            : 'text-g-300 dark:text-g-500',
-        ]"
-      >
-        {{ $t("from") }} {{ dayjs(item.from).format(dateFormat) }}
-        <!-- {{ $t("to") }} {{ dayjs(item.to).format(dateFormat) }} -->
-        <!-- <TimePretty
-          :time="getObjectTime(dayjs(new Date()).diff(item.from))"
-          short
-        /> -->
-      </div>
-      <!-- <div class="flex flex-row items-center gap-1">
-        <div>
-          <VImg
-            :image="item.worker?.images?.[0]"
-            class="w-8 h-8 rounded-full"
-          />
-        </div>
-        <div class="text-s-500 dark:text-s-300 flex-auto">
-          {{ getShortFIO(item.worker?.name) }}
-        </div>
-      </div> -->
-      <div class="flex-auto">
-        <div class="self-center pl-4 hidden group-hover:flex flex-row gap-2">
-          <a-tooltip
-            v-if="
-              authStore.roles?.includes('taskWorker-patch') &&
-              order?.status != 200
-            "
-          >
-            <template #title>
-              {{ $t("button.patchTaskWorker") }}
-            </template>
-            <a-button
-              size="small"
-              @click="onEditTaskWorker(item as ITaskWorker)"
-            >
-              <div class="flex gap-1 items-center">
-                <VIcon :path="iPen" class="text-xs" />
-                <!-- {{ $t("button.edit") }} -->
-              </div>
-            </a-button>
-          </a-tooltip>
-
-          <a-tooltip
-            v-if="
-              authStore.roles?.includes('taskWorker-delete') &&
-              item.status === 'wait' &&
-              order?.status != 200
-            "
-          >
-            <template #title>
-              {{ $t("button.deleteTaskWorker") }}
-            </template>
-            <a-button
-              size="small"
-              danger
-              class="hidden group-hover:block"
-              @click="onDeleteTaskWorker(item as ITaskWorker)"
-            >
-              <div class="flex gap-1 items-center">
-                <VIcon :path="iTrashFill" />
-              </div>
-            </a-button>
-          </a-tooltip>
-          <!-- <a-popconfirm
-          v-if="authStore.roles?.includes('taskWorker-delete')"
-          :cancelText="$t('button.cancel')"
-          :okText="$t('button.delete')"
-          :okButtonProps="{
-            size: 'small',
-            type: 'primary',
-            danger: true,
-          }"
-          @confirm="onDeleteTaskWorker(item as ITaskWorker)"
+        <a-tooltip
+          v-if="
+            task &&
+            authStore.roles?.includes('task-maxHours') &&
+            order?.status != 200
+          "
         >
           <template #title>
-            <div class="w-52">
-              {{
-                replaceSubstringByArray($t("message.removeTaskWorker"), [
-                  item.worker?.name,
-                  order?.number,
-                  order?.name,
-                ])
-              }}
+            {{ $t("button.editMaxHours") }}
+          </template>
+          <a-button
+            size="small"
+            class="hidden group-hover:block"
+            @click="onEditTask(task)"
+          >
+            <div class="flex gap-1 items-center">
+              <VIcon :path="iTimer" />
             </div>
-          </template>
-          <template #icon>
-            <VIcon :path="iWraningTriangle" class="text-2xl text-red-500" />
-          </template>
-          <a-tooltip>
-            <template #title>
-              {{ $t("button.deleteTaskWorker") }}
-            </template>
-            <a-button danger size="small">
-              <VIcon :path="iTrashFill" />
-            </a-button>
-          </a-tooltip>
-        </a-popconfirm> -->
-        </div>
-      </div>
-      <div>
-        <TaskWorkerStatusTag :task-worker-id="item.id" />
+          </a-button>
+        </a-tooltip>
       </div>
     </div>
+
+    <template v-if="task && task.maxHours">
+      <div class="w-full flex flex-row items-center gap-2 mb-2">
+        <VIcon :path="iTimer" class="text-xl" />
+        <!-- <template #message>
+          <p class="font-medium">
+            {{
+              replaceSubstringByArray(t("info.timeTaskMax"), [task.maxHours])
+            }}
+          </p>
+        </template> -->
+        <div class="flex-auto flex flex-row gap-2">
+          <!-- <p class="text-nowrap">
+              {{
+                replaceSubstringByArray(t("info.timeTaskMax"), [task.maxHours])
+              }}
+            </p> -->
+          <div class="flex-auto">
+            <TimeProgress
+              :procent="percentWorkedMs"
+              :height="12"
+              :active="task.status == 'process'"
+            />
+          </div>
+          <div></div>
+          <!-- <a-progress
+            :percent="percentWorkedMs"
+            type="line"
+            status="normal"
+            :strokeWidth="12"
+            :strokeColor="{
+              '0%': '#00c950',
+              '80%': '#ffe58f',
+              '100%': '#ffccc7',
+            }"
+          ></a-progress> -->
+          <p class="text-nowrap">
+            {{
+              replaceSubstringByArray(t("info.timeTask"), [
+                Math.round(task.workedMs / (60 * 60 * 1000)),
+                task.maxHours,
+              ])
+            }}
+          </p>
+        </div>
+      </div>
+    </template>
+
+    <OrderTaskItemWorker
+      v-for="(item, key) in taskWorkers"
+      :task-id="item.taskId"
+      :task-worker-id="item.id"
+      :max-worked-ms="maxWorkedMs"
+      @on-delete-task-worker="onDeleteTaskWorker"
+      @on-edit-task-worker="onEditTaskWorker"
+    >
+    </OrderTaskItemWorker>
 
     <div
       v-if="
@@ -559,16 +515,18 @@ const onEditTaskWorker = (item: ITaskWorker) => {
   <a-modal
     v-model:open="openTaskModal"
     :destroyOnClose="true"
-    :key="dataTaskForm.id"
+    :key="dataTaskWorkerForm.id"
     :title="
-      dataTaskForm.id ? $t('form.taskWorker.edit') : $t('form.taskWorker.new')
+      dataTaskWorkerForm.id
+        ? $t('form.taskWorker.edit')
+        : $t('form.taskWorker.new')
     "
     :ok-button-props="{ hidden: true }"
     :cancel-button-props="{ hidden: true }"
   >
     <VFormTaskWorker
-      :data="dataTaskForm"
-      :default-data="defaultDataTask"
+      :data="dataTaskWorkerForm"
+      :default-data="defaultDataTaskWorker"
       @callback="
         () => {
           openTaskModal = false;
@@ -577,6 +535,28 @@ const onEditTaskWorker = (item: ITaskWorker) => {
     />
   </a-modal>
 
+  <a-modal
+    v-model:open="openTaskMaxHours"
+    :destroyOnClose="true"
+    :key="dataTaskWorkerForm.id"
+    :title="
+      dataTaskWorkerForm.id
+        ? $t('form.task.editMaxHours')
+        : $t('form.task.newMaxHours')
+    "
+    :ok-button-props="{ hidden: true }"
+    :cancel-button-props="{ hidden: true }"
+  >
+    <VFormTaskMaxHours
+      :data="dataTaskForm"
+      :default-data="defaultDataTask"
+      @callback="
+        () => {
+          openTaskMaxHours = false;
+        }
+      "
+    />
+  </a-modal>
   <!-- <a-modal
     v-model:open="trashTaskLodal"
     style="top: 20px"

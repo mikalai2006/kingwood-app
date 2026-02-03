@@ -29,6 +29,8 @@ export const roles = [
   "task-patch",
   "task-delete",
   "task-list",
+  "task-maxHours",
+
   "taskWorker-create",
   "taskWorker-patch",
   "taskWorker-delete",

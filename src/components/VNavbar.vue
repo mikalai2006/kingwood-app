@@ -118,12 +118,12 @@ const menuItems = computed(() =>
           v-if="route.name === item"
           class="w-4 h-4 rotate-45 bg-s-200 absolute -right-2 z-50"
         ></span> -->
-        <span
+        <!-- <span
           v-if="item == 'montajList'"
           class="bg-lime-600 px-1.5 rounded-md text-white"
         >
           тест
-        </span>
+        </span> -->
       </RouterLink>
     </template>
   </nav>
